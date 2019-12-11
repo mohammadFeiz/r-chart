@@ -24,4 +24,8 @@
   </li>
 </ul> 
 
+<h3>Instalation</h3>
+npm i r-chart
 <h3>Usage</h3>
+import RChart from "r-chart";
+<RChart data={...} x={...} y={...} style={(optional inline css)}/>
