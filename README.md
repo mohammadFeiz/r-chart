@@ -167,3 +167,5 @@ import RChart from "r-chart";
     <td>Color of vertical grid lines.</td>
   </tr>
 </table>
+
+<a href="https://stackblitz.com/edit/r-chart?embed=1&file=index.js">See demo on stackblitz</a>
