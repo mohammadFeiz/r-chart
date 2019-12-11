@@ -23,10 +23,14 @@ import RChart from "r-chart";
 ### Root Properties
 Properties | Type | Required | Description
 ---------- | ---- | -------- | -----------
-data | Array of objects | Required | each member of data is an object that render a sort of values(line or bars).</td>
-x | Object | Required | horizontal axis configuration
-y | Object | Required | vertical axis configuration
-
+data | Array of objects | Required | Each member of data is an object that render a sort of values(line or bars).</td>
+x | Object | Required | Horizontal axis configuration
+y | Object | Required | Vertical axis configuration
+padding | Object | default is {left:30,top:20,right:20,bottom:30} | Set padding of chart container.
+onchange | function(callback) | Optional | Set onchange for edit mode. onchange is an callback that receive changed data as parameter
+style | Object(css object) | Optional | Set inline style for chart container.
+className | string | Optional | Set class attribute for chart
+id | string | Optional | Set id attribute for chart
 
 ### data Properties
 Properties | Type | Required | Description
