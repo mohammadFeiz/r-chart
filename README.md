@@ -1,6 +1,7 @@
 # r-chart
 
-<h3>description</h3><br>
+### description
+<br>
 <ul>
   <li>
     create line chart , bar chart and combo chart.
@@ -25,14 +26,18 @@
   </li>
 </ul> 
 
-<h3>Instalation</h3>
-npm i r-chart
+### Instalation
+```npm i r-chart```
 
-<h3>Usage</h3>
+### Usage
+
+```
+import react from 'react';
 import RChart from "r-chart";
-<code><<code>RChart data={...} x={...} y={...} style={(optional inline css)}/</code>></code>
+<RCahrt data={} x={} y={} padding={} onchange={} style={}/>
+```
 
-<h3>Root Properties</h3>
+### Root Properties
 <table>
   <tr>
     <th>Properties</th>
@@ -61,7 +66,7 @@ import RChart from "r-chart";
 </table>
 
 
-<h3>data Properties</h3>
+### data Properties
 <table>
   <tr>
     <th>Properties</th>
@@ -113,7 +118,7 @@ import RChart from "r-chart";
   </tr>
 </table>
 
-<h3>x Properties</h3>
+### **x** Properties
 <table>
   <tr>
     <th>Properties</th>
