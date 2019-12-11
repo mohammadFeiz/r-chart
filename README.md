@@ -9,6 +9,14 @@
 * customizable style.
 * zoomable.
 * up to 1000000 point support.
+
+### Zoom Demo
+![GitHub Logo](/images/r-chart-zoom.gif)
+
+### Edit Demo
+![GitHub Logo](/images/r-chart-edit.gif)
+
+
 ### Instalation
 ```npm i r-chart```
 
