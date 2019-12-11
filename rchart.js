@@ -184,7 +184,6 @@ export default class RChart extends Component {
     var h = y; 
     return {x:x + '%',y:(y * -1) + '%',width:w + '%',height:h + '%',fill:color,type:'rectangle'};
   }
-  
   updateData() {
     var {data} = this.props;
     var {x,y} = this.state;
@@ -218,8 +217,11 @@ export default class RChart extends Component {
     return grid;
   }
   getStyle(axis){
-    var {filter,padding} = this.props;
-    var {left = 30,top = 20,right = 20,bottom = 20} = padding;
+    var {filter,padding,defaultPadding} = this.props;
+    var {
+      left = defaultPadding.left,top = defaultPadding.top,
+      right = defaultPadding.right,bottom = defaultPadding.bottom
+    } = padding;
     return axis === 'x'?
     {
       bottom:0,
@@ -430,7 +432,7 @@ export default class RChart extends Component {
   }
   hover(){
     $('.r-chart-detail-container').remove();
-    var {data,padding} = this.props,x = this.mousePosition.x; 
+    var {data,padding,defaultPadding} = this.props,x = this.mousePosition.x; 
     var result = [];
     for(var i = 0; i < data.length; i++){
       var {stream} = data[i];
@@ -445,7 +447,7 @@ export default class RChart extends Component {
     }
     if(!result.length){return;}
     var Chart = $(this.dom.current);
-    var {left = 30,bottom = 20} = padding;
+    var {left = defaultPadding.left,bottom = defaultPadding.bottom} = padding;
     var Left = left + result[0].obj.center.x * this.width / 100;
     var Bottom = bottom + 12 + parseFloat(this.mousePosition.y) * -this.height / 100;
     var ui = getDetailUI(Left,Bottom,result);
@@ -473,12 +475,15 @@ export default class RChart extends Component {
   //   Chart.append(getDetailUI(left,bottom,result));
   // }
   render() {
-    var {zoom,style,padding} = this.props;
+    var {zoom,style,padding,defaultPadding} = this.props;
     style.padding = 0;
     var {x,y} = this.state;
     var {zoom:zoomx} = x;
     var {zoom:zoomy} = y;
-    var {left = 30,top = 20,right = 20,bottom = 20} = padding;
+    var {
+      left = defaultPadding.left,top = defaultPadding.top,
+      right = defaultPadding.right,bottom = defaultPadding.bottom
+    } = padding;
     var d = this.updateData();
     this.d = d; 
     var grids = [d.x.grid||{type:'group',id:'x-grid',items:[]},d.y.grid||{type:'group',id:'y-grid',items:[]}];
@@ -556,5 +561,5 @@ export default class RChart extends Component {
   }
 }
 RChart.defaultProps = {
-  filter:false,changeStep:1,padding:{left:30,top:20,right:20,bottom:20}
+  filter:false,changeStep:1,padding:{},defaultPadding:{left:30,top:20,right:20,bottom:30}
 }

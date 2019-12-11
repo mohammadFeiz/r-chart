@@ -527,15 +527,16 @@ function (_Component) {
     value: function getStyle(axis) {
       var _this$props2 = this.props,
           filter = _this$props2.filter,
-          padding = _this$props2.padding;
+          padding = _this$props2.padding,
+          defaultPadding = _this$props2.defaultPadding;
       var _padding$left = padding.left,
-          left = _padding$left === void 0 ? 30 : _padding$left,
+          left = _padding$left === void 0 ? defaultPadding.left : _padding$left,
           _padding$top = padding.top,
-          top = _padding$top === void 0 ? 20 : _padding$top,
+          top = _padding$top === void 0 ? defaultPadding.top : _padding$top,
           _padding$right = padding.right,
-          right = _padding$right === void 0 ? 20 : _padding$right,
+          right = _padding$right === void 0 ? defaultPadding.right : _padding$right,
           _padding$bottom = padding.bottom,
-          bottom = _padding$bottom === void 0 ? 20 : _padding$bottom;
+          bottom = _padding$bottom === void 0 ? defaultPadding.bottom : _padding$bottom;
       return axis === 'x' ? {
         bottom: 0,
         right: "".concat(right, "px"),
@@ -890,6 +891,7 @@ function (_Component) {
       var _this$props4 = this.props,
           data = _this$props4.data,
           padding = _this$props4.padding,
+          defaultPadding = _this$props4.defaultPadding,
           x = this.mousePosition.x;
       var result = [];
 
@@ -920,9 +922,9 @@ function (_Component) {
 
       var Chart = (0, _jquery.default)(this.dom.current);
       var _padding$left2 = padding.left,
-          left = _padding$left2 === void 0 ? 30 : _padding$left2,
+          left = _padding$left2 === void 0 ? defaultPadding.left : _padding$left2,
           _padding$bottom2 = padding.bottom,
-          bottom = _padding$bottom2 === void 0 ? 20 : _padding$bottom2;
+          bottom = _padding$bottom2 === void 0 ? defaultPadding.bottom : _padding$bottom2;
       var Left = left + result[0].obj.center.x * this.width / 100;
       var Bottom = bottom + 12 + parseFloat(this.mousePosition.y) * -this.height / 100;
       var ui = (0, _functions.getDetailUI)(Left, Bottom, result);
@@ -957,7 +959,8 @@ function (_Component) {
       var _this$props5 = this.props,
           zoom = _this$props5.zoom,
           style = _this$props5.style,
-          padding = _this$props5.padding;
+          padding = _this$props5.padding,
+          defaultPadding = _this$props5.defaultPadding;
       style.padding = 0;
       var _this$state2 = this.state,
           x = _this$state2.x,
@@ -965,13 +968,13 @@ function (_Component) {
       var zoomx = x.zoom;
       var zoomy = y.zoom;
       var _padding$left3 = padding.left,
-          left = _padding$left3 === void 0 ? 30 : _padding$left3,
+          left = _padding$left3 === void 0 ? defaultPadding.left : _padding$left3,
           _padding$top2 = padding.top,
-          top = _padding$top2 === void 0 ? 20 : _padding$top2,
+          top = _padding$top2 === void 0 ? defaultPadding.top : _padding$top2,
           _padding$right2 = padding.right,
-          right = _padding$right2 === void 0 ? 20 : _padding$right2,
+          right = _padding$right2 === void 0 ? defaultPadding.right : _padding$right2,
           _padding$bottom3 = padding.bottom,
-          bottom = _padding$bottom3 === void 0 ? 20 : _padding$bottom3;
+          bottom = _padding$bottom3 === void 0 ? defaultPadding.bottom : _padding$bottom3;
       var d = this.updateData();
       this.d = d;
       var grids = [d.x.grid || {
@@ -1100,10 +1103,11 @@ exports.default = RChart;
 RChart.defaultProps = {
   filter: false,
   changeStep: 1,
-  padding: {
+  padding: {},
+  defaultPadding: {
     left: 30,
     top: 20,
     right: 20,
-    bottom: 20
+    bottom: 30
   }
 };
