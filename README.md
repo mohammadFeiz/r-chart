@@ -1,4 +1,5 @@
 # r-chart
+![GitHub Logo](/images/r-chart-dark.png)
 
 
 ### description
