@@ -26,7 +26,7 @@ Properties | Type | Required | Description
 data | Array of objects | Required | Each member of data is an object that render a sort of values(line or bars).</td>
 x | Object | Required | Horizontal axis configuration
 y | Object | Required | Vertical axis configuration
-padding | Object | default is {left:30,top:20,right:20,bottom:30} | Set padding of chart container.
+padding | Object | default is {left:30,top:20,right:20,bottom:30} | Set padding of chart container. has 4 properties that get number value (left,top,right and bottom)
 onchange | function(callback) | Optional | Set onchange for edit mode. onchange is an callback that receive changed data as parameter
 style | Object(css object) | Optional | Set inline style for chart container.
 className | string | Optional | Set class attribute for chart
@@ -59,6 +59,8 @@ gridColor | string | Optional | Color of vertical grid lines.
 
 ```javascript
 <RChart
+    className='chart'
+    id='my-chart'
     data={[
        {
           color:'lightgreen',type:'bar',width:60,
