@@ -123,7 +123,7 @@ import RChart from "r-chart";
   <tr>
     <td>labels</td>
     <td>Array of strings</td>
-    <td>Required if x of stream members is string</td>
+    <td>Required if x property of stream members is string</td>
     <td>List of labels of horizontal axis. use when x property of stream members is string</td>
   </tr>
   <tr>
