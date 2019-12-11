@@ -1,4 +1,5 @@
 # r-chart
+
 <h3>description</h3><br>
 <ul>
   <li>
@@ -168,5 +169,36 @@ import RChart from "r-chart";
   </tr>
 </table>
 
-<a href="https://stackblitz.com/edit/r-chart?embed=1&file=index.js">See demo on stackblitz</a><br>
-<embed src="https://r-chart.stackblitz.io">
+```javascript
+<RChart
+    data={[
+       {
+          color:'lightgreen',type:'bar',width:60,
+          stream:[
+            {x:'Jan',y:0},{x:'Feb',y:4},{x:'Mar',y:0},{x:'Apr',y:3},{x:'May',y:5}
+          ]
+       },
+      {
+        lineWidth:2,color:'orange',r:4,point:true,dash:[5,3],
+        stream:[
+          {x:'Jan',y:0},{x:'Feb',y:4},{x:'Mar',y:0},{x:'Apr',y:3},{x:'May',y:20}
+        ],
+      },
+    ]
+    x={{
+      gridColor:'#ddd',
+      zoom:true,
+      rotation:10,
+      labels:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec" ],
+    }}
+    y={{
+      gridColor:'#ddd',
+      zoom:true
+    }}
+    padding={{top:8,right:8,bottom:50,top:20}}
+    onchange={(data)=>{
+      this.setState({data});
+    }}
+ />
+
+<a href="https://stackblitz.com/edit/r-chart-qfx76m">See demo on stackblitz</a><br>
