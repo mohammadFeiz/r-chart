@@ -46,113 +46,28 @@ y | Object | Required | vertical axis configuration
 
 
 ### data Properties
-<table>
-  <tr>
-    <th>Properties</th>
-    <th>Type</th>
-    <th>Required</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td>stream</td>
-    <td>Array of objects</td>
-    <td>Required</td>
-    <td>Each member of stream is a point of data that have x and y properties.</td>
-  </tr>
-  <tr>
-    <td>type</td>
-    <td>string</td>
-    <td>default is "line"</td>
-    <td>Type of chart for this member of data("line" or "bar").</td>
-  </tr>
-  <tr>
-    <td>color</td>
-    <td>string</td>
-    <td>default is "#444"</td>
-    <td>Color of this member of data.</td>
-  </tr>
-  <tr>
-    <td>lineWidth</td>
-    <td>number(+)</td>
-    <td>default is 2</td>
-    <td>Set width of lines in line chart.</td>
-  </tr>
-  <tr>
-    <td>dash</td>
-    <td>Array of 2 number</td>
-    <td>Optional</td>
-    <td>Set dashed style for lines in line chart.first number is length of fill and second number is length of empty. </td>
-  </tr>
-  <tr>
-    <td>pointColor</td>
-    <td>string</td>
-    <td>default is "#444"</td>
-    <td>Color of point in line chart.</td>
-  </tr>
-  <tr>
-    <td>width</td>
-    <td>number</td>
-    <td>default is 80</td>
-    <td>Number between 1 and 100. width percent of bars in bar chart.</td>
-  </tr>
-</table>
-
+Properties | Type | Required | Description
+---------- | ---- | -------- | -----------
+stream | Array of objects | Required | Each member of stream is a point of data that have x and y properties.
+type | string | default is "line" | Type of chart for this member of data("line" or "bar")
+color | string | default is "#444" | Color of this member of data.
+lineWidth | number(+) | default is 2 | Set width of lines in line chart.
+dash | Array of 2 number | Optional | Set dashed style for lines in line chart.first number is length of fill and second number is length of empty.
+pointColor | string | default is "#444" | Color of point in line chart.
+width | number | default is 80 | Number between 1 and 100. width percent of bars in bar chart.
 ### **x** Properties
-<table>
-  <tr>
-    <th>Properties</th>
-    <th>Type</th>
-    <th>Required</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td>labels</td>
-    <td>Array of strings</td>
-    <td>Required if x property of stream members is string</td>
-    <td>List of labels of horizontal axis. use when x property of stream members is string</td>
-  </tr>
-  <tr>
-    <td>zoom</td>
-    <td>boolean</td>
-    <td>default is false</td>
-    <td>set horizontal axis zoomable.</td>
-  </tr>
-  <tr>
-    <td>gridColor</td>
-    <td>string</td>
-    <td>Optional</td>
-    <td>Color of horizontal grid lines.</td>
-  </tr>
-  <tr>
-    <td>rotation</td>
-    <td>number</td>
-    <td>Optional</td>
-    <td>Set angle of horizontal labels.</td>
-  </tr>
-</table>
-
+Properties | Type | Required | Description
+---------- | ---- | -------- | -----------
+labels | Array of strings | Required if x property of stream members is string | List of labels of horizontal axis. use when x property of stream members is string
+zoom | boolean | default is false | set horizontal axis zoomable.
+gridColor | string | Optional | Color of horizontal grid lines.
+rotation | number | Optional | Set angle of horizontal labels.
 <h3>y Properties</h3>
-<table>
-  <tr>
-    <th>Properties</th>
-    <th>Type</th>
-    <th>Required</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td>zoom</td>
-    <td>boolean</td>
-    <td>default is false</td>
-    <td>set vertical axis zoomable.</td>
-  </tr>
-  <tr>
-    <td>gridColor</td>
-    <td>string</td>
-    <td>Optional</td>
-    <td>Color of vertical grid lines.</td>
-  </tr>
-</table>
-
+Properties | Type | Required | Description
+---------- | ---- | -------- | -----------
+zoom | boolean | default is false | set vertical axis zoomable.
+gridColor | string | Optional | Color of vertical grid lines.
+### Sample Configuration
 ```javascript
 <RChart
     data={[
