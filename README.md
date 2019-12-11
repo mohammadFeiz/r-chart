@@ -168,4 +168,5 @@ import RChart from "r-chart";
   </tr>
 </table>
 
-<a href="https://stackblitz.com/edit/r-chart?embed=1&file=index.js">See demo on stackblitz</a>
+<a href="https://stackblitz.com/edit/r-chart?embed=1&file=index.js">See demo on stackblitz</a><br>
+<embed src="https://r-chart.stackblitz.io">
