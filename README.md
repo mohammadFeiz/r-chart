@@ -1,7 +1,7 @@
 # r-chart
 
+
 ### description
-<br>
 <ul>
   <li>
     create line chart , bar chart and combo chart.
@@ -38,32 +38,11 @@ import RChart from "r-chart";
 ```
 
 ### Root Properties
-<table>
-  <tr>
-    <th>Properties</th>
-    <th>Type</th>
-    <th>Required</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td>data</td>
-    <td>Array of objects</td>
-    <td>Required</td>
-    <td>each member of data is an object that render a sort of values(line or bars).</td>
-  </tr>
-  <tr>
-    <td>x</td>
-    <td>object</td>
-    <td>Required</td>
-    <td>horizontal axis configuration.</td>
-  </tr>
-  <tr>
-    <td>y</td>
-    <td>object</td>
-    <td>Required</td>
-    <td>vertical axis configuration.</td>
-  </tr>
-</table>
+Properties | Type | Required | Description
+---------- | ---- | -------- | -----------
+data | Array of objects | Required | each member of data is an object that render a sort of values(line or bars).</td>
+x | Object | Required | horizontal axis configuration
+y | Object | Required | vertical axis configuration
 
 
 ### data Properties
