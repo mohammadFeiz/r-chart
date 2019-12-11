@@ -7,7 +7,7 @@ exports.default = void 0;
 
 var _react = _interopRequireWildcard(require("react"));
 
-var _rSlider = _interopRequireDefault(require("@mohamadfeiz/r-slider"));
+var _rRangeSlider = _interopRequireDefault(require("r-range-slider"));
 
 var _rCanvas = _interopRequireDefault(require("r-canvas"));
 
@@ -961,7 +961,6 @@ function (_Component) {
           style = _this$props5.style,
           padding = _this$props5.padding,
           defaultPadding = _this$props5.defaultPadding;
-      style.padding = 0;
       var _this$state2 = this.state,
           x = _this$state2.x,
           y = _this$state2.y;
@@ -1022,16 +1021,18 @@ function (_Component) {
         value: d
       }, _react.default.createElement("div", {
         className: "r-chart",
-        style: style,
+        style: _jquery.default.extend({}, {
+          padding: 0
+        }, style),
         ref: this.dom
-      }, d.x.labelSlider && _react.default.createElement(_rSlider.default, _extends({}, d.x.labelSlider, {
+      }, d.x.labelSlider && _react.default.createElement(_rRangeSlider.default, _extends({}, d.x.labelSlider, {
         style: this.getStyle('x'),
         className: "r-chart-labels r-chart-labels-x"
-      })), d.y.labelSlider && _react.default.createElement(_rSlider.default, _extends({}, d.y.labelSlider, {
+      })), d.y.labelSlider && _react.default.createElement(_rRangeSlider.default, _extends({}, d.y.labelSlider, {
         style: this.getStyle('y'),
         direction: "up",
         className: "r-chart-labels r-chart-labels-y"
-      })), zoomx && d.x.filterSlider && _react.default.createElement(_rSlider.default, {
+      })), zoomx && d.x.filterSlider && _react.default.createElement(_rRangeSlider.default, {
         className: "r-chart-filter r-chart-filter-x",
         axis: "x",
         start: d.x.filterSlider.start,
@@ -1046,7 +1047,7 @@ function (_Component) {
           bottom: "".concat(bottom - 9, "px"),
           right: "".concat(right, "px")
         }
-      }), zoomy && d.y.filterSlider && _react.default.createElement(_rSlider.default, {
+      }), zoomy && d.y.filterSlider && _react.default.createElement(_rRangeSlider.default, {
         className: "r-chart-filter r-chart-filter-y",
         axis: "y",
         direction: "up",

@@ -1,5 +1,5 @@
 import React, { Component,createContext,createRef } from 'react';
-import Slider from '@mohamadfeiz/r-slider';
+import Slider from 'r-range-slider';
 import Canvas from 'r-canvas';
 import $ from 'jquery';
 import './index.css'
@@ -476,7 +476,6 @@ export default class RChart extends Component {
   // }
   render() {
     var {zoom,style,padding,defaultPadding} = this.props;
-    style.padding = 0;
     var {x,y} = this.state;
     var {zoom:zoomx} = x;
     var {zoom:zoomy} = y;
@@ -507,7 +506,7 @@ export default class RChart extends Component {
     }
     return (
       <chartContext.Provider value={d}>
-        <div className='r-chart' style={style} ref={this.dom}>
+        <div className='r-chart' style={$.extend({},{padding:0},style)} ref={this.dom}>
           {
             d.x.labelSlider &&
             <Slider {...d.x.labelSlider} style={this.getStyle('x')} className='r-chart-labels r-chart-labels-x'/>
