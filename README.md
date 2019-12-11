@@ -38,10 +38,13 @@ Properties | Type | Required | Description
 stream | Array of objects | Required | Each member of stream is a point of data that have x and y properties.
 type | string | default is "line" | Type of chart for this member of data("line" or "bar")
 color | string | default is "#444" | Color of this member of data.
+line | boolean | default is true | Set for show lines of **line chart**.
 lineWidth | number(+) | default is 2 | Set width of lines in line chart.
-dash | Array of 2 number | Optional | Set dashed style for lines in line chart.first number is length of fill and second number is length of empty.
+dash | Array of 2 number | Optional | Set dashed style for lines in **line chart**. first number is length of fill and second number is length of empty.
+point | boolean | default is false | Set true for show points of data in **line chart** 
 pointColor | string | default is "#444" | Color of point in line chart.
-width | number | default is 80 | Number between 1 and 100. width percent of bars in bar chart.
+r | number | default is 3 | Radius of **line chart** points.
+width | number | default is 80 | Number between 1 and 100. width percent of bars in **bar chart**.
 ### **x** Properties
 Properties | Type | Required | Description
 ---------- | ---- | -------- | -----------
