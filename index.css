@@ -93,4 +93,18 @@
   position:absolute;    
 }
 
-
+.r-chart-deselect-all{
+  position:absolute;
+  width:50px;
+  height:12px;
+  color:#fff;
+  font-size:8px;
+  font-family:arial;
+  border-radius:3px;
+  background:red;
+  z-index:100;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  cursor:pointer;
+}

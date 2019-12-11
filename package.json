@@ -1,7 +1,7 @@
 {
   "name": "r-chart",
-  "version": "1.0.2",
-  "description": "",
+  "version": "1.0.3",
+  "description": "chart component written by react js,support line charts and bar charts,resposive,zoomable,editable,dragable",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,11 +10,17 @@
     "type": "git",
     "url": "git+https://github.com/mohammadFeiz/r-chart.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "chart","r-chart","line chart","bar chart","diagram","zoom","responsive",
+    "drag","dragable chart","changable chart","changable","dragable",
+    "data correction","correaction chart","graph","react","reactjs","react chart",
+    "change point","editable","editable chart","editable graph"
+  ],
+  "author": "mohamad sharif feiz <feiz.ms@gmail.com> (http://www.frontend-master.ir)",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/mohammadFeiz/r-chart/issues"
+    "url": "https://github.com/mohammadFeiz/r-chart/issues",
+    "email":"feiz.ms@gmail.com"
   },
   "homepage": "https://github.com/mohammadFeiz/r-chart#readme"
 }

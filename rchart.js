@@ -5,7 +5,7 @@ import $ from 'jquery';
 import './index.css'
 import {getRange,getLimit,getIndex,getPosition,getDetailUI} from './functions';
 import RActions from 'r-actions';
-var {eventHandler,getClient,fix,getPercentByValue,getValueByPercent,binarySearch} = new RActions();
+var {eventHandler,getClient,fix,getPercentByValue,getValueByPercent,binarySearch,compaire} = new RActions();
 var chartContext = createContext();
 export default class RChart extends Component {
   constructor(props) {
@@ -315,6 +315,8 @@ export default class RChart extends Component {
     this.onchange({data});
   }
   mouseDown(e,d){
+    if(!this.props.onchange){return;}
+    this.clickedItem = [false,false];
     var point =this.getpoint(d.lines,this.mousePosition);
     var bar =this.getbar(d.rectangles,this.mousePosition);
     var item = point || bar || false;
@@ -329,6 +331,7 @@ export default class RChart extends Component {
     };
     if(item){
       this.setLimit = false;
+      this.clickedItem = item;
       if(data[item[0]].stream[item[1]].selected){
         eventHandler('window','mousemove',$.proxy(this.pointMouseMove,this));
       }
@@ -367,8 +370,8 @@ export default class RChart extends Component {
     eventHandler('window','mouseup',this.pointMouseUp,'unbind');
     var point =this.getpoint(this.d.lines,this.mousePosition);
     var rect =this.getbar(this.d.rectangles,this.mousePosition);
-    if(point){this.select(point[0],point[1])}
-    else if(rect){this.select(rect[0],rect[1])}
+    var item = point || rect || false;
+    if(item && compaire(this.clickedItem,item)){this.select(item[0],item[1])}
     var {data} = this.props;
     this.setLimit = true;
     this.onchange({data});
@@ -507,6 +510,10 @@ export default class RChart extends Component {
     return (
       <chartContext.Provider value={d}>
         <div className='r-chart' style={$.extend({},{padding:0},style)} ref={this.dom}>
+          {
+            this.selected.length !==0 &&
+            <div className='r-chart-deselect-all' onClick={this.deselectAll.bind(this)} style={{right:right+'px',top:top+'px'}}>Deselect All</div>
+          }
           {
             d.x.labelSlider &&
             <Slider {...d.x.labelSlider} style={this.getStyle('x')} className='r-chart-labels r-chart-labels-x'/>

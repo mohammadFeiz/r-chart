@@ -63,7 +63,8 @@ var _ref = new _rActions.default(),
     fix = _ref.fix,
     getPercentByValue = _ref.getPercentByValue,
     getValueByPercent = _ref.getValueByPercent,
-    binarySearch = _ref.binarySearch;
+    binarySearch = _ref.binarySearch,
+    compaire = _ref.compaire;
 
 var chartContext = (0, _react.createContext)();
 
@@ -679,6 +680,11 @@ function (_Component) {
   }, {
     key: "mouseDown",
     value: function mouseDown(e, d) {
+      if (!this.props.onchange) {
+        return;
+      }
+
+      this.clickedItem = [false, false];
       var point = this.getpoint(d.lines, this.mousePosition);
       var bar = this.getbar(d.rectangles, this.mousePosition);
       var item = point || bar || false;
@@ -698,6 +704,7 @@ function (_Component) {
 
       if (item) {
         this.setLimit = false;
+        this.clickedItem = item;
 
         if (data[item[0]].stream[item[1]].selected) {
           eventHandler('window', 'mousemove', _jquery.default.proxy(this.pointMouseMove, this));
@@ -763,11 +770,10 @@ function (_Component) {
       eventHandler('window', 'mouseup', this.pointMouseUp, 'unbind');
       var point = this.getpoint(this.d.lines, this.mousePosition);
       var rect = this.getbar(this.d.rectangles, this.mousePosition);
+      var item = point || rect || false;
 
-      if (point) {
-        this.select(point[0], point[1]);
-      } else if (rect) {
-        this.select(rect[0], rect[1]);
+      if (item && compaire(this.clickedItem, item)) {
+        this.select(item[0], item[1]);
       }
 
       var data = this.props.data;
@@ -1025,7 +1031,14 @@ function (_Component) {
           padding: 0
         }, style),
         ref: this.dom
-      }, d.x.labelSlider && _react.default.createElement(_rRangeSlider.default, _extends({}, d.x.labelSlider, {
+      }, this.selected.length !== 0 && _react.default.createElement("div", {
+        className: "r-chart-deselect-all",
+        onClick: this.deselectAll.bind(this),
+        style: {
+          right: right + 'px',
+          top: top + 'px'
+        }
+      }, "Deselect All"), d.x.labelSlider && _react.default.createElement(_rRangeSlider.default, _extends({}, d.x.labelSlider, {
         style: this.getStyle('x'),
         className: "r-chart-labels r-chart-labels-x"
       })), d.y.labelSlider && _react.default.createElement(_rRangeSlider.default, _extends({}, d.y.labelSlider, {
