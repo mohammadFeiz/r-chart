@@ -34,7 +34,7 @@ import RChart from "r-chart";
 <h3>Root Properties</h3>
 <table>
   <tr>
-    <th>prop</th>
+    <th>Properties</th>
     <th>Type</th>
     <th>Required</th>
     <th>Description</th>
@@ -63,7 +63,7 @@ import RChart from "r-chart";
 <h3>data Properties</h3>
 <table>
   <tr>
-    <th>Props</th>
+    <th>Properties</th>
     <th>Type</th>
     <th>Required</th>
     <th>Description</th>
@@ -109,5 +109,61 @@ import RChart from "r-chart";
     <td>number</td>
     <td>default is 80</td>
     <td>Number between 1 and 100. width percent of bars in bar chart.</td>
+  </tr>
+</table>
+
+<h3>x Properties</h3>
+<table>
+  <tr>
+    <th>Properties</th>
+    <th>Type</th>
+    <th>Required</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>labels</td>
+    <td>Array of strings</td>
+    <td>Optional</td>
+    <td>List of labels of horizontal axis. use when x property of stream members is string</td>
+  </tr>
+  <tr>
+    <td>zoom</td>
+    <td>boolean</td>
+    <td>default is false</td>
+    <td>set horizontal axis zoomable.</td>
+  </tr>
+  <tr>
+    <td>gridColor</td>
+    <td>string</td>
+    <td>Optional</td>
+    <td>Color of horizontal grid lines.</td>
+  </tr>
+  <tr>
+    <td>rotation</td>
+    <td>number</td>
+    <td>Optional</td>
+    <td>Set angle of horizontal labels.</td>
+  </tr>
+</table>
+
+<h3>y Properties</h3>
+<table>
+  <tr>
+    <th>Properties</th>
+    <th>Type</th>
+    <th>Required</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>zoom</td>
+    <td>boolean</td>
+    <td>default is false</td>
+    <td>set vertical axis zoomable.</td>
+  </tr>
+  <tr>
+    <td>gridColor</td>
+    <td>string</td>
+    <td>Optional</td>
+    <td>Color of vertical grid lines.</td>
   </tr>
 </table>
