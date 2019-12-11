@@ -72,7 +72,7 @@ gridColor | string | Optional | Color of vertical grid lines.
           ]
        },
       {
-        lineWidth:2,color:'orange',r:4,point:true,dash:[5,3],
+        lineWidth:2,color:'orange',r:4,showPoint:true,dash:[5,3],pointColor:'yellow',
         stream:[
           {x:'Jan',y:0},{x:'Feb',y:4},{x:'Mar',y:0},{x:'Apr',y:3},{x:'May',y:20}
         ],
