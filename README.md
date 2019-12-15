@@ -1,4 +1,4 @@
-# r-chart (under development . stable version commin soon!!!)
+# r-chart (under development . stable version comin soon!!!)
 ![GitHub Logo](/images/r-chart-dark.png)
 
 
