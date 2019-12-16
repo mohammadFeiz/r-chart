@@ -49,9 +49,9 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
@@ -92,33 +92,21 @@ function (_Component) {
       }
     };
     _this.selected = [];
+    _this.state = {
+      setting: false,
+      open: data.map(function (d) {
+        return d.show !== false;
+      })
+    };
     _this.isMobile = 'ontouchstart' in document.documentElement ? true : false;
     _this.dom = (0, _react.createRef)();
     (0, _jquery.default)('body').on('mouseout', '.r-chart canvas', function () {
       (0, _jquery.default)('.r-chart-detail-container').remove();
     });
-    (0, _jquery.default)(window).on('resize', _this.resize.bind(_assertThisInitialized(_this)));
     return _this;
   }
 
   _createClass(RChart, [{
-    key: "resize",
-    value: function resize() {
-      var _this2 = this;
-
-      this.timer = 0;
-      clearInterval(this.interval);
-      this.interval = setInterval(function () {
-        _this2.timer++;
-
-        if (_this2.timer >= 20) {
-          _this2.setState({});
-
-          clearInterval(_this2.interval);
-        }
-      }, 10);
-    }
-  }, {
     key: "change",
     value: function change(obj) {
       //change state.x or state.y by slider
@@ -150,8 +138,12 @@ function (_Component) {
       var label, start, step, end;
 
       if (labels) {
-        var fs = filter[0] ? (0, _functions.getIndex)(labels, filter[0]) : 0;
-        var fe = filter[1] ? (0, _functions.getIndex)(labels, filter[1]) : labels.length - 1;
+        var fs = filter[0] ? (0, _functions.getIndex)(labels, function (label) {
+          return label === filter[0];
+        }) : 0;
+        var fe = filter[1] ? (0, _functions.getIndex)(labels, function (label) {
+          return label === filter[1];
+        }) : labels.length - 1;
         label = {
           items: labels.map(function (m, i) {
             return {
@@ -210,8 +202,12 @@ function (_Component) {
       var start, step, end, labelItems, labelStep, labelStyle;
 
       if (labels) {
-        var fs = filter[0] ? (0, _functions.getIndex)(labels, filter[0]) : 0;
-        var fe = filter[1] ? (0, _functions.getIndex)(labels, filter[1]) : labels.length - 1;
+        var fs = filter[0] ? (0, _functions.getIndex)(labels, function (label) {
+          return label === filter[0];
+        }) : 0;
+        var fe = filter[1] ? (0, _functions.getIndex)(labels, function (label) {
+          return label === filter[1];
+        }) : labels.length - 1;
         labelItems = labels.map(function (m, i) {
           return {
             text: m,
@@ -288,159 +284,284 @@ function (_Component) {
     }
   }, {
     key: "getlineChart",
-    value: function getlineChart(_ref2, s, i) {
-      var stream = _ref2.stream,
-          background = _ref2.background,
-          _ref2$lineWidth = _ref2.lineWidth,
-          lineWidth = _ref2$lineWidth === void 0 ? 1 : _ref2$lineWidth,
-          _ref2$color = _ref2.color,
-          color = _ref2$color === void 0 ? '#444' : _ref2$color,
-          _ref2$r = _ref2.r,
-          r = _ref2$r === void 0 ? 3 : _ref2$r,
-          showPoint = _ref2.point,
-          _ref2$line = _ref2.line,
-          showLine = _ref2$line === void 0 ? true : _ref2$line,
-          dash = _ref2.dash;
+    value: function getlineChart(s, dataIndex) {
+      var _this$props$data$data = this.props.data[dataIndex],
+          stream = _this$props$data$data.stream,
+          pointColor = _this$props$data$data.pointColor,
+          _this$props$data$data2 = _this$props$data$data.lineWidth,
+          lineWidth = _this$props$data$data2 === void 0 ? 1 : _this$props$data$data2,
+          _this$props$data$data3 = _this$props$data$data.color,
+          color = _this$props$data$data3 === void 0 ? '#444' : _this$props$data$data3,
+          _this$props$data$data4 = _this$props$data$data.r,
+          r = _this$props$data$data4 === void 0 ? 3 : _this$props$data$data4,
+          showPoint = _this$props$data$data.showPoint,
+          _this$props$data$data5 = _this$props$data$data.showLine,
+          showLine = _this$props$data$data5 === void 0 ? true : _this$props$data$data5,
+          _this$props$data$data6 = _this$props$data$data.show,
+          show = _this$props$data$data6 === void 0 ? true : _this$props$data$data6,
+          dash = _this$props$data$data.dash,
+          selectable = _this$props$data$data.selectable,
+          shadow = _this$props$data$data.shadow;
+
+      if (!showLine && !showPoint) {
+        return;
+      }
+
+      var points = this.getPoints(s, stream, dataIndex);
       var line = {
-        dataIndex: i,
+        dataIndex: dataIndex,
         type: 'line',
-        points: [],
         stroke: color,
         dash: dash,
-        lineWidth: lineWidth
+        lineWidth: lineWidth,
+        selectable: selectable,
+        points: points
       };
-
-      for (var j = 0; j < stream.length; j++) {
-        var selected = stream[j].selected;
-
-        if (selected) {
-          this.selected.push([i, j]);
-        }
-
-        var point = this.getPoint(s, stream[j]);
-
-        if (point === false) {
-          continue;
-        }
-
-        point.streamIndex = j;
-        line.points.push(point);
-
-        if (showPoint) {
-          var x = point.x,
-              y = point.y;
-          s.arcs.push({
-            stroke: color,
-            r: r,
-            x: x,
-            y: y,
-            lineWidth: lineWidth * 2,
-            type: 'arc',
-            fill: selected ? 'red' : background || '#fff'
-          });
-        }
-      }
+      var arcs = showPoint ? line.points.map(function (p, i) {
+        var x = p.x,
+            y = p.y,
+            R = p.r;
+        return {
+          stroke: color,
+          r: R || r,
+          x: x,
+          y: y,
+          lineWidth: lineWidth * 2,
+          type: 'arc',
+          fill: p.selected ? 'red' : pointColor || '#fff'
+        };
+      }) : [];
+      s.arcs = s.arcs.concat(arcs);
 
       if (showLine) {
         s.lines.push(line);
       }
+
+      if (shadow) {
+        var firstPoint = {
+          x: points[0].x,
+          y: points[0].y
+        };
+        var lastPoint = {
+          x: points[points.length - 1].x,
+          y: points[points.length - 1].y
+        };
+        firstPoint[this.mainAxis] = '0%';
+        lastPoint[this.mainAxis] = '0%';
+        s.shadows.push(_jquery.default.extend({}, line, {
+          fill: color,
+          stroke: false,
+          opacity: .2,
+          points: [firstPoint].concat(points, [lastPoint])
+        }));
+      }
     }
   }, {
-    key: "getPoint",
-    value: function getPoint(s, stream) {
-      var x = stream.x,
-          y = stream.y;
+    key: "getPoints",
+    value: function getPoints(s, stream, dataIndex) {
+      var points = [];
 
-      var _getPosition = (0, _functions.getPosition)(s.x.labelSlider, x),
-          X = _getPosition.position,
-          centerX = _getPosition.center;
+      for (var i = 0; i < stream.length; i++) {
+        var str = stream[i];
+        var selected = str.selected,
+            x = str.x,
+            y = str.y,
+            r = str.r,
+            _str$show = str.show,
+            show = _str$show === void 0 ? true : _str$show;
 
-      var _getPosition2 = (0, _functions.getPosition)(s.y.labelSlider, y),
-          Y = _getPosition2.position,
-          centerY = _getPosition2.center;
-
-      stream.position = {
-        x: X,
-        y: Y
-      };
-      stream.center = {
-        x: centerX,
-        y: centerY
-      };
-      return X === false || Y === false ? false : {
-        x: X + '%',
-        y: -Y + '%',
-        value: {
-          x: x,
-          y: y
+        if (!show) {
+          continue;
         }
+
+        var X = this.getPointPosition(s.x.labelSlider, x, 'x');
+
+        if (X === false) {
+          continue;
+        }
+
+        var Y = this.getPointPosition(s.y.labelSlider, y, 'y');
+
+        if (Y === false) {
+          continue;
+        }
+
+        var point = {
+          x: X.pos + '%',
+          y: -Y.pos + '%',
+          streamIndex: i,
+          r: r
+        };
+        str.position = {
+          x: X.pos,
+          y: Y.pos
+        };
+        str.center = {
+          x: X.pos,
+          y: Y.pos
+        };
+
+        if (selected) {
+          this.selected.push([dataIndex, i]);
+          point.selected = true;
+        }
+
+        points.push(point);
+      }
+
+      return points;
+    }
+  }, {
+    key: "getPointPosition",
+    value: function getPointPosition(labelSlider, value, axis) {
+      var label = labelSlider.label,
+          start = labelSlider.start,
+          end = labelSlider.end;
+      var pos, center;
+
+      if (label.items) {
+        var index = (0, _functions.getIndex)(label.items, function (obj) {
+          return obj.text === value;
+        });
+        var length = label.items.length;
+
+        if (index === -1) {
+          return false;
+        }
+
+        pos = (index + 0.5) * 100 / length;
+        center = pos;
+      } else {
+        pos = (value - start) * 100 / (end - start);
+        center = pos;
+      }
+
+      return {
+        pos: pos,
+        center: center
       };
     }
   }, {
     key: "getbarChart",
-    value: function getbarChart(data, s, i) {
-      var stream = data.stream;
+    value: function getbarChart(s, dataIndex) {
+      var data = this.props.data[dataIndex];
+      var stream = data.stream,
+          show = data.show,
+          selectable = data.selectable;
+
+      if (show === false) {
+        return;
+      }
+
       this.barCounter++;
+      var bars = this.getBars(s, dataIndex, this.barCounter);
+      s.rectangles.push({
+        type: 'group',
+        items: bars,
+        dataIndex: dataIndex,
+        selectable: selectable
+      });
+    }
+  }, {
+    key: "getBars",
+    value: function getBars(s, dataIndex, barCounter) {
+      var rects = [];
+      var _this$props2 = this.props,
+          data = _this$props2.data,
+          _this$props2$barWidth = _this$props2.barWidth,
+          barWidth = _this$props2$barWidth === void 0 ? 80 : _this$props2$barWidth;
+      var _data$dataIndex = data[dataIndex],
+          color = _data$dataIndex.color,
+          stream = _data$dataIndex.stream;
 
-      for (var j = 0; j < stream.length; j++) {
-        var selected = stream[j].selected;
+      if (barWidth < 1 || barWidth > 100) {
+        barWidth = 80;
+      }
 
-        if (selected) {
-          this.selected.push([i, j]);
-        }
+      for (var i = 0; i < stream.length; i++) {
+        var str = stream[i];
+        var selected = str.selected,
+            x = str.x,
+            y = str.y,
+            _str$show2 = str.show,
+            show = _str$show2 === void 0 ? true : _str$show2;
 
-        var rectangle = this.getBar(s, stream[j], data);
-
-        if (rectangle === false) {
+        if (!show) {
           continue;
         }
 
-        rectangle.dataIndex = i;
-        rectangle.streamIndex = j;
-        rectangle.fill = selected ? 'red' : rectangle.fill;
-        rectangle.shadow = [3, 3, 6, 'rgba(10,10,10,.4)'];
-        s.rectangles.push(rectangle);
+        if (selected) {
+          this.selected.push([dataIndex, i]);
+        }
+
+        var X = this.getBarPosition(s.x.labelSlider, x, 'x', barCounter, barWidth);
+
+        if (X === false) {
+          continue;
+        }
+
+        var Y = this.getBarPosition(s.y.labelSlider, y, 'y', barCounter, barWidth);
+
+        if (Y === false) {
+          continue;
+        }
+
+        str.position = {
+          x: X.pos,
+          y: Y.pos
+        };
+        str.center = {
+          x: X.center,
+          y: Y.center
+        };
+        rects.push({
+          type: 'rectangle',
+          x: X.pos + '%',
+          y: -Y.pos + '%',
+          width: X.size + '%',
+          height: Y.size + '%',
+          streamIndex: i,
+          fill: selected ? 'red' : color,
+          shadow: [3, 3, 6, 'rgba(10,10,10,.4)']
+        });
       }
+
+      return rects;
     }
   }, {
-    key: "getBar",
-    value: function getBar(s, stream, _ref3) {
-      var color = _ref3.color,
-          _ref3$width = _ref3.width,
-          width = _ref3$width === void 0 ? 80 : _ref3$width;
-      width = width < 1 ? 1 : width;
-      width = width > 100 ? 100 : width;
+    key: "getBarPosition",
+    value: function getBarPosition(labelSlider, value, axis, barCounter, barWidth) {
+      var label = labelSlider.label,
+          start = labelSlider.start,
+          end = labelSlider.end;
+      var pos, center, size;
 
-      var _getPosition3 = (0, _functions.getPosition)(s.x.labelSlider, stream.x, {
-        barCount: this.barCount,
-        barCounter: this.barCounter,
-        width: width
-      }),
-          x = _getPosition3.position,
-          centerX = _getPosition3.center;
+      if (label.items) {
+        //if(axis === 'y'){debugger;}
+        var index = (0, _functions.getIndex)(label.items, function (obj) {
+          return obj.text === value;
+        });
 
-      var _getPosition4 = (0, _functions.getPosition)(s.y.labelSlider, stream.y),
-          y = _getPosition4.position,
-          centerY = _getPosition4.center;
+        if (index === -1) {
+          return false;
+        }
 
-      stream.position = {
-        x: x,
-        y: y
-      };
-      stream.center = {
-        x: centerX,
-        y: centerY
-      };
-      var length = s.x.labelSlider.label.items.length;
-      var w = width / this.barCount / length;
-      var h = y;
+        var length = label.items.length;
+        center = (index + 0.5) * 100 / length;
+        var barUnit = barWidth / length / this.barCount;
+        var offsetFromCenter = barUnit * (barCounter - this.barCount / 2);
+        pos = center + offsetFromCenter + (axis === 'y' ? barUnit : 0);
+        size = barWidth / this.barCount / length;
+      } else {
+        center = (value - start) * 100 / (end - start);
+        pos = axis === 'x' ? 0 : center;
+        size = center;
+      }
+
       return {
-        x: x + '%',
-        y: y * -1 + '%',
-        width: w + '%',
-        height: h + '%',
-        fill: color,
-        type: 'rectangle'
+        pos: pos,
+        center: center,
+        size: size
       };
     }
   }, {
@@ -454,7 +575,8 @@ function (_Component) {
         barCount: 0,
         lines: [],
         arcs: [],
-        rectangles: []
+        rectangles: [],
+        shadows: []
       };
 
       if (this.setLimit !== false) {
@@ -466,25 +588,49 @@ function (_Component) {
 
       s.x = this.getDetail('x');
       s.y = this.getDetail('y');
+
+      if (s.y.labelSlider.label.items && !s.x.labelSlider.label.items) {
+        this.mainAxis = 'x';
+        this.secondAxis = 'y';
+        this.sign = -1;
+      } else {
+        this.mainAxis = 'y';
+        this.secondAxis = 'x';
+        this.sign = 1;
+      }
+
       this.barCount = data.filter(function (d) {
         return d.type === 'bar';
       }).length;
       this.barCounter = -1;
 
       for (var i = 0; i < data.length; i++) {
-        var _data$i$type = data[i].type,
-            type = _data$i$type === void 0 ? 'line' : _data$i$type;
-        this["get".concat(type, "Chart")](data[i], s, i);
+        var _data$i = data[i],
+            _data$i$type = _data$i.type,
+            type = _data$i$type === void 0 ? 'line' : _data$i$type,
+            _data$i$show = _data$i.show,
+            show = _data$i$show === void 0 ? true : _data$i$show;
+
+        if (!this.state.open[i]) {
+          continue;
+        }
+
+        if (type === 'line') {
+          this.getlineChart(s, i);
+        } else {
+          this.getbarChart(s, i);
+        } //this[`get${type}Chart`](data[i],s,i);    
+
       }
 
       return s;
     }
   }, {
     key: "getGridLines",
-    value: function getGridLines(_ref4, color, axis) {
-      var start = _ref4.start,
-          step = _ref4.step,
-          end = _ref4.end;
+    value: function getGridLines(_ref2, color, axis) {
+      var start = _ref2.start,
+          step = _ref2.step,
+          end = _ref2.end;
       var value = Math.round((start - step) / step) * step;
       var grid = {
         id: axis + '-grid',
@@ -526,10 +672,10 @@ function (_Component) {
   }, {
     key: "getStyle",
     value: function getStyle(axis) {
-      var _this$props2 = this.props,
-          filter = _this$props2.filter,
-          padding = _this$props2.padding,
-          defaultPadding = _this$props2.defaultPadding;
+      var _this$props3 = this.props,
+          filter = _this$props3.filter,
+          padding = _this$props3.padding,
+          defaultPadding = _this$props3.defaultPadding;
       var _padding$left = padding.left,
           left = _padding$left === void 0 ? defaultPadding.left : _padding$left,
           _padding$top = padding.top,
@@ -580,17 +726,31 @@ function (_Component) {
     key: "getpoint",
     value: function getpoint(lines, coords) {
       var min = 1000000;
+      var data = this.props.data;
       var result;
 
-      for (var j = 0; j < lines.length; j++) {
-        var line = lines[j];
+      for (var i = 0; i < lines.length; i++) {
+        var _lines$i = lines[i],
+            points = _lines$i.points,
+            selectable = _lines$i.selectable,
+            dataIndex = _lines$i.dataIndex;
 
-        for (var i = 0; i < line.points.length; i++) {
-          var point = line.points[i];
-          var length = this.getLength(point, coords);
+        if (selectable === false) {
+          continue;
+        }
+
+        for (var j = 0; j < points.length; j++) {
+          var _points$j = points[j],
+              x = _points$j.x,
+              y = _points$j.y,
+              streamIndex = _points$j.streamIndex;
+          var length = this.getLength(coords, {
+            x: parseFloat(x),
+            y: parseFloat(y)
+          });
 
           if (length < min) {
-            result = [line.dataIndex, point.streamIndex];
+            result = [dataIndex, streamIndex];
             min = length;
           }
         }
@@ -604,29 +764,47 @@ function (_Component) {
     key: "getbar",
     value: function getbar(rectangles, coords) {
       var result;
-      var x = parseFloat(coords.x),
-          y = parseFloat(coords.y);
 
-      for (var j = 0; j < rectangles.length; j++) {
-        var rect = rectangles[j];
-        var X = parseFloat(rect.x),
-            Y = parseFloat(rect.y);
-        var width = parseFloat(rect.width);
-        var height = parseFloat(rect.height);
+      for (var i = 0; i < rectangles.length; i++) {
+        var _rectangles$i = rectangles[i],
+            items = _rectangles$i.items,
+            dataIndex = _rectangles$i.dataIndex,
+            selectable = _rectangles$i.selectable;
 
-        if (X > x) {
+        if (selectable === false) {
           continue;
         }
 
-        if (X + width < x) {
-          continue;
-        }
+        for (var j = 0; j < items.length; j++) {
+          var _items$j = items[j],
+              x = _items$j.x,
+              y = _items$j.y,
+              width = _items$j.width,
+              height = _items$j.height,
+              streamIndex = _items$j.streamIndex;
+          x = parseFloat(x);
+          y = parseFloat(y);
+          width = parseFloat(width);
+          height = parseFloat(height);
 
-        if (y < -height) {
-          continue;
-        }
+          if (x > coords.x) {
+            continue;
+          }
 
-        return [rect.dataIndex, rect.streamIndex];
+          if (x + width < coords.x) {
+            continue;
+          }
+
+          if (coords.y < y) {
+            continue;
+          }
+
+          if (coords.y > y + height) {
+            continue;
+          }
+
+          return [dataIndex, streamIndex];
+        }
       }
     }
   }, {
@@ -725,36 +903,32 @@ function (_Component) {
           x = _getClient.x,
           y = _getClient.y;
 
-      var _this$props3 = this.props,
-          data = _this$props3.data,
-          changeStep = _this$props3.changeStep;
-      var _this$d$y$labelSlider = this.d.y.labelSlider,
-          start = _this$d$y$labelSlider.start,
-          end = _this$d$y$labelSlider.end;
+      var _this$props4 = this.props,
+          data = _this$props4.data,
+          changeStep = _this$props4.changeStep;
+      var _this$d$this$mainAxis = this.d[this.mainAxis].labelSlider,
+          start = _this$d$this$mainAxis.start,
+          end = _this$d$this$mainAxis.end;
       var _this$startOffset = this.startOffset,
           body = _this$startOffset.body,
           selected = _this$startOffset.selected;
       var offset = {
-        x: getPercentByValue(x - body.x, 0, this.width),
+        x: -getPercentByValue(x - body.x, 0, this.width),
         y: getPercentByValue(y - body.y, 0, this.height)
       };
       var changed = false;
 
       for (var i = 0; i < selected.length; i++) {
-        var _selected$i = selected[i],
-            _x = _selected$i.x,
-            _y = _selected$i.y,
-            stream = _selected$i.stream;
-
-        var value = _y - getValueByPercent(offset.y, 0, end - start);
-
+        var stream = selected[i].stream;
+        var axis = selected[i][this.mainAxis];
+        var value = axis - getValueByPercent(offset[this.mainAxis], 0, end - start);
         value = Math.round(value / changeStep) * changeStep;
 
-        if (stream.y !== value) {
+        if (stream[this.mainAxis] !== value) {
           changed = true;
         }
 
-        stream.y = value;
+        stream[this.mainAxis] = value;
       }
 
       if (changed) {
@@ -771,6 +945,7 @@ function (_Component) {
       var point = this.getpoint(this.d.lines, this.mousePosition);
       var rect = this.getbar(this.d.rectangles, this.mousePosition);
       var item = point || rect || false;
+      console.log(item);
 
       if (item && compaire(this.clickedItem, item)) {
         this.select(item[0], item[1]);
@@ -812,10 +987,10 @@ function (_Component) {
             dataIndex = _this$d$lines$i.dataIndex;
 
         for (var j = 0; j < points.length; j++) {
-          var _points$j = points[j],
-              x = _points$j.x,
-              y = _points$j.y,
-              streamIndex = _points$j.streamIndex;
+          var _points$j2 = points[j],
+              x = _points$j2.x,
+              y = _points$j2.y,
+              streamIndex = _points$j2.streamIndex;
           x = parseFloat(x);
           y = parseFloat(y);
 
@@ -893,23 +1068,29 @@ function (_Component) {
   }, {
     key: "hover",
     value: function hover() {
+      var _this2 = this;
+
       (0, _jquery.default)('.r-chart-detail-container').remove();
-      var _this$props4 = this.props,
-          data = _this$props4.data,
-          padding = _this$props4.padding,
-          defaultPadding = _this$props4.defaultPadding,
-          x = this.mousePosition.x;
+      var _this$props5 = this.props,
+          data = _this$props5.data,
+          padding = _this$props5.padding,
+          defaultPadding = _this$props5.defaultPadding;
       var result = [];
 
       for (var i = 0; i < data.length; i++) {
         var stream = data[i].stream;
 
-        if (!stream.length) {
+        if (!this.state.open[i] || !stream.length) {
           continue;
         }
 
-        var index = binarySearch(stream, x, function (a) {
-          return a.center.x;
+        var index = binarySearch(stream, this.mousePosition[this.secondAxis] * this.sign, function (a) {
+          if (!a.center) {
+            /*console.error('missing center in an stream in data['+i+']');*/
+            return false;
+          }
+
+          return a.center[_this2.secondAxis];
         }, 6);
 
         if (index === -1) {
@@ -931,42 +1112,33 @@ function (_Component) {
           left = _padding$left2 === void 0 ? defaultPadding.left : _padding$left2,
           _padding$bottom2 = padding.bottom,
           bottom = _padding$bottom2 === void 0 ? defaultPadding.bottom : _padding$bottom2;
-      var Left = left + result[0].obj.center.x * this.width / 100;
-      var Bottom = bottom + 12 + parseFloat(this.mousePosition.y) * -this.height / 100;
+
+      if (this.mainAxis === 'y') {
+        var Left = left + result[0].obj.center.x * this.width / 100;
+        var Bottom = bottom + 12 + parseFloat(this.mousePosition.y) * -this.height / 100;
+        console.log('ok');
+      } else {
+        var Left = 40 + left + parseFloat(this.mousePosition.x) * this.width / 100;
+        var Bottom = bottom + result[0].obj.center.y * this.height / 100;
+        console.log(Bottom);
+      }
+
       var ui = (0, _functions.getDetailUI)(Left, Bottom, result);
       Chart.append(ui);
-    } // hover(){
-    //   $('.r-chart-detail-container').remove();
-    //   var {lines} = this.d,{data} = this.props,x = this.mousePosition.x;
-    //   var result = [];
-    //   for(var i = 0; i < lines.length; i++){
-    //     var {points} = lines[i];
-    //     if(!points.length){continue;}
-    //     var index = binarySearch(points,x,function(a){return parseFloat(a.x)},2);
-    //     if(index === -1){continue;}
-    //     result.push({
-    //       obj:lines[i].points[index],
-    //       color:data[i].color,        
-    //     })
-    //     debugger;  
-    //   }
-    //   if(!result.length){return;}
-    //   var Chart = $(this.dom.current);
-    //   var left = Chart.width() - this.width + parseFloat(result[0].obj.x) * this.width / 100;
-    //   var bottom = Chart.height() - this.height + 20 + parseFloat(this.mousePosition.y) * -this.height / 100;
-    //   Chart.append(getDetailUI(left,bottom,result));
-    // }
-
+    }
   }, {
     key: "render",
     value: function render() {
       var _this3 = this;
 
-      var _this$props5 = this.props,
-          zoom = _this$props5.zoom,
-          style = _this$props5.style,
-          padding = _this$props5.padding,
-          defaultPadding = _this$props5.defaultPadding;
+      var _this$props6 = this.props,
+          zoom = _this$props6.zoom,
+          style = _this$props6.style,
+          padding = _this$props6.padding,
+          defaultPadding = _this$props6.defaultPadding,
+          id = _this$props6.id,
+          className = _this$props6.className,
+          data = _this$props6.data;
       var _this$state2 = this.state,
           x = _this$state2.x,
           y = _this$state2.y;
@@ -991,7 +1163,7 @@ function (_Component) {
         id: 'y-grid',
         items: []
       }];
-      var items = grids.concat(d.rectangles, d.lines, d.arcs);
+      var items = grids.concat(d.rectangles, d.lines, d.arcs, d.shadows);
       var canvas = {
         mouseDown: function mouseDown(e) {
           _this3.mouseDown(e, d);
@@ -1026,12 +1198,66 @@ function (_Component) {
       return _react.default.createElement(chartContext.Provider, {
         value: d
       }, _react.default.createElement("div", {
-        className: "r-chart",
+        className: "r-chart".concat(className ? ' ' + className : ''),
+        id: id,
         style: _jquery.default.extend({}, {
           padding: 0
         }, style),
         ref: this.dom
-      }, this.selected.length !== 0 && _react.default.createElement("div", {
+      }, _react.default.createElement("div", {
+        className: "r-chart-toggle-setting",
+        style: {
+          top: top + 'px',
+          right: right + 'px'
+        },
+        onClick: function onClick() {
+          return _this3.setState({
+            setting: true
+          });
+        }
+      }), this.state.setting && _react.default.createElement("div", {
+        className: "r-chart-setting"
+      }, _react.default.createElement("div", {
+        style: {
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          width: '100%',
+          height: '100%',
+          zIndex: -1
+        },
+        onClick: function onClick() {
+          return _this3.setState({
+            setting: false
+          });
+        }
+      }), _react.default.createElement("div", {
+        className: "r-chart-close-setting",
+        onClick: function onClick() {
+          return _this3.setState({
+            setting: false
+          });
+        }
+      }, "Close"), data.map(function (Data, i) {
+        return _react.default.createElement("div", {
+          className: "r-chart-data-list",
+          style: {
+            color: Data.color
+          },
+          onClick: function onClick() {
+            var o = _this3.state.open;
+            o[i] = !o[i];
+
+            _this3.setState({
+              open: _this3.state.open
+            });
+          }
+        }, _react.default.createElement("div", {
+          className: "r-chart-check ".concat(!_this3.state.open[i] ? 'unchecked' : 'checked')
+        }), _react.default.createElement("div", {
+          className: "r-chart-title"
+        }, Data.title || 'Untitle'));
+      })), this.selected.length !== 0 && _react.default.createElement("div", {
         className: "r-chart-deselect-all",
         onClick: this.deselectAll.bind(this),
         style: {

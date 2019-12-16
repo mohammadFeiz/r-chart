@@ -13,6 +13,7 @@ export function getRange({min,max}){
   var end = Math.round(max / step) * step + step;
   return {start,step,end};
 }
+
 export function getLimit(data,axisObj = {},axis){
   var {labels} = axisObj;
   if(labels){return false;}
@@ -28,43 +29,21 @@ export function getLimit(data,axisObj = {},axis){
   return min === Infinity || max === -Infinity?false:{min,max};
 }
 
-
-export function getIndex(array,result,field){ 
+export function getIndex(array,searchMethod){ 
   for(var i = 0; i < array.length; i++){
-    var m = array[i];
-    if(field){m = m[field]}
-    if(m === result){return i;} 
+    if(searchMethod(array[i])){return i;} 
   } 
   return -1;
 }
 
-export function getPosition({start,end,label},value,bar){
-  if(value === undefined || value === null){return false}
-  if(label.items){//اگر لیبل آیتمز داشت یعنی محور آرایه ای وگر نه محور عددی است
-    var index = getIndex(label.items,value,'text');
-    if(index === -1){return false;}
-    var position = (index + 0.5) * 100 / (label.items.length); 
-    var center = position;
-    //محور زیر بار فقط می تواند از نوع استرینگ باشد
-    if(bar){//در حالت بار مقدار زیر به موقعیت افزوده می شود
-      var {barCount,barCounter,width} = bar;
-      position = center + (width / 2 / barCount / label.items.length * (-barCount + 2 * barCounter));
-    }  
-    return {position,center};
-  }
-
-  var position = (value - start) * 100 / (end - start); 
-  return {position,center:position};
-}
-
 export function getDetailUI(left,bottom,arr){
   return `<div class="r-chart-detail-container" style="left:${left+'px'};bottom:${bottom+'px'};">
-            <div class="r-chart-detail">
-              ${arr.map((ar)=>{
-                var {color,obj} = ar;
-                return `<div class="r-chart-detail-value" style="color:${color};">${obj.x}</div>
-                <div class="r-chart-detail-value">${obj.y}</div>`
-              }).join('')}
-            </div>
-          </div>`
+    <div class="r-chart-detail">
+      ${arr.map((ar)=>{
+        var {color,obj} = ar;
+        return `<div class="r-chart-detail-value" style="color:${color};">${obj.x}</div>
+        <div class="r-chart-detail-value">${obj.y}</div>`
+      }).join('')}
+    </div>
+  </div>`
 }

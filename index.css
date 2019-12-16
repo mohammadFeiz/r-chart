@@ -1,4 +1,5 @@
 .r-chart{
+  font-family:arial;
   font-size:10px;
   background:#eee;
 }
@@ -27,9 +28,22 @@
   width:2px;
 }
 .r-chart .r-slider-point{
+  width:13px;
+  height:13px;
+  border-radius:0;
+  background:none;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.r-chart .r-slider-point:before{
+  content:'';
   width:7px;
   height:7px;
-  border-radius:0;
+  left:3px;
+  top:3px;
+  position:absolute;
   background:#aaa;
   display:flex;
   justify-content:center;
@@ -48,16 +62,15 @@
   align-items:flex-end;
   user-select:none;
   -webkit-user-select:none;
+  color:#fff;
 }
 .r-chart-detail{
   flex:1;
   display:grid;
   grid-template-columns:auto auto;
-  box-shadow:2px 2px 3px 0px rgba(0,0,0,.2);
-  border:1px solid #eee;
   border-radius:3px;
   padding:6px;
-  background:#fff;
+  background:rgba(10, 10, 10,.6);
   font-weight:bold;
 }
 .r-chart-detail-value{
@@ -65,7 +78,6 @@
   line-height:12px;
   padding-left:3px;
   padding:0 3px;
-  background:rgb(255, 255, 255);
 }
 
 .r-chart canvas{
@@ -107,4 +119,77 @@
   justify-content:center;
   align-items:center;
   cursor:pointer;
+}
+
+.r-chart-setting{
+  position:absolute;
+  width:calc(100% - 12px);
+  height:calc(100% - 12px);
+  left:6px;
+  top:6px;
+  background:rgba(10, 10, 10,.6);
+  z-index:10000;
+  padding:12px;
+  box-sizing:border-box;
+  border-radius:8px;
+}
+
+.r-chart-data-list{
+  width:100%;
+  background:rgb(255, 255, 255);
+  display:flex;
+  align-items: center;
+  margin-bottom:3px;
+  padding:3px;
+  cursor:pointer;
+  user-select:none;
+  -webkit-user-select:none;
+  z-index:1000;
+  box-sizing:border-box;
+}
+.r-chart-check{
+  width:12px;
+  height:12px;
+  margin-right:3px;
+  border:2px solid;
+  display:flex;
+  justify-content: center;
+  align-items:center;
+  font-size: 14px;
+}
+
+.r-chart-check.checked:after{
+  content:'\2714';
+}
+.r-chart-close-setting{
+  width:48px;
+  height:16px;
+  float:right;
+  position:absolute;
+  bottom:12px;
+  left:calc(50% - 24px);
+  background: #fff;
+  color:rgb(0, 0, 0);
+  display:flex;
+  justify-content: center;
+  align-items:center;
+  border-radius:3px;
+  cursor:pointer;
+}
+
+.r-chart-toggle-setting{
+  width:12px;
+  height:12px;
+  background:#fff;
+  position:absolute;
+  z-index:10;
+  color:#000;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+    cursor:pointer;
+
+}
+.r-chart-toggle-setting:after{
+  content:'\2630';
 }

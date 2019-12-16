@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", {
 exports.getRange = getRange;
 exports.getLimit = getLimit;
 exports.getIndex = getIndex;
-exports.getPosition = getPosition;
 exports.getDetailUI = getDetailUI;
 
 function getRange(_ref) {
@@ -94,15 +93,9 @@ function getLimit(data) {
   };
 }
 
-function getIndex(array, result, field) {
+function getIndex(array, searchMethod) {
   for (var i = 0; i < array.length; i++) {
-    var m = array[i];
-
-    if (field) {
-      m = m[field];
-    }
-
-    if (m === result) {
+    if (searchMethod(array[i])) {
       return i;
     }
   }
@@ -110,51 +103,10 @@ function getIndex(array, result, field) {
   return -1;
 }
 
-function getPosition(_ref2, value, bar) {
-  var start = _ref2.start,
-      end = _ref2.end,
-      label = _ref2.label;
-
-  if (value === undefined || value === null) {
-    return false;
-  }
-
-  if (label.items) {
-    //اگر لیبل آیتمز داشت یعنی محور آرایه ای وگر نه محور عددی است
-    var index = getIndex(label.items, value, 'text');
-
-    if (index === -1) {
-      return false;
-    }
-
-    var position = (index + 0.5) * 100 / label.items.length;
-    var center = position; //محور زیر بار فقط می تواند از نوع استرینگ باشد
-
-    if (bar) {
-      //در حالت بار مقدار زیر به موقعیت افزوده می شود
-      var barCount = bar.barCount,
-          barCounter = bar.barCounter,
-          width = bar.width;
-      position = center + width / 2 / barCount / label.items.length * (-barCount + 2 * barCounter);
-    }
-
-    return {
-      position: position,
-      center: center
-    };
-  }
-
-  var position = (value - start) * 100 / (end - start);
-  return {
-    position: position,
-    center: position
-  };
-}
-
 function getDetailUI(left, bottom, arr) {
-  return "<div class=\"r-chart-detail-container\" style=\"left:".concat(left + 'px', ";bottom:").concat(bottom + 'px', ";\">\n            <div class=\"r-chart-detail\">\n              ").concat(arr.map(function (ar) {
+  return "<div class=\"r-chart-detail-container\" style=\"left:".concat(left + 'px', ";bottom:").concat(bottom + 'px', ";\">\n    <div class=\"r-chart-detail\">\n      ").concat(arr.map(function (ar) {
     var color = ar.color,
         obj = ar.obj;
-    return "<div class=\"r-chart-detail-value\" style=\"color:".concat(color, ";\">").concat(obj.x, "</div>\n                <div class=\"r-chart-detail-value\">").concat(obj.y, "</div>");
-  }).join(''), "\n            </div>\n          </div>");
+    return "<div class=\"r-chart-detail-value\" style=\"color:".concat(color, ";\">").concat(obj.x, "</div>\n        <div class=\"r-chart-detail-value\">").concat(obj.y, "</div>");
+  }).join(''), "\n    </div>\n  </div>");
 }
