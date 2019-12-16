@@ -201,7 +201,7 @@ export default class RChart extends Component {
         width:X.size + '%',height:Y.size + '%', 
         streamIndex:i,
         fill:selected?'red':color,
-        shadow:[3,3,6,'rgba(10,10,10,.4)'], 
+        //shadow:[3,3,6,'rgba(10,10,10,.4)'], 
       });
     }
     return rects; 
