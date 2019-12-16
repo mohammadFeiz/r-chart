@@ -83,34 +83,59 @@ gridColor | string | Optional | Color of vertical grid lines.
 ```javascript
 <RChart
     className='chart'
-    id='my-chart'
-    barWidth:50,
-    padding={{top:8,right:8,bottom:50,top:20}}
+    id='my-chart' // set html id for chart element
+    barWidth:50, // set html class for chart element
+    padding={{
+        top:8, //padding top 
+        right:8, //padding right
+        bottom:50, //padding bottom
+        left:30 //padding left 
+    }}
+    // this chart have 2 data set
     data={[
        {
-          type:'bar',title:'Buy',color:'lightgreen',
-          stream:[
-            {x:'Jan',y:0,show:false},{x:'Feb',y:4},{x:'Mar',y:0},{x:'Apr',y:3},{x:'May',y:5}
+          type:'bar', // first data will render bar chart
+          title:'Buy', // title of first data is Buy
+          color:'lightgreen', // color of first data is lightgreen
+          stream:[ //points of first data
+            {
+                x:'Jan', // this point will render in position of Jan label horizontaly 
+                y:0, //this point will render in position of 0 label verticaly
+                show:false // this point will not render
+            },
+            {x:'Feb',y:4},
+            {x:'Mar',y:0},
+            {x:'Apr',y:3},
+            {x:'May',y:5}
           ]
        },
       {
-        type:'line',title:'Sale',lineWidth:2,color:'orange',r:4,showPoint:true,dash:[5,3],pointColor:'yellow',
-        stream:[
+        type:'line',// second data will render line chart
+        title:'Sale', // title of second data is Sale
+        lineWidth:2, // line width of line chart will be 2px
+        color:'orange', color of second data is orange
+        r:4, // public radius of points in second data
+        showPoint:true, // points will be rendered in second data
+        dash:[5,3], // lines of second data will be dashed
+        pointColor:'yellow', // background color points of second data will be yellow
+        stream:[ // points of second data
           {x:'Jan',y:0},{x:'Feb',y:4},{x:'Mar',y:0},{x:'Apr',y:3},{x:'May',y:20}
         ],
       },
     ]
     x={{
-      gridColor:'#ddd',
-      zoom:true,
-      rotation:10,
-      labels:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec" ],
+      gridColor:'#ddd', // horizontal grid lines will be rendered in #ddd color 
+      zoom:true, // horizontal axis is zoomable
+      rotation:10, // rotate horizontal labels in 10 degree
+      labels:[ // sort of labels of horizontal axis
+        "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"
+      ],
     }}
     y={{
-      gridColor:'#ddd',
-      zoom:true
+      gridColor:'#ddd', // vertical grid lines will be rendered in #ddd color 
+      zoom:true // vertical axis is zoomable
     }}
-    onchange={(data)=>{
+    onchange={(data)=>{ // change data callback
       this.setState({data});
     }}
  />
