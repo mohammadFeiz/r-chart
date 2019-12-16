@@ -1,4 +1,4 @@
-# r-chart (under development . stable version comin soon!!!)
+# r-chart (react editable line chart and bar chart)
 ![GitHub Logo](/images/r-chart-dark.png)
 
 
@@ -40,7 +40,7 @@ onchange | function(callback) | Optional | Set onchange for edit mode. onchange 
 style | Object(css object) | Optional | Set inline style for chart container.
 className | string | Optional | Set class attribute for chart
 id | string | Optional | Set id attribute for chart
-
+barWidth | number between 1 and 100 | default is 80 | width of elements of **bar chart** in percent 
 ### data Properties
 Properties | Type | Required | Description
 ---------- | ---- | -------- | -----------
@@ -54,6 +54,14 @@ showPoint | boolean | default is false | Set true for show points of data in **l
 pointColor | string | default is "#444" | Color of point in line chart.
 r | number | default is 3 | Radius of **line chart** points.
 width | number | default is 80 | Number between 1 and 100. width percent of bars in **bar chart**.
+### stream Properties
+Properties | Type | Required | Description
+---------- | ---- | -------- | -----------
+x | number or string | required | point value on horizontal axis
+y | number or string | required | point value on vertical axis
+r | number | optional | set self radius on each point. default radius is r in data property
+show | boolean | default is true | set show or not for one point
+
 ### **x** Properties
 Properties | Type | Required | Description
 ---------- | ---- | -------- | -----------
