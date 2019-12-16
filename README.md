@@ -40,7 +40,7 @@ onchange | function(callback) | Optional | Set onchange for edit mode. onchange 
 style | Object(css object) | Optional | Set inline style for chart container.
 className | string | Optional | Set class attribute for chart
 id | string | Optional | Set id attribute for chart
-barWidth | number between 1 and 100 | default is 80 | width of elements of **bar chart** in percent 
+barWidth | number between 1 and 100 | default is 80 | Number between 1 and 100. width percent of bars in **bar chart**.
 ### data Properties
 Properties | Type | Required | Description
 ---------- | ---- | -------- | -----------
@@ -53,7 +53,9 @@ dash | Array of 2 number | Optional | Set dashed style for lines in **line chart
 showPoint | boolean | default is false | Set true for show points of data in **line chart**. 
 pointColor | string | default is "#444" | Color of point in line chart.
 r | number | default is 3 | Radius of **line chart** points.
-width | number | default is 80 | Number between 1 and 100. width percent of bars in **bar chart**.
+title | 'string' | default is 'untitle' | title of data.
+selectable | boolean | default is true | if set false , user cannot select points of this data for edit.
+show | boolean | default is true | show and hide data in chart.
 ### stream Properties
 Properties | Type | Required | Description
 ---------- | ---- | -------- | -----------
@@ -68,10 +70,11 @@ Properties | Type | Required | Description
 labels | Array of strings | Required if x property of stream members is string | List of labels of horizontal axis. use when x property of stream members is string
 zoom | boolean | default is false | set horizontal axis zoomable.
 gridColor | string | Optional | Color of horizontal grid lines.
-rotation | number | Optional | Set angle of horizontal labels.
+rotation | number | Optional | Set angle of horizontal labels. for optimal use of space.
 ### y Properties
 Properties | Type | Required | Description
 ---------- | ---- | -------- | -----------
+labels | Array of strings | Required if y property of stream members is string | List of labels of vertical axis. use when y property of stream members is string
 zoom | boolean | default is false | set vertical axis zoomable.
 gridColor | string | Optional | Color of vertical grid lines.
 
@@ -81,15 +84,17 @@ gridColor | string | Optional | Color of vertical grid lines.
 <RChart
     className='chart'
     id='my-chart'
+    barWidth:50,
+    padding={{top:8,right:8,bottom:50,top:20}}
     data={[
        {
-          color:'lightgreen',type:'bar',width:60,
+          type:'bar',title:'Buy',color:'lightgreen',
           stream:[
-            {x:'Jan',y:0},{x:'Feb',y:4},{x:'Mar',y:0},{x:'Apr',y:3},{x:'May',y:5}
+            {x:'Jan',y:0,show:false},{x:'Feb',y:4},{x:'Mar',y:0},{x:'Apr',y:3},{x:'May',y:5}
           ]
        },
       {
-        lineWidth:2,color:'orange',r:4,showPoint:true,dash:[5,3],pointColor:'yellow',
+        type:'line',title:'Sale',lineWidth:2,color:'orange',r:4,showPoint:true,dash:[5,3],pointColor:'yellow',
         stream:[
           {x:'Jan',y:0},{x:'Feb',y:4},{x:'Mar',y:0},{x:'Apr',y:3},{x:'May',y:20}
         ],
@@ -105,7 +110,6 @@ gridColor | string | Optional | Color of vertical grid lines.
       gridColor:'#ddd',
       zoom:true
     }}
-    padding={{top:8,right:8,bottom:50,top:20}}
     onchange={(data)=>{
       this.setState({data});
     }}
