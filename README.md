@@ -44,7 +44,7 @@ id | string | Optional | Set id attribute for chart
 ### data Properties
 Properties | Type | Required | Description
 ---------- | ---- | -------- | -----------
-stream | Array of objects | Required | Each member of stream is a point of data that have x and y properties.
+stream | Array of objects | Required | Each member of stream is a point of data that have x, y, r and show properties.
 type | string | default is "line" | Type of chart for this member of data("line" or "bar")
 color | string | default is "#444" | Color of this member of data.
 showLine | boolean | default is true | Set for show lines of **line chart**.
