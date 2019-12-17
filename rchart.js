@@ -561,7 +561,7 @@ export default class RChart extends Component {
     }
     return (
       <chartContext.Provider value={d}>
-        <div className={`r-chart${className?' ' + className:''}`} id={id} style={$.extend({},{padding:0},style)} ref={this.dom}>
+        <div className={`r-chart${className?' ' + className:''}`} id={id} style={$.extend({},{padding:0,direction:'rtl'},style)} ref={this.dom}>
           <div className='r-chart-toggle-setting' style={{top:top+'px',right:right+'px'}} onClick={()=>this.setState({setting:true})}></div>
           {this.state.setting &&
           <div className='r-chart-setting'>
