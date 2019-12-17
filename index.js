@@ -1201,7 +1201,8 @@ function (_Component) {
         className: "r-chart".concat(className ? ' ' + className : ''),
         id: id,
         style: _jquery.default.extend({}, {
-          padding: 0
+          padding: 0,
+          direction:"ltr"
         }, style),
         ref: this.dom
       }, _react.default.createElement("div", {
