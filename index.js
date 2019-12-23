@@ -370,6 +370,10 @@ function (_Component) {
             _str$show = str.show,
             show = _str$show === void 0 ? true : _str$show;
 
+        if (x === null || y === null) {
+          continue;
+        }
+
         if (!show) {
           continue;
         }
@@ -521,8 +525,8 @@ function (_Component) {
           width: X.size + '%',
           height: Y.size + '%',
           streamIndex: i,
-          fill: selected ? 'red' : color,
-          //shadow: [3, 3, 6, 'rgba(10,10,10,.4)']
+          fill: selected ? 'red' : color //shadow:[3,3,6,'rgba(10,10,10,.4)'], 
+
         });
       }
 
@@ -982,9 +986,16 @@ function (_Component) {
       }
 
       for (var i = 0; i < this.d.lines.length; i++) {
+        debugger;
         var _this$d$lines$i = this.d.lines[i],
             points = _this$d$lines$i.points,
             dataIndex = _this$d$lines$i.dataIndex;
+        var _this$props$data$data7 = this.props.data[dataIndex].selectable,
+            selectable = _this$props$data$data7 === void 0 ? true : _this$props$data$data7;
+
+        if (!selectable) {
+          continue;
+        }
 
         for (var j = 0; j < points.length; j++) {
           var _points$j2 = points[j],
@@ -1202,7 +1213,7 @@ function (_Component) {
         id: id,
         style: _jquery.default.extend({}, {
           padding: 0,
-          direction:"ltr"
+          direction: 'ltr'
         }, style),
         ref: this.dom
       }, _react.default.createElement("div", {
@@ -1241,6 +1252,7 @@ function (_Component) {
         }
       }, "Close"), data.map(function (Data, i) {
         return _react.default.createElement("div", {
+          key: i,
           className: "r-chart-data-list",
           style: {
             color: Data.color

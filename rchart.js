@@ -1,10 +1,10 @@
 import React, { Component,createContext,createRef } from 'react';
 import Slider from 'r-range-slider';
 import Canvas from 'r-canvas';
-import RActions from 'r-actions';
 import $ from 'jquery';
 import './index.css'
 import {getRange,getLimit,getIndex,getPosition,getDetailUI} from './functions';
+import RActions from 'r-actions';
 var {eventHandler,getClient,fix,getPercentByValue,getValueByPercent,binarySearch,compaire} = new RActions();
 var chartContext = createContext();
 export default class RChart extends Component {
@@ -145,6 +145,7 @@ export default class RChart extends Component {
     for(var i = 0; i < stream.length; i++){
       var str = stream[i];
       var {selected,x,y,r,show = true} = str;
+      if(x === null || y === null){continue;} 
       if(!show){continue;}
       var X = this.getPointPosition(s.x.labelSlider,x,'x'); if(X === false){continue;}
       var Y = this.getPointPosition(s.y.labelSlider,y,'y'); if(Y === false){continue;}
@@ -444,7 +445,10 @@ export default class RChart extends Component {
     if(start.y < end.y){starty = start.y; endy = end.y;}
     else{starty = end.y; endy = start.y;}
     for(var i = 0; i < this.d.lines.length; i++){
+      debugger;
       var {points,dataIndex} = this.d.lines[i];
+      var {selectable = true} = this.props.data[dataIndex];
+      if(!selectable){continue;}
       for(var j = 0; j < points.length; j++){
         var {x,y,streamIndex} = points[j];
         x = parseFloat(x); y = parseFloat(y);
@@ -561,7 +565,7 @@ export default class RChart extends Component {
     }
     return (
       <chartContext.Provider value={d}>
-        <div className={`r-chart${className?' ' + className:''}`} id={id} style={$.extend({},{padding:0,direction:'rtl'},style)} ref={this.dom}>
+        <div className={`r-chart${className?' ' + className:''}`} id={id} style={$.extend({},{padding:0,direction:'ltr'},style)} ref={this.dom}>
           <div className='r-chart-toggle-setting' style={{top:top+'px',right:right+'px'}} onClick={()=>this.setState({setting:true})}></div>
           {this.state.setting &&
           <div className='r-chart-setting'>
@@ -569,7 +573,7 @@ export default class RChart extends Component {
             <div className='r-chart-close-setting' onClick={()=>this.setState({setting:false})}>Close</div>
             {data.map((Data,i)=>{
               return (
-                <div className='r-chart-data-list' style={{color:Data.color}} onClick={()=>{var o = this.state.open; o[i] = !o[i]; this.setState({open:this.state.open})  }}>
+                <div key={i} className='r-chart-data-list' style={{color:Data.color}} onClick={()=>{var o = this.state.open; o[i] = !o[i]; this.setState({open:this.state.open})  }}>
                   <div className={`r-chart-check ${!this.state.open[i]?'unchecked':'checked'}`}></div>
                   <div className='r-chart-title'>{Data.title || 'Untitle'}</div>
                 </div>
