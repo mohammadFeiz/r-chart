@@ -10,7 +10,7 @@ var chartContext = createContext();
 export default class RChart extends Component {
   constructor(props) {
     super(props);
-    var {x,y,data} = this.props;
+    var {x = {},y = {},data} = this.props;
     this.state = {x,y,position:{x:0,y:0}}  
     this.selected = [];
     this.state = {setting:false,open:data.map((d)=>d.show !== false)};
@@ -35,7 +35,7 @@ export default class RChart extends Component {
   }
   static getDerivedStateFromProps(props,state){
     var {prevx,prevy} = state;
-    var {x,y} = props;
+    var {x = {},y = {}} = props;
     var change = {},changed = false;
     if(prevx !== JSON.stringify(x)){//اگر پروپس جدید از بیرون آمد
       change.prevx = JSON.stringify(x);
@@ -82,7 +82,7 @@ export default class RChart extends Component {
       labelItems = labels.map((m,i)=>{return {text:m,value:i}}).slice(fs,fe + 1);
       start = fs - 0.5; step = 1; end = fe + 0.5; 
     }
-    else if(!range){return false;}
+    else if(!range){return {label:{}};}
     else{
       var [fs = range.start,fe = range.end] = filter;
       start = fs; step = range.step; end = fe; labelStep = range.step; 
@@ -117,7 +117,7 @@ export default class RChart extends Component {
   }
   
   getlineChart(s,dataIndex){  
-    var {stream,pointColor,lineWidth = 1,color = '#444',r = 3,showPoint,showLine = true,show = true,dash,selectable,shadow} = this.props.data[dataIndex];
+    var {stream = [],pointColor,lineWidth = 1,color = '#444',r = 3,showPoint,showLine = true,show = true,dash,selectable,shadow} = this.props.data[dataIndex];
     if(!showLine && !showPoint){return;} 
     
     var points = this.getPoints(s,stream,dataIndex);
@@ -160,7 +160,7 @@ export default class RChart extends Component {
   getPointPosition(labelSlider,value,axis){
     var {label,start,end} = labelSlider;
     var pos,center;
-    if(label.items){
+    if(label && label.items){
       var index = getIndex(label.items,(obj)=>obj.text === value);
       var length = label.items.length;
       if(index === -1){return false;}
@@ -175,7 +175,7 @@ export default class RChart extends Component {
   }
   getbarChart(s,dataIndex){ 
     var data = this.props.data[dataIndex];
-    var {stream,show,selectable} = data;
+    var {stream = [],show,selectable} = data;
     if(show === false){return;}
     this.barCounter++;
     var bars = this.getBars(s,dataIndex,this.barCounter);
@@ -184,7 +184,7 @@ export default class RChart extends Component {
   getBars(s,dataIndex,barCounter){
     var rects = [];
     var {data,barWidth = 80} = this.props;
-    var {color,stream} = data[dataIndex];
+    var {color,stream = []} = data[dataIndex];
     
     if(barWidth < 1 || barWidth > 100){barWidth = 80;} 
     for (var i = 0; i < stream.length; i++) {
@@ -502,7 +502,7 @@ export default class RChart extends Component {
     var {data,padding,defaultPadding} = this.props; 
     var result = [];
     for(var i = 0; i < data.length; i++){ 
-      var {stream} = data[i]; 
+      var {stream = []} = data[i]; 
       if(!this.state.open[i] || !stream.length){continue;}
       var index = binarySearch(stream,this.mousePosition[this.secondAxis] * this.sign,
       (a)=>{
@@ -521,7 +521,6 @@ export default class RChart extends Component {
     if(this.mainAxis === 'y'){
       var Left = left + result[0].obj.center.x * this.width / 100;
       var Bottom = bottom + 12 + parseFloat(this.mousePosition.y) * -this.height / 100;
-      console.log('ok')
     }
     else{
       var Left = 40 + left + parseFloat(this.mousePosition.x) * this.width / 100;
@@ -563,6 +562,7 @@ export default class RChart extends Component {
         top:`${top}px`,
       }
     }
+    console.log(JSON.stringify(canvas))
     return (
       <chartContext.Provider value={d}>
         <div className={`r-chart${className?' ' + className:''}`} id={id} style={$.extend({},{padding:0,direction:'ltr'},style)} ref={this.dom}>
@@ -638,5 +638,5 @@ export default class RChart extends Component {
   }
 }
 RChart.defaultProps = {
-  filter:false,changeStep:1,padding:{},defaultPadding:{left:30,top:20,right:20,bottom:30}
+  filter:false,changeStep:1,padding:{},defaultPadding:{left:30,top:20,right:20,bottom:30},data:[]
 }

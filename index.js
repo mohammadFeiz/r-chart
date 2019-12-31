@@ -80,8 +80,10 @@ function (_Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(RChart).call(this, props));
     var _this$props = _this.props,
-        x = _this$props.x,
-        y = _this$props.y,
+        _this$props$x = _this$props.x,
+        x = _this$props$x === void 0 ? {} : _this$props$x,
+        _this$props$y = _this$props.y,
+        y = _this$props$y === void 0 ? {} : _this$props$y,
         data = _this$props.data;
     _this.state = {
       x: x,
@@ -218,7 +220,9 @@ function (_Component) {
         step = 1;
         end = fe + 0.5;
       } else if (!range) {
-        return false;
+        return {
+          label: {}
+        };
       } else {
         var _filter2 = _slicedToArray(filter, 2),
             _filter2$ = _filter2[0],
@@ -286,19 +290,20 @@ function (_Component) {
     key: "getlineChart",
     value: function getlineChart(s, dataIndex) {
       var _this$props$data$data = this.props.data[dataIndex],
-          stream = _this$props$data$data.stream,
+          _this$props$data$data2 = _this$props$data$data.stream,
+          stream = _this$props$data$data2 === void 0 ? [] : _this$props$data$data2,
           pointColor = _this$props$data$data.pointColor,
-          _this$props$data$data2 = _this$props$data$data.lineWidth,
-          lineWidth = _this$props$data$data2 === void 0 ? 1 : _this$props$data$data2,
-          _this$props$data$data3 = _this$props$data$data.color,
-          color = _this$props$data$data3 === void 0 ? '#444' : _this$props$data$data3,
-          _this$props$data$data4 = _this$props$data$data.r,
-          r = _this$props$data$data4 === void 0 ? 3 : _this$props$data$data4,
+          _this$props$data$data3 = _this$props$data$data.lineWidth,
+          lineWidth = _this$props$data$data3 === void 0 ? 1 : _this$props$data$data3,
+          _this$props$data$data4 = _this$props$data$data.color,
+          color = _this$props$data$data4 === void 0 ? '#444' : _this$props$data$data4,
+          _this$props$data$data5 = _this$props$data$data.r,
+          r = _this$props$data$data5 === void 0 ? 3 : _this$props$data$data5,
           showPoint = _this$props$data$data.showPoint,
-          _this$props$data$data5 = _this$props$data$data.showLine,
-          showLine = _this$props$data$data5 === void 0 ? true : _this$props$data$data5,
-          _this$props$data$data6 = _this$props$data$data.show,
-          show = _this$props$data$data6 === void 0 ? true : _this$props$data$data6,
+          _this$props$data$data6 = _this$props$data$data.showLine,
+          showLine = _this$props$data$data6 === void 0 ? true : _this$props$data$data6,
+          _this$props$data$data7 = _this$props$data$data.show,
+          show = _this$props$data$data7 === void 0 ? true : _this$props$data$data7,
           dash = _this$props$data$data.dash,
           selectable = _this$props$data$data.selectable,
           shadow = _this$props$data$data.shadow;
@@ -423,7 +428,7 @@ function (_Component) {
           end = labelSlider.end;
       var pos, center;
 
-      if (label.items) {
+      if (label && label.items) {
         var index = (0, _functions.getIndex)(label.items, function (obj) {
           return obj.text === value;
         });
@@ -449,7 +454,8 @@ function (_Component) {
     key: "getbarChart",
     value: function getbarChart(s, dataIndex) {
       var data = this.props.data[dataIndex];
-      var stream = data.stream,
+      var _data$stream = data.stream,
+          stream = _data$stream === void 0 ? [] : _data$stream,
           show = data.show,
           selectable = data.selectable;
 
@@ -476,7 +482,8 @@ function (_Component) {
           barWidth = _this$props2$barWidth === void 0 ? 80 : _this$props2$barWidth;
       var _data$dataIndex = data[dataIndex],
           color = _data$dataIndex.color,
-          stream = _data$dataIndex.stream;
+          _data$dataIndex$strea = _data$dataIndex.stream,
+          stream = _data$dataIndex$strea === void 0 ? [] : _data$dataIndex$strea;
 
       if (barWidth < 1 || barWidth > 100) {
         barWidth = 80;
@@ -990,8 +997,8 @@ function (_Component) {
         var _this$d$lines$i = this.d.lines[i],
             points = _this$d$lines$i.points,
             dataIndex = _this$d$lines$i.dataIndex;
-        var _this$props$data$data7 = this.props.data[dataIndex].selectable,
-            selectable = _this$props$data$data7 === void 0 ? true : _this$props$data$data7;
+        var _this$props$data$data8 = this.props.data[dataIndex].selectable,
+            selectable = _this$props$data$data8 === void 0 ? true : _this$props$data$data8;
 
         if (!selectable) {
           continue;
@@ -1089,7 +1096,8 @@ function (_Component) {
       var result = [];
 
       for (var i = 0; i < data.length; i++) {
-        var stream = data[i].stream;
+        var _data$i$stream = data[i].stream,
+            stream = _data$i$stream === void 0 ? [] : _data$i$stream;
 
         if (!this.state.open[i] || !stream.length) {
           continue;
@@ -1127,7 +1135,6 @@ function (_Component) {
       if (this.mainAxis === 'y') {
         var Left = left + result[0].obj.center.x * this.width / 100;
         var Bottom = bottom + 12 + parseFloat(this.mousePosition.y) * -this.height / 100;
-        console.log('ok');
       } else {
         var Left = 40 + left + parseFloat(this.mousePosition.x) * this.width / 100;
         var Bottom = bottom + result[0].obj.center.y * this.height / 100;
@@ -1206,6 +1213,7 @@ function (_Component) {
           top: "".concat(top, "px")
         }
       };
+      console.log(JSON.stringify(canvas));
       return _react.default.createElement(chartContext.Provider, {
         value: d
       }, _react.default.createElement("div", {
@@ -1322,8 +1330,10 @@ function (_Component) {
     value: function getDerivedStateFromProps(props, state) {
       var prevx = state.prevx,
           prevy = state.prevy;
-      var x = props.x,
-          y = props.y;
+      var _props$x = props.x,
+          x = _props$x === void 0 ? {} : _props$x,
+          _props$y = props.y,
+          y = _props$y === void 0 ? {} : _props$y;
       var change = {},
           changed = false;
 
@@ -1362,5 +1372,6 @@ RChart.defaultProps = {
     top: 20,
     right: 20,
     bottom: 30
-  }
+  },
+  data: []
 };
