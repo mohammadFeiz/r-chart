@@ -1,4 +1,6 @@
 # r-chart (react editable line chart and bar chart)
+# under develop commin soon!!!!!
+
 ![GitHub Logo](/images/r-chart-dark.png)
 
 
@@ -56,6 +58,7 @@ r | number | default is 3 | Radius of **line chart** points.
 title | 'string' | default is 'untitle' | title of data.
 selectable | boolean | default is true | if set false , user cannot select points of this data for edit.
 show | boolean | default is true | show and hide data in chart.
+area | number between 0 and 1 | optional | show area under **line chart**
 ### stream Properties
 Properties | Type | Required | Description
 ---------- | ---- | -------- | -----------
