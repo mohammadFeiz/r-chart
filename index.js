@@ -85,6 +85,12 @@ function (_Component) {
         _this$props$y = _this$props.y,
         y = _this$props$y === void 0 ? {} : _this$props$y,
         data = _this$props.data;
+
+    if (!Array.isArray(data)) {
+      console.error('data property of RChart must be an array of objects!!!');
+      return _possibleConstructorReturn(_this);
+    }
+
     _this.state = {
       x: x,
       y: y,
@@ -306,7 +312,8 @@ function (_Component) {
           show = _this$props$data$data7 === void 0 ? true : _this$props$data$data7,
           dash = _this$props$data$data.dash,
           selectable = _this$props$data$data.selectable,
-          shadow = _this$props$data$data.shadow;
+          _this$props$data$data8 = _this$props$data$data.shadow,
+          shadow = _this$props$data$data8 === void 0 ? 0 : _this$props$data$data8;
 
       if (!showLine && !showPoint) {
         return;
@@ -342,7 +349,7 @@ function (_Component) {
         s.lines.push(line);
       }
 
-      if (shadow) {
+      if (shadow && points.length) {
         var firstPoint = {
           x: points[0].x,
           y: points[0].y
@@ -356,7 +363,7 @@ function (_Component) {
         s.shadows.push(_jquery.default.extend({}, line, {
           fill: color,
           stroke: false,
-          opacity: .2,
+          opacity: shadow,
           points: [firstPoint].concat(points, [lastPoint])
         }));
       }
@@ -956,7 +963,6 @@ function (_Component) {
       var point = this.getpoint(this.d.lines, this.mousePosition);
       var rect = this.getbar(this.d.rectangles, this.mousePosition);
       var item = point || rect || false;
-      console.log(item);
 
       if (item && compaire(this.clickedItem, item)) {
         this.select(item[0], item[1]);
@@ -997,8 +1003,8 @@ function (_Component) {
         var _this$d$lines$i = this.d.lines[i],
             points = _this$d$lines$i.points,
             dataIndex = _this$d$lines$i.dataIndex;
-        var _this$props$data$data8 = this.props.data[dataIndex].selectable,
-            selectable = _this$props$data$data8 === void 0 ? true : _this$props$data$data8;
+        var _this$props$data$data9 = this.props.data[dataIndex].selectable,
+            selectable = _this$props$data$data9 === void 0 ? true : _this$props$data$data9;
 
         if (!selectable) {
           continue;
@@ -1105,7 +1111,6 @@ function (_Component) {
 
         var index = binarySearch(stream, this.mousePosition[this.secondAxis] * this.sign, function (a) {
           if (!a.center) {
-            /*console.error('missing center in an stream in data['+i+']');*/
             return false;
           }
 
@@ -1138,7 +1143,6 @@ function (_Component) {
       } else {
         var Left = 40 + left + parseFloat(this.mousePosition.x) * this.width / 100;
         var Bottom = bottom + result[0].obj.center.y * this.height / 100;
-        console.log(Bottom);
       }
 
       var ui = (0, _functions.getDetailUI)(Left, Bottom, result);
@@ -1156,7 +1160,8 @@ function (_Component) {
           defaultPadding = _this$props6.defaultPadding,
           id = _this$props6.id,
           className = _this$props6.className,
-          data = _this$props6.data;
+          data = _this$props6.data,
+          title = _this$props6.title;
       var _this$state2 = this.state,
           x = _this$state2.x,
           y = _this$state2.y;
@@ -1213,7 +1218,6 @@ function (_Component) {
           top: "".concat(top, "px")
         }
       };
-      console.log(JSON.stringify(canvas));
       return _react.default.createElement(chartContext.Provider, {
         value: d
       }, _react.default.createElement("div", {
@@ -1225,6 +1229,11 @@ function (_Component) {
         }, style),
         ref: this.dom
       }, _react.default.createElement("div", {
+        className: "r-chart-title",
+        style: _jquery.default.extend({}, title.style || {}, {
+          height: top + 'px'
+        })
+      }, title.text || ''), this.props.setting !== false && _react.default.createElement("div", {
         className: "r-chart-toggle-setting",
         style: {
           top: top + 'px',
@@ -1285,10 +1294,10 @@ function (_Component) {
           right: right + 'px',
           top: top + 'px'
         }
-      }, "Deselect All"), d.x.labelSlider && _react.default.createElement(_rRangeSlider.default, _extends({}, d.x.labelSlider, {
+      }, "Deselect All"), d.x.labelSlider && x.show !== false && _react.default.createElement(_rRangeSlider.default, _extends({}, d.x.labelSlider, {
         style: this.getStyle('x'),
         className: "r-chart-labels r-chart-labels-x"
-      })), d.y.labelSlider && _react.default.createElement(_rRangeSlider.default, _extends({}, d.y.labelSlider, {
+      })), d.y.labelSlider && y.show !== false && _react.default.createElement(_rRangeSlider.default, _extends({}, d.y.labelSlider, {
         style: this.getStyle('y'),
         direction: "up",
         className: "r-chart-labels r-chart-labels-y"
@@ -1373,5 +1382,6 @@ RChart.defaultProps = {
     right: 20,
     bottom: 30
   },
-  data: []
+  data: [],
+  title: {}
 };

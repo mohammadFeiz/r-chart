@@ -11,6 +11,10 @@ export default class RChart extends Component {
   constructor(props) {
     super(props);
     var {x = {},y = {},data} = this.props;
+    if(!Array.isArray(data)){
+      console.error('data property of RChart must be an array of objects!!!');
+      return;
+    }
     this.state = {x,y,position:{x:0,y:0}}  
     this.selected = [];
     this.state = {setting:false,open:data.map((d)=>d.show !== false)};
@@ -117,9 +121,9 @@ export default class RChart extends Component {
   }
   
   getlineChart(s,dataIndex){  
-    var {stream = [],pointColor,lineWidth = 1,color = '#444',r = 3,showPoint,showLine = true,show = true,dash,selectable,shadow} = this.props.data[dataIndex];
+    var {stream = [],pointColor,lineWidth = 1,color = '#444',r = 3,showPoint,showLine = true,show = true,dash,selectable,shadow = 0} = this.props.data[dataIndex];
     if(!showLine && !showPoint){return;} 
-    
+
     var points = this.getPoints(s,stream,dataIndex);
     var line = {dataIndex,type:'line',stroke:color,dash,lineWidth,selectable,points};  
     var arcs = showPoint?line.points.map((p,i)=>{
@@ -133,11 +137,11 @@ export default class RChart extends Component {
     s.arcs = s.arcs.concat(arcs);
     if(showLine){s.lines.push(line);} 
     
-    if(shadow){
+    if(shadow && points.length){
       var firstPoint = {x:points[0].x,y:points[0].y};
       var lastPoint = {x:points[points.length - 1].x,y:points[points.length - 1].y};
       firstPoint[this.mainAxis] = '0%'; lastPoint[this.mainAxis] = '0%';
-      s.shadows.push($.extend({},line,{fill:color,stroke:false,opacity:.2,points:[firstPoint].concat(points,[lastPoint])}));
+      s.shadows.push($.extend({},line,{fill:color,stroke:false,opacity:shadow,points:[firstPoint].concat(points,[lastPoint])}));
     }
   }
   getPoints(s,stream,dataIndex){
@@ -431,7 +435,6 @@ export default class RChart extends Component {
     var point =this.getpoint(this.d.lines,this.mousePosition);
     var rect =this.getbar(this.d.rectangles,this.mousePosition);
     var item = point || rect || false;
-    console.log(item);
     if(item && compaire(this.clickedItem,item)){this.select(item[0],item[1])}
     var {data} = this.props;
     this.setLimit = true;
@@ -506,7 +509,7 @@ export default class RChart extends Component {
       if(!this.state.open[i] || !stream.length){continue;}
       var index = binarySearch(stream,this.mousePosition[this.secondAxis] * this.sign,
       (a)=>{
-        if(!a.center){/*console.error('missing center in an stream in data['+i+']');*/ return false;} 
+        if(!a.center){return false;} 
         return a.center[this.secondAxis]},6);  
       if(index === -1){continue;}
       
@@ -525,7 +528,6 @@ export default class RChart extends Component {
     else{
       var Left = 40 + left + parseFloat(this.mousePosition.x) * this.width / 100;
       var Bottom = bottom + result[0].obj.center.y * this.height / 100;
-      console.log(Bottom)
     }
     
     var ui = getDetailUI(Left,Bottom,result);
@@ -533,7 +535,7 @@ export default class RChart extends Component {
   }
   
   render() {
-    var {zoom,style,padding,defaultPadding,id,className,data} = this.props;
+    var {zoom,style,padding,defaultPadding,id,className,data,title} = this.props;
     var {x,y} = this.state;
     var {zoom:zoomx} = x;
     var {zoom:zoomy} = y;
@@ -562,11 +564,11 @@ export default class RChart extends Component {
         top:`${top}px`,
       }
     }
-    console.log(JSON.stringify(canvas))
     return (
       <chartContext.Provider value={d}>
         <div className={`r-chart${className?' ' + className:''}`} id={id} style={$.extend({},{padding:0,direction:'ltr'},style)} ref={this.dom}>
-          <div className='r-chart-toggle-setting' style={{top:top+'px',right:right+'px'}} onClick={()=>this.setState({setting:true})}></div>
+        <div className='r-chart-title' style={$.extend({},title.style || {},{height:top+'px'})}>{title.text || ''}</div>
+          {this.props.setting !== false && <div className='r-chart-toggle-setting' style={{top:top+'px',right:right+'px'}} onClick={()=>this.setState({setting:true})}></div>}
           {this.state.setting &&
           <div className='r-chart-setting'>
           <div style={{position:'absolute',left:0,top:0,width:'100%',height:'100%',zIndex:-1}} onClick={()=>this.setState({setting:false})}></div>
@@ -586,11 +588,11 @@ export default class RChart extends Component {
             <div className='r-chart-deselect-all' onClick={this.deselectAll.bind(this)} style={{right:right+'px',top:top+'px'}}>Deselect All</div>
           }
           {
-            d.x.labelSlider &&
+            d.x.labelSlider && x.show !== false &&
             <Slider {...d.x.labelSlider} style={this.getStyle('x')} className='r-chart-labels r-chart-labels-x'/>
           }
           {
-            d.y.labelSlider &&
+            d.y.labelSlider && y.show !== false &&
             <Slider {...d.y.labelSlider} style={this.getStyle('y')} direction='up' className='r-chart-labels r-chart-labels-y'/>
           }
           {
@@ -638,5 +640,5 @@ export default class RChart extends Component {
   }
 }
 RChart.defaultProps = {
-  filter:false,changeStep:1,padding:{},defaultPadding:{left:30,top:20,right:20,bottom:30},data:[]
+  filter:false,changeStep:1,padding:{},defaultPadding:{left:30,top:20,right:20,bottom:30},data:[],title:{}
 }
