@@ -9,7 +9,7 @@ var _react = _interopRequireWildcard(require("react"));
 
 var _rRangeSlider = _interopRequireDefault(require("r-range-slider"));
 
-var _rCanvas = _interopRequireDefault(require("r-canvas"));
+var _rCanvas = _interopRequireDefault(require("./r-canvas"));
 
 var _jquery = _interopRequireDefault(require("jquery"));
 
@@ -312,59 +312,79 @@ function (_Component) {
           show = _this$props$data$data7 === void 0 ? true : _this$props$data$data7,
           dash = _this$props$data$data.dash,
           selectable = _this$props$data$data.selectable,
-          _this$props$data$data8 = _this$props$data$data.shadow,
-          shadow = _this$props$data$data8 === void 0 ? 0 : _this$props$data$data8;
+          _this$props$data$data8 = _this$props$data$data.area,
+          area = _this$props$data$data8 === void 0 ? 0 : _this$props$data$data8;
 
       if (!showLine && !showPoint) {
         return;
       }
 
       var points = this.getPoints(s, stream, dataIndex);
+      var linePoints = [],
+          arcs = [];
+
+      if (showPoint) {
+        for (var i = 0; i < points.length; i++) {
+          var _points$i = points[i],
+              x = _points$i.x,
+              y = _points$i.y,
+              R = _points$i.r,
+              Color = _points$i.color,
+              background = _points$i.background,
+              selected = _points$i.selected;
+          linePoints.push([x, y]);
+          arcs.push({
+            stroke: Color || color,
+            r: R || r,
+            x: x,
+            y: y,
+            lineWidth: lineWidth * 2,
+            type: 'arc',
+            fill: selected ? 'red' : background || pointColor || '#fff'
+          });
+        }
+      } else {
+        for (var i = 0; i < points.length; i++) {
+          var _points$i2 = points[i],
+              _x = _points$i2.x,
+              _y = _points$i2.y,
+              _R = _points$i2.r,
+              _Color = _points$i2.color,
+              _background = _points$i2.background;
+          linePoints.push([_x, _y]);
+        }
+      }
+
       var line = {
         dataIndex: dataIndex,
-        type: 'line',
         stroke: color,
         dash: dash,
         lineWidth: lineWidth,
         selectable: selectable,
-        points: points
+        points: linePoints
       };
-      var arcs = showPoint ? line.points.map(function (p, i) {
-        var x = p.x,
-            y = p.y,
-            R = p.r;
-        return {
-          stroke: color,
-          r: R || r,
-          x: x,
-          y: y,
-          lineWidth: lineWidth * 2,
-          type: 'arc',
-          fill: p.selected ? 'red' : pointColor || '#fff'
-        };
-      }) : [];
       s.arcs = s.arcs.concat(arcs);
+      s.lines.push(line);
+      var mainIndex, secondIndex;
 
-      if (showLine) {
-        s.lines.push(line);
+      if (this.mainAxis === 'x') {
+        mainIndex = 0;
+        secondIndex = 1;
+      } else {
+        mainIndex = 1;
+        secondIndex = 0;
       }
 
-      if (shadow && points.length) {
-        var firstPoint = {
-          x: points[0].x,
-          y: points[0].y
-        };
-        var lastPoint = {
-          x: points[points.length - 1].x,
-          y: points[points.length - 1].y
-        };
-        firstPoint[this.mainAxis] = '0%';
-        lastPoint[this.mainAxis] = '0%';
+      if (area && points.length) {
+        var firstPoint = [points[0].x, points[0].y];
+        var lastPoint = [points[points.length - 1].x, points[points.length - 1].y];
+        firstPoint[mainIndex] = '0%';
+        lastPoint[mainIndex] = '0%';
         s.shadows.push(_jquery.default.extend({}, line, {
           fill: color,
           stroke: false,
-          opacity: shadow,
-          points: [firstPoint].concat(points, [lastPoint])
+          opacity: area,
+          points: [firstPoint].concat(linePoints, [lastPoint])
         }));
       }
     }
@@ -380,7 +400,9 @@ function (_Component) {
             y = str.y,
             r = str.r,
             _str$show = str.show,
-            show = _str$show === void 0 ? true : _str$show;
+            show = _str$show === void 0 ? true : _str$show,
+            color = str.color,
+            background = str.background;
 
         if (x === null || y === null) {
           continue;
@@ -406,7 +428,9 @@ function (_Component) {
           x: X.pos + '%',
           y: -Y.pos + '%',
           streamIndex: i,
-          r: r
+          r: r,
+          color: color,
+          background: background
         };
         str.position = {
           x: X.pos,
@@ -533,7 +557,6 @@ function (_Component) {
           y: Y.center
         };
         rects.push({
-          type: 'rectangle',
           x: X.pos + '%',
           y: -Y.pos + '%',
           width: X.size + '%',
@@ -569,7 +592,7 @@ function (_Component) {
         var barUnit = barWidth / length / this.barCount;
         var offsetFromCenter = barUnit * (barCounter - this.barCount / 2);
         pos = center + offsetFromCenter + (axis === 'y' ? barUnit : 0);
-        size = barWidth / this.barCount / length;
+        size = barUnit;
       } else {
         center = (value - start) * 100 / (end - start);
         pos = axis === 'x' ? 0 : center;
@@ -660,20 +683,8 @@ function (_Component) {
       while (value <= end) {
         if (value >= start) {
           var val = (value - start) * a;
-          var p1 = axis === 'x' ? {
-            x: val + '%',
-            y: 0 + '%'
-          } : {
-            x: 0 + '%',
-            y: -val + '%'
-          };
-          var p2 = axis === 'x' ? {
-            x: val + '%',
-            y: -100 + '%'
-          } : {
-            x: 100 + '%',
-            y: -val + '%'
-          };
+          var p1 = axis === 'x' ? [val + '%', 0 + '%'] : [0 + '%', -val + '%'];
+          var p2 = axis === 'x' ? [val + '%', -100 + '%'] : [100 + '%', -val + '%'];
           grid.items.push({
             stroke: color,
             lineWidth: 0.7,
@@ -758,17 +769,17 @@ function (_Component) {
         }
 
         for (var j = 0; j < points.length; j++) {
-          var _points$j = points[j],
-              x = _points$j.x,
-              y = _points$j.y,
-              streamIndex = _points$j.streamIndex;
+          var _points$j = _slicedToArray(points[j], 2),
+              x = _points$j[0],
+              y = _points$j[1];
+
           var length = this.getLength(coords, {
             x: parseFloat(x),
             y: parseFloat(y)
           });
 
           if (length < min) {
-            result = [dataIndex, streamIndex];
+            result = [dataIndex, j];
             min = length;
           }
         }
@@ -999,7 +1010,6 @@ function (_Component) {
       }
 
       for (var i = 0; i < this.d.lines.length; i++) {
-        debugger;
         var _this$d$lines$i = this.d.lines[i],
             points = _this$d$lines$i.points,
             dataIndex = _this$d$lines$i.dataIndex;
@@ -1011,10 +1021,10 @@ function (_Component) {
         }
 
         for (var j = 0; j < points.length; j++) {
-          var _points$j2 = points[j],
-              x = _points$j2.x,
-              y = _points$j2.y,
-              streamIndex = _points$j2.streamIndex;
+          var _points$j2 = _slicedToArray(points[j], 2),
+              x = _points$j2[0],
+              y = _points$j2[1];
+
           x = parseFloat(x);
           y = parseFloat(y);
 
@@ -1026,7 +1036,7 @@ function (_Component) {
             continue;
           }
 
-          this.select(dataIndex, streamIndex);
+          this.select(dataIndex, j);
         }
       }
     }
@@ -1215,7 +1225,9 @@ function (_Component) {
           width: "calc(100% - ".concat(left, "px - ").concat(right + 1, "px)"),
           height: "calc(100% - ".concat(bottom, "px - ").concat(top + 1, "px)"),
           right: "".concat(right, "px"),
-          top: "".concat(top, "px")
+          top: "".concat(top, "px"),
+          borderLeft: x.borderColor !== false ? "1px solid ".concat(x.borderColor || '#000') : undefined,
+          borderBottom: y.borderColor !== false ? "1px solid ".concat(y.borderColor || '#000') : undefined
         }
       };
       return _react.default.createElement(chartContext.Provider, {

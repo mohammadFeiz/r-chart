@@ -82,8 +82,6 @@
 
 .r-chart canvas{
   position:absolute;
-  border-left:1px solid #777;
-  border-bottom:1px solid #777;
   background:#fff;
 }
 .r-chart-filter{
@@ -192,4 +190,13 @@
 }
 .r-chart-toggle-setting:after{
   content:'\2630';
+}
+
+.r-chart-title{
+  top:0;
+  left:0;
+  width:100%;
+  display:flex;
+  justify-content: center;
+  align-items:center;
 }

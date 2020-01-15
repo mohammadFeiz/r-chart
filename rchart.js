@@ -1,6 +1,6 @@
 import React, { Component,createContext,createRef } from 'react';
 import Slider from 'r-range-slider';
-import Canvas from 'r-canvas';
+import Canvas from './r-canvas';
 import $ from 'jquery';
 import './index.css'
 import {getRange,getLimit,getIndex,getPosition,getDetailUI} from './functions';
@@ -114,46 +114,56 @@ export default class RChart extends Component {
     var labelSlider = this.getLabelSlider(axis,range);
     var filterSlider = this.getFilterSlider(axis,range);
     return {
-      filterSlider,
+      filterSlider, 
       labelSlider,
       grid:gridColor?this.getGridLines(labelSlider,gridColor,axis):undefined
     }
   }
   
   getlineChart(s,dataIndex){  
-    var {stream = [],pointColor,lineWidth = 1,color = '#444',r = 3,showPoint,showLine = true,show = true,dash,selectable,shadow = 0} = this.props.data[dataIndex];
+    var {stream = [],pointColor,lineWidth = 1,color = '#444',r = 3,showPoint,showLine = true,show = true,dash,selectable,area = 0} = this.props.data[dataIndex];
     if(!showLine && !showPoint){return;} 
-
     var points = this.getPoints(s,stream,dataIndex);
-    var line = {dataIndex,type:'line',stroke:color,dash,lineWidth,selectable,points};  
-    var arcs = showPoint?line.points.map((p,i)=>{
-      let {x,y,r:R} = p;
-      return {
-        stroke:color,r:R || r,x,y,lineWidth:lineWidth * 2,type:'arc', 
-        fill:p.selected?'red':pointColor || '#fff'
+    var linePoints = [],arcs = [];
+    if(showPoint){
+      for(var i = 0; i < points.length; i++){
+        let {x,y,r:R,color:Color,background,selected} = points[i];
+        linePoints.push([x,y]);
+        arcs.push({
+          stroke:Color || color,r:R || r,x,y,lineWidth:lineWidth * 2,type:'arc', 
+          fill:selected?'red':background || pointColor || '#fff'
+        }) 
       }
-    }):[];
-    
+    }
+    else{
+      for(var i = 0; i < points.length; i++){
+        let {x,y,r:R,color:Color,background} = points[i];
+        linePoints.push([x,y]);
+      }
+    }
+    var line = {dataIndex,stroke:color,dash,lineWidth,selectable,points:linePoints};  
     s.arcs = s.arcs.concat(arcs);
-    if(showLine){s.lines.push(line);} 
-    
-    if(shadow && points.length){
-      var firstPoint = {x:points[0].x,y:points[0].y};
-      var lastPoint = {x:points[points.length - 1].x,y:points[points.length - 1].y};
-      firstPoint[this.mainAxis] = '0%'; lastPoint[this.mainAxis] = '0%';
-      s.shadows.push($.extend({},line,{fill:color,stroke:false,opacity:shadow,points:[firstPoint].concat(points,[lastPoint])}));
+    s.lines.push(line); 
+    var mainIndex,secondIndex;
+    if(this.mainAxis === 'x'){mainIndex = 0; secondIndex = 1;}
+    else{mainIndex = 1; secondIndex = 0;}
+    if(area && points.length){
+      var firstPoint = [points[0].x,points[0].y];
+      var lastPoint = [points[points.length - 1].x,points[points.length - 1].y]; 
+      firstPoint[mainIndex] = '0%'; lastPoint[mainIndex] = '0%';
+      s.shadows.push($.extend({},line,{fill:color,stroke:false,opacity:area,points:[firstPoint].concat(linePoints,[lastPoint])}));
     }
   }
   getPoints(s,stream,dataIndex){
     var points = [];
     for(var i = 0; i < stream.length; i++){
       var str = stream[i];
-      var {selected,x,y,r,show = true} = str;
+      var {selected,x,y,r,show = true,color,background} = str;
       if(x === null || y === null){continue;} 
       if(!show){continue;}
       var X = this.getPointPosition(s.x.labelSlider,x,'x'); if(X === false){continue;}
       var Y = this.getPointPosition(s.y.labelSlider,y,'y'); if(Y === false){continue;}
-      var point = {x:X.pos + '%',y:-Y.pos + '%',streamIndex:i,r};
+      var point = {x:X.pos + '%',y:-Y.pos + '%',streamIndex:i,r,color,background};
       str.position = {x:X.pos,y:Y.pos};
       str.center = {x:X.pos,y:Y.pos};
       if(selected){this.selected.push([dataIndex,i]); point.selected = true;}
@@ -201,7 +211,6 @@ export default class RChart extends Component {
       str.position = {x:X.pos,y:Y.pos};
       str.center = {x:X.center,y:Y.center}; 
       rects.push({
-        type:'rectangle',
         x:X.pos + '%',y:-Y.pos + '%',
         width:X.size + '%',height:Y.size + '%', 
         streamIndex:i,
@@ -223,7 +232,7 @@ export default class RChart extends Component {
       var barUnit = barWidth / length / this.barCount;
       var offsetFromCenter = barUnit * (barCounter - this.barCount / 2);
       pos = center + offsetFromCenter + (axis === 'y'?barUnit:0);
-      size = barWidth / this.barCount / length;
+      size = barUnit;
     }
     else{
       center = (value - start) * 100 / (end - start)
@@ -259,14 +268,14 @@ export default class RChart extends Component {
     return s;
   }
   getGridLines({start,step,end},color,axis){
-    var value = Math.round((start - step) / step) * step; 
+    var value = Math.round((start - step) / step) * step;  
     var grid = {id:axis + '-grid',items:[],type:'group'};
     var a = 100 / (end - start);
     while (value <= end) {
       if(value >= start){
         var val = (value - start) * a;
-        var p1 = axis === 'x'?{x:val + '%',y:0 + '%'}:{x:0 + '%',y:-val + '%'};
-        var p2 = axis === 'x'?{x:val + '%',y:-100 + '%'}:{x:100 + '%',y:-val + '%'};
+        var p1 = axis === 'x'?[val + '%',0 + '%']:[0 + '%',-val + '%'];
+        var p2 = axis === 'x'?[val + '%',-100 + '%']:[100 + '%',-val + '%'];
         grid.items.push({stroke:color,lineWidth:0.7,points:[p1,p2],type:'line'});
       }
       value += step;
@@ -319,10 +328,10 @@ export default class RChart extends Component {
       var {points,selectable,dataIndex} = lines[i]; 
       if(selectable === false){continue;}
       for(var j = 0; j < points.length; j++){
-        var {x,y,streamIndex} = points[j];
+        var [x,y] = points[j];
         var length = this.getLength(coords,{x:parseFloat(x),y:parseFloat(y)});  
         if(length < min){
-          result = [dataIndex,streamIndex]; 
+          result = [dataIndex,j]; 
           min = length;
         }
       }
@@ -438,9 +447,9 @@ export default class RChart extends Component {
     if(item && compaire(this.clickedItem,item)){this.select(item[0],item[1])}
     var {data} = this.props;
     this.setLimit = true;
-    this.onchange({data});
+    this.onchange({data}); 
   }
-  selectPointsBySelectRect(){
+  selectPointsBySelectRect(){ 
     var startx,starty,endx,endy;
     var {start,end} = this.selectCoords;
     if(start.x < end.x){startx = start.x; endx = end.x;}
@@ -448,16 +457,15 @@ export default class RChart extends Component {
     if(start.y < end.y){starty = start.y; endy = end.y;}
     else{starty = end.y; endy = start.y;}
     for(var i = 0; i < this.d.lines.length; i++){
-      debugger;
       var {points,dataIndex} = this.d.lines[i];
       var {selectable = true} = this.props.data[dataIndex];
       if(!selectable){continue;}
       for(var j = 0; j < points.length; j++){
-        var {x,y,streamIndex} = points[j];
+        var [x,y] = points[j];
         x = parseFloat(x); y = parseFloat(y);
         if(x < startx || x > endx){continue;}
         if(y < starty || y > endy){continue;}
-        this.select(dataIndex,streamIndex);
+        this.select(dataIndex,j);
       }  
     }
   }
@@ -553,7 +561,7 @@ export default class RChart extends Component {
       getMousePosition:(p)=>{
         this.mousePosition = {x:p.x * 100 / this.width,y:p.y * 100 / this.height,X:p.x,Y:p.y};
         this.hover();
-      },
+      }, 
       id:'canvas', 
       axisPosition:{x:'0%',y:'100%'},
       items,
@@ -562,6 +570,8 @@ export default class RChart extends Component {
         height:`calc(100% - ${bottom}px - ${top + 1}px)`,
         right:`${right}px`,
         top:`${top}px`,
+        borderLeft:x.borderColor !== false?`1px solid ${x.borderColor || '#000'}`:undefined,
+        borderBottom:y.borderColor !== false?`1px solid ${y.borderColor || '#000'}`:undefined, 
       }
     }
     return (
