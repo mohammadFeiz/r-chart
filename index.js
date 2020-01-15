@@ -9,7 +9,7 @@ var _react = _interopRequireWildcard(require("react"));
 
 var _rRangeSlider = _interopRequireDefault(require("r-range-slider"));
 
-var _rCanvas = _interopRequireDefault(require("./r-canvas"));
+var _rCanvas = _interopRequireDefault(require("r-canvas"));
 
 var _jquery = _interopRequireDefault(require("jquery"));
 
