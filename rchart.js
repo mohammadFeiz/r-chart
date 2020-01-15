@@ -1,6 +1,6 @@
 import React, { Component,createContext,createRef } from 'react';
 import Slider from 'r-range-slider';
-import Canvas from './r-canvas';
+import Canvas from 'r-canvas';
 import $ from 'jquery';
 import './index.css'
 import {getRange,getLimit,getIndex,getPosition,getDetailUI} from './functions';
