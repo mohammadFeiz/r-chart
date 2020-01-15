@@ -563,7 +563,7 @@ export default class RChart extends Component {
         this.hover();
       }, 
       id:'canvas', 
-      axisPosition:{x:'0%',y:'100%'},
+      axisPosition:['0%','100%'],
       items,
       style:{
         width:`calc(100% - ${left}px - ${right + 1}px)`,

@@ -1216,10 +1216,7 @@ function (_Component) {
           _this3.hover();
         },
         id: 'canvas',
-        axisPosition: {
-          x: '0%',
-          y: '100%'
-        },
+        axisPosition: ['0%', '100%'],
         items: items,
         style: {
           width: "calc(100% - ".concat(left, "px - ").concat(right + 1, "px)"),
