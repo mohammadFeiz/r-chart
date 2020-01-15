@@ -224,7 +224,6 @@ export default class RChart extends Component {
     var {label,start,end} = labelSlider; 
     var pos,center,size;
     if(label.items){
-      //if(axis === 'y'){debugger;}
       var index = getIndex(label.items,(obj)=>obj.text === value);
       if(index === -1){return false;}
       var length = label.items.length;
@@ -358,7 +357,6 @@ export default class RChart extends Component {
     }
   }
   deselect(dataIndex,streamIndex){ 
-    //debugger;
     var {data} = this.props;
     data[dataIndex].stream[streamIndex].selected = false;
     this.onchange({data});

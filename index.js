@@ -578,7 +578,6 @@ function (_Component) {
       var pos, center, size;
 
       if (label.items) {
-        //if(axis === 'y'){debugger;}
         var index = (0, _functions.getIndex)(label.items, function (obj) {
           return obj.text === value;
         });
@@ -839,7 +838,6 @@ function (_Component) {
   }, {
     key: "deselect",
     value: function deselect(dataIndex, streamIndex) {
-      //debugger;
       var data = this.props.data;
       data[dataIndex].stream[streamIndex].selected = false;
       this.onchange({
