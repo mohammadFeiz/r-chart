@@ -15,8 +15,6 @@ var _jquery = _interopRequireDefault(require("jquery"));
 
 require("./index.css");
 
-var _functions = require("./functions");
-
 var _rActions = _interopRequireDefault(require("r-actions"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -146,10 +144,10 @@ function (_Component) {
       var label, start, step, end;
 
       if (labels) {
-        var fs = filter[0] ? (0, _functions.getIndex)(labels, function (label) {
+        var fs = filter[0] ? this.getIndex(labels, function (label) {
           return label === filter[0];
         }) : 0;
-        var fe = filter[1] ? (0, _functions.getIndex)(labels, function (label) {
+        var fe = filter[1] ? this.getIndex(labels, function (label) {
           return label === filter[1];
         }) : labels.length - 1;
         label = {
@@ -210,10 +208,10 @@ function (_Component) {
       var start, step, end, labelItems, labelStep, labelStyle;
 
       if (labels) {
-        var fs = filter[0] ? (0, _functions.getIndex)(labels, function (label) {
+        var fs = filter[0] ? this.getIndex(labels, function (label) {
           return label === filter[0];
         }) : 0;
-        var fe = filter[1] ? (0, _functions.getIndex)(labels, function (label) {
+        var fe = filter[1] ? this.getIndex(labels, function (label) {
           return label === filter[1];
         }) : labels.length - 1;
         labelItems = labels.map(function (m, i) {
@@ -283,7 +281,7 @@ function (_Component) {
     value: function getDetail(axis) {
       var gridColor = this.state[axis].gridColor;
       var limit = this.limit[axis];
-      var range = limit ? (0, _functions.getRange)(limit) : false;
+      var range = limit ? this.getRange(limit) : false;
       var labelSlider = this.getLabelSlider(axis, range);
       var filterSlider = this.getFilterSlider(axis, range);
       return {
@@ -460,7 +458,7 @@ function (_Component) {
       var pos, center;
 
       if (label && label.items) {
-        var index = (0, _functions.getIndex)(label.items, function (obj) {
+        var index = this.getIndex(label.items, function (obj) {
           return obj.text === value;
         });
         var length = label.items.length;
@@ -562,6 +560,7 @@ function (_Component) {
           width: X.size + '%',
           height: Y.size + '%',
           streamIndex: i,
+          dataIndex: dataIndex,
           fill: selected ? 'red' : color //shadow:[3,3,6,'rgba(10,10,10,.4)'], 
 
         });
@@ -578,7 +577,8 @@ function (_Component) {
       var pos, center, size;
 
       if (label.items) {
-        var index = (0, _functions.getIndex)(label.items, function (obj) {
+        //if(axis === 'y'){debugger;}
+        var index = this.getIndex(label.items, function (obj) {
           return obj.text === value;
         });
 
@@ -621,8 +621,8 @@ function (_Component) {
 
       if (this.setLimit !== false) {
         this.limit = {
-          x: (0, _functions.getLimit)(data, x, 'x'),
-          y: (0, _functions.getLimit)(data, y, 'y')
+          x: this.getLimit(data, x, 'x'),
+          y: this.getLimit(data, y, 'y')
         };
       }
 
@@ -838,6 +838,7 @@ function (_Component) {
   }, {
     key: "deselect",
     value: function deselect(dataIndex, streamIndex) {
+      //debugger;
       var data = this.props.data;
       data[dataIndex].stream[streamIndex].selected = false;
       this.onchange({
@@ -1129,8 +1130,14 @@ function (_Component) {
           continue;
         }
 
+        var s = data[i].stream[index];
+
+        if (!s.center) {
+          continue;
+        }
+
         result.push({
-          obj: data[i].stream[index],
+          obj: s,
           color: data[i].color
         });
       }
@@ -1153,8 +1160,115 @@ function (_Component) {
         var Bottom = bottom + result[0].obj.center.y * this.height / 100;
       }
 
-      var ui = (0, _functions.getDetailUI)(Left, Bottom, result);
+      var ui = this.getDetailUI(Left, Bottom, result);
       Chart.append(ui);
+    }
+  }, {
+    key: "getRange",
+    value: function getRange(_ref3) {
+      var min = _ref3.min,
+          max = _ref3.max;
+      var range = max - min,
+          i = 1;
+
+      if (range === 0) {
+        if (min < 0) {
+          return {
+            start: 2 * min,
+            step: Math.abs(min),
+            end: 0
+          };
+        } else if (min > 0) {
+          return {
+            start: 0,
+            step: min,
+            end: 2 * min
+          };
+        } else {
+          return {
+            start: -1,
+            step: 1,
+            end: 1
+          };
+        }
+      }
+
+      while (range / 10 > 1) {
+        i *= 10;
+        range /= 10;
+      }
+
+      var step;
+
+      if (range >= 0 && range <= 3) {
+        step = 0.2 * i;
+      } else {
+        step = 1 * i;
+      }
+
+      var start = Math.round(min / step) * step - step;
+      var end = Math.round(max / step) * step + step;
+      return {
+        start: start,
+        step: step,
+        end: end
+      };
+    }
+  }, {
+    key: "getLimit",
+    value: function getLimit(data) {
+      var axisObj = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      var axis = arguments.length > 2 ? arguments[2] : undefined;
+      var labels = axisObj.labels;
+
+      if (labels) {
+        return false;
+      }
+
+      var min = Infinity,
+          max = -Infinity;
+
+      for (var i = 0; i < data.length; i++) {
+        var _data$i$stream2 = data[i].stream,
+            stream = _data$i$stream2 === void 0 ? [] : _data$i$stream2;
+
+        for (var j = 0; j < stream.length; j++) {
+          var value = stream[j][axis];
+
+          if (value < min) {
+            min = value;
+          }
+
+          if (value > max) {
+            max = value;
+          }
+        }
+      }
+
+      return min === Infinity || max === -Infinity ? false : {
+        min: min,
+        max: max
+      };
+    }
+  }, {
+    key: "getIndex",
+    value: function getIndex(array, searchMethod) {
+      for (var i = 0; i < array.length; i++) {
+        if (searchMethod(array[i])) {
+          return i;
+        }
+      }
+
+      return -1;
+    }
+  }, {
+    key: "getDetailUI",
+    value: function getDetailUI(left, bottom, arr) {
+      return "<div class=\"r-chart-detail-container\" style=\"left:".concat(left + 'px', ";bottom:").concat(bottom + 'px', ";\">\n      <div class=\"r-chart-detail\">\n        ").concat(arr.map(function (ar) {
+        var color = ar.color,
+            obj = ar.obj;
+        return "<div class=\"r-chart-detail-value\" style=\"color:".concat(color, ";\">").concat(obj.x, "</div>\n          <div class=\"r-chart-detail-value\">").concat(obj.y, "</div>");
+      }).join(''), "\n      </div>\n    </div>");
     }
   }, {
     key: "render",
@@ -1203,12 +1317,12 @@ function (_Component) {
           _this3.width = w;
           _this3.height = h;
         },
-        getMousePosition: function getMousePosition(p) {
+        mouseMove: function mouseMove(e, mousePosition) {
           _this3.mousePosition = {
-            x: p.x * 100 / _this3.width,
-            y: p.y * 100 / _this3.height,
-            X: p.x,
-            Y: p.y
+            x: mousePosition[0] * 100 / _this3.width,
+            y: mousePosition[1] * 100 / _this3.height,
+            X: mousePosition[0],
+            Y: mousePosition[1]
           };
 
           _this3.hover();

@@ -3,7 +3,6 @@ import Slider from 'r-range-slider';
 import Canvas from 'r-canvas';
 import $ from 'jquery';
 import './index.css'
-import {getRange,getLimit,getIndex,getPosition,getDetailUI} from './functions';
 import RActions from 'r-actions';
 var {eventHandler,getClient,fix,getPercentByValue,getValueByPercent,binarySearch,compaire} = new RActions();
 var chartContext = createContext();
@@ -59,8 +58,8 @@ export default class RChart extends Component {
     var {filter = [],labels} = this.state[axis];
     var label,start,step,end;
     if(labels){
-      var fs = filter[0]?getIndex(labels,(label)=>label === filter[0]):0;
-      var fe = filter[1]?getIndex(labels,(label)=>label === filter[1]):labels.length - 1; 
+      var fs = filter[0]?this.getIndex(labels,(label)=>label === filter[0]):0;
+      var fe = filter[1]?this.getIndex(labels,(label)=>label === filter[1]):labels.length - 1; 
       label = {items:labels.map((m,i)=>{return {text:m,value:i}})};
       start = 0; step = 1; end = labels.length - 1;
     }
@@ -81,8 +80,8 @@ export default class RChart extends Component {
     var {filter = [],labels,rotation = 0} = this.state[axis];
     var start,step,end,labelItems,labelStep,labelStyle;
     if(labels){
-      var fs = filter[0]?getIndex(labels,(label)=>label === filter[0]):0;
-      var fe = filter[1]?getIndex(labels,(label)=>label === filter[1]):labels.length - 1;
+      var fs = filter[0]?this.getIndex(labels,(label)=>label === filter[0]):0;
+      var fe = filter[1]?this.getIndex(labels,(label)=>label === filter[1]):labels.length - 1;
       labelItems = labels.map((m,i)=>{return {text:m,value:i}}).slice(fs,fe + 1);
       start = fs - 0.5; step = 1; end = fe + 0.5; 
     }
@@ -110,7 +109,7 @@ export default class RChart extends Component {
   getDetail(axis){
     var {gridColor} = this.state[axis];
     var limit = this.limit[axis];
-    var range = limit?getRange(limit):false;
+    var range = limit?this.getRange(limit):false;
     var labelSlider = this.getLabelSlider(axis,range);
     var filterSlider = this.getFilterSlider(axis,range);
     return {
@@ -175,7 +174,7 @@ export default class RChart extends Component {
     var {label,start,end} = labelSlider;
     var pos,center;
     if(label && label.items){
-      var index = getIndex(label.items,(obj)=>obj.text === value);
+      var index = this.getIndex(label.items,(obj)=>obj.text === value);
       var length = label.items.length;
       if(index === -1){return false;}
       pos = (index + 0.5) * 100 / length  
@@ -213,7 +212,7 @@ export default class RChart extends Component {
       rects.push({
         x:X.pos + '%',y:-Y.pos + '%',
         width:X.size + '%',height:Y.size + '%', 
-        streamIndex:i,
+        streamIndex:i,dataIndex,
         fill:selected?'red':color,
         //shadow:[3,3,6,'rgba(10,10,10,.4)'], 
       });
@@ -224,7 +223,8 @@ export default class RChart extends Component {
     var {label,start,end} = labelSlider; 
     var pos,center,size;
     if(label.items){
-      var index = getIndex(label.items,(obj)=>obj.text === value);
+      //if(axis === 'y'){debugger;}
+      var index = this.getIndex(label.items,(obj)=>obj.text === value);
       if(index === -1){return false;}
       var length = label.items.length;
       center = (index + 0.5) * 100 / length ;
@@ -245,7 +245,7 @@ export default class RChart extends Component {
     var {x,y} = this.state;
     var s = {barCount:0,lines:[],arcs:[],rectangles:[],shadows:[]};
     if(this.setLimit !== false){
-      this.limit = {x:getLimit(data,x,'x'),y:getLimit(data,y,'y')};
+      this.limit = {x:this.getLimit(data,x,'x'),y:this.getLimit(data,y,'y')};
     }
     s.x = this.getDetail('x');
     s.y = this.getDetail('y'); 
@@ -357,6 +357,7 @@ export default class RChart extends Component {
     }
   }
   deselect(dataIndex,streamIndex){ 
+    //debugger;
     var {data} = this.props;
     data[dataIndex].stream[streamIndex].selected = false;
     this.onchange({data});
@@ -497,31 +498,32 @@ export default class RChart extends Component {
     this.moved = false;
   }
   
-  getCanvasClient(e){
+  getCanvasClient(e){ 
     var dom = $(this.dom.current);
     var {left,top} = dom.offset();
     var {x,y} = getClient(e);
     return {
       x:x - left + window.pageXOffset,
       y:y - top + window.pageYOffset  
-    } 
+    }  
   }
   hover(){   
     $('.r-chart-detail-container').remove();  
-    var {data,padding,defaultPadding} = this.props; 
-    var result = [];
+    var {data,padding,defaultPadding} = this.props;  
+    var result = []; 
     for(var i = 0; i < data.length; i++){ 
-      var {stream = []} = data[i]; 
+      var {stream = []} = data[i];    
       if(!this.state.open[i] || !stream.length){continue;}
-      var index = binarySearch(stream,this.mousePosition[this.secondAxis] * this.sign,
+      var index = binarySearch(stream,this.mousePosition[this.secondAxis] * this.sign, 
       (a)=>{
         if(!a.center){return false;} 
-        return a.center[this.secondAxis]},6);  
-      if(index === -1){continue;}
-      
+        return a.center[this.secondAxis]},6);   
+      if(index === -1){continue;}  
+      let s = data[i].stream[index];
+      if(!s.center){continue;}
       result.push({
-        obj:data[i].stream[index],
-        color:data[i].color,         
+        obj:s,
+        color:data[i].color,          
       })  
     }
     if(!result.length){return;}
@@ -536,10 +538,57 @@ export default class RChart extends Component {
       var Bottom = bottom + result[0].obj.center.y * this.height / 100;
     }
     
-    var ui = getDetailUI(Left,Bottom,result);
+    var ui = this.getDetailUI(Left,Bottom,result);
     Chart.append(ui);
   }
+  getRange({min,max}){
+      var range = max - min,i = 1;
+      if(range === 0){
+        if(min < 0){return {start:2 * min,step:Math.abs(min),end:0,}}
+        else if(min > 0){return {start:0,step:min,end:2 * min,}}
+        else {return {start:-1,step:1,end:1}}
+      }
+      while(range / 10 > 1){i *= 10; range /= 10;}
+      var step;
+      if(range >= 0 && range <= 3){step = 0.2 * i;}
+      else{step = 1 * i;}
+      var start = Math.round(min / step) * step - step;
+      var end = Math.round(max / step) * step + step;
+      return {start,step,end};
+  }
+  getLimit(data,axisObj = {},axis){
+    var {labels} = axisObj;
+    if(labels){return false;}
+    var min = Infinity,max = -Infinity;
+    for (var i = 0; i < data.length; i++) {
+      var {stream = []} = data[i];
+      for (var j = 0; j < stream.length; j++) { 
+        var value = stream[j][axis]; 
+        if(value < min){min = value;}
+        if(value > max){max = value;}
+      }
+    }
+    return min === Infinity || max === -Infinity?false:{min,max};
+  }
   
+  getIndex(array,searchMethod){ 
+    for(var i = 0; i < array.length; i++){
+      if(searchMethod(array[i])){return i;} 
+    } 
+    return -1;
+  }
+
+  getDetailUI(left,bottom,arr){
+    return `<div class="r-chart-detail-container" style="left:${left+'px'};bottom:${bottom+'px'};">
+      <div class="r-chart-detail">
+        ${arr.map((ar)=>{
+          var {color,obj} = ar;
+          return `<div class="r-chart-detail-value" style="color:${color};">${obj.x}</div>
+          <div class="r-chart-detail-value">${obj.y}</div>`
+        }).join('')}
+      </div>
+    </div>`
+  }
   render() {
     var {zoom,style,padding,defaultPadding,id,className,data,title} = this.props;
     var {x,y} = this.state;
@@ -556,8 +605,8 @@ export default class RChart extends Component {
     var canvas = {
       mouseDown:(e)=>{this.mouseDown(e,d)},
       getSize:(w,h)=>{this.width = w; this.height = h;},
-      getMousePosition:(p)=>{
-        this.mousePosition = {x:p.x * 100 / this.width,y:p.y * 100 / this.height,X:p.x,Y:p.y};
+      mouseMove:(e,mousePosition)=>{
+        this.mousePosition = {x:mousePosition[0] * 100 / this.width,y:mousePosition[1] * 100 / this.height,X:mousePosition[0],Y:mousePosition[1]};
         this.hover();
       }, 
       id:'canvas', 
@@ -572,6 +621,7 @@ export default class RChart extends Component {
         borderBottom:y.borderColor !== false?`1px solid ${y.borderColor || '#000'}`:undefined, 
       }
     }
+    
     return (
       <chartContext.Provider value={d}>
         <div className={`r-chart${className?' ' + className:''}`} id={id} style={$.extend({},{padding:0,direction:'ltr'},style)} ref={this.dom}>
