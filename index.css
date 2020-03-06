@@ -1,57 +1,7 @@
 .r-chart{
   font-size:10px;
-  background:#eee;
-}
-.r-chart .r-slider{
-  font-size:inherit;
-}
-.r-chart-labels{
-  padding:0;
-  
-}
-.r-chart-labels.horizontal .r-slider-label{
-  top:10px;
 }
 
-.r-chart-labels.vertical .r-slider-label{
-  right:10px;
-  left:unset;
-}
-.r-chart .r-slider-line{
-  display:none;
-}
-.r-chart .r-slider.horizontal .r-slider-fill{
-  height:2px;
-}
-.r-chart .r-slider.vertical .r-slider-fill{
-  width:2px;
-}
-.r-chart .r-slider-point{
-  width:13px;
-  height:13px;
-  border-radius:0;
-  background:none;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-
-.r-chart .r-slider-point:before{
-  content:'';
-  width:7px;
-  height:7px;
-  left:3px;
-  top:3px;
-  position:absolute;
-  background:#aaa;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-
-.r-chart .r-slider-pin{
-  display:none;
-}
 .r-chart-detail-container{
   display:flex;
   position:absolute;
@@ -82,24 +32,6 @@
 .r-chart canvas{
   position:absolute;
   background:#fff;
-}
-.r-chart-filter{
-  position:absolute;
-  z-index:1000;
-}
-.r-chart-filter-x{
-  height:5px;
-  padding:0 12px;
-  
-}
-
-.r-chart-filter-y{
-  width:5px;
-  padding:12px 0;
-}
-
-.r-chart-labels{
-  position:absolute;    
 }
 
 .r-chart-deselect-all{
@@ -193,9 +125,10 @@
 
 .r-chart-title{
   top:0;
-  left:0;
-  width:100%;
+  position: absolute;
+  left:unset;
+  right:0;
   display:flex;
-  justify-content: center;
   align-items:center;
+  white-space: nowrap;
 }
