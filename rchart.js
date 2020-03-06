@@ -1,15 +1,23 @@
 import React, { Component,createContext,createRef } from 'react';
-import Slider from 'r-range-slider';
+import RRangeSlider from 'r-range-slider';
 import Canvas from 'r-canvas';
 import $ from 'jquery';
 import './index.css'
-import RActions from 'r-actions';
-var {eventHandler,getClient,fix,getPercentByValue,getValueByPercent,binarySearch,compaire} = new RActions();
 var chartContext = createContext();
 export default class RChart extends Component {
   constructor(props) {
     super(props);
-    var {x = {},y = {},data} = this.props;
+    var {x = {},y = {},data,padding} = this.props;
+    var {left = 30,top = 20,bottom = 30,right = 20} = padding;
+    this.padding = {left,top,bottom,right};
+    this.controlPanel = {
+      filterSlider:{
+        fillStyle:{background:'#ccc'},lineStyle:{display:'none'},
+        pointStyle:{width:'13px',height:'13px',borderRadius:0,background:'#aaa',display:'flex',justifyContent:'center',alignItems:'center'},
+      },
+      xlabelStyle:{top:'18px',fontSize:'inherit'},
+      ylabelStyle:{right:'15px',left:'unset',justifyContent:'flex-end',fontSize:'inherit'}
+    }
     if(!Array.isArray(data)){
       console.error('data property of RChart must be an array of objects!!!');
       return;
@@ -17,11 +25,58 @@ export default class RChart extends Component {
     this.state = {x,y,position:{x:0,y:0}}  
     this.selected = [];
     this.state = {setting:false,open:data.map((d)=>d.show !== false)};
-    this.isMobile = 'ontouchstart' in document.documentElement?true:false;
+    this.touch = this.isMobile();
     this.dom = createRef();
     $('body').on('mouseout','.r-chart canvas',()=>{$('.r-chart-detail-container').remove()})
   }
-  
+  isMobile(){return 'ontouchstart' in document.documentElement;}
+  eventHandler(selector, event, action,type = 'bind'){
+    var me = { mousedown: "touchstart", mousemove: "touchmove", mouseup: "touchend" };
+    event = this.touch ? me[event] : event;
+    var element = typeof selector === "string"? 
+    (selector === "window"?$(window):$(selector)):
+    selector; 
+    element.unbind(event, action); 
+    if(type === 'bind'){element.bind(event, action)}
+  }
+  getClient(e){
+    return this.touch?{x: e.changedTouches[0].clientX,y:e.changedTouches[0].clientY }:{x:e.clientX,y:e.clientY}
+  }
+  fix(number,a = 6){return parseFloat((number).toFixed(a))}
+  getPercentByValue(value,start,end){return 100 * (value - start) / (end - start)}
+  getValueByPercent(percent,start,end){return start + (percent * (end - start) / 100)}
+  binarySearch(arr,value,field,limit = 0){
+    var start = 0,end = arr.length - 1;
+    var startValue = field(arr[start]);
+    var endValue = field(arr[end]);
+    if(value < startValue){
+      return Math.abs(value - startValue) <= limit?start:-1;
+    }
+    if(value > endValue){
+      return Math.abs(value - endValue) <= limit?end:-1;
+    }
+    if(value === startValue){return start;}
+    if(value === endValue){return end;}
+    while(end - start > 1){
+      var mid = Math.floor((end + start)/2);
+      var mp = field(arr[mid]);
+      var dif = value - mp;
+      if(dif === 0){return mid;}
+      if(dif < 0){end = mid;}//اگر مقدار در سمت چپ است
+      else{start = mid;}//اگر مقدار در سمت راست است
+    }
+    var startDif = Math.abs(field(arr[start]) - value);
+    var endDif = Math.abs(field(arr[end]) - value);
+    if(startDif <= endDif){
+      return startDif <=limit?start:-1;
+    }
+    else{
+      return endDif <=limit?end:-1;
+    }
+  }
+  compaire(a,b){
+    return JSON.stringify(a) === JSON.stringify(b);
+  }
   change(obj){//change state.x or state.y by slider
     //if(!final){return;}
     var axis = JSON.parse(JSON.stringify(this.state[obj.axis])) 
@@ -56,29 +111,37 @@ export default class RChart extends Component {
   
   getFilterSlider(axis,range){
     var {filter = [],labels} = this.state[axis];
-    var label,start,step,end;
+    var {left,right,top,bottom} = this.padding;
+    var {fillStyle,lineStyle,pointStyle,style} = this.controlPanel.filterSlider;
+    var label,start,step,end,points;
     if(labels){
       var fs = filter[0]?this.getIndex(labels,(label)=>label === filter[0]):0;
       var fe = filter[1]?this.getIndex(labels,(label)=>label === filter[1]):labels.length - 1; 
       label = {items:labels.map((m,i)=>{return {text:m,value:i}})};
       start = 0; step = 1; end = labels.length - 1;
+      points = [{value:fs},{value:fe,fillStyle}]
     }
     else if(!range){return false;}
     else{
       start = range.start; step = range.step; end = range.end;
       var [fs = start,fe = end] = filter;  
+      points = [{value:fs},{value:fe,fillStyle}]   
     }
-    return {
-      start,step,end,label,
-      points:[
-          {value:fs,style:{color:'#444'},html:''},
-          {value:fe,style:{color:'#444'},fillColor:'#ccc',html:''}
-      ]
+    var config = {
+      start,step,end,label,axis,points,lineStyle,pointStyle,
+      ondrag:this.change.bind(this),
+      direction:axis === 'y'?'top':'right',
+      className:`r-chart-filter r-chart-filter-${axis}`,
+      style:axis === 'x'?
+      {width:`calc(100% - ${left}px - ${right}px)`,bottom:`${bottom - 9}px`,right:`${right}px`,position:'absolute',zIndex:1000,height:'5px',padding:'0 12px'}:
+      {left:`${left - 9}px`,top:`${top}px`,height:`calc(100% - ${bottom}px - ${top}px)`,position:'absolute',zIndex:1000,width:'5px',padding:'12px 0'}
     }
+    return config;
   }
-  getLabelSlider(axis,range){
-    var {filter = [],labels,rotation = 0} = this.state[axis];
-    var start,step,end,labelItems,labelStep,labelStyle;
+  getLabelSlider(axis,range){ 
+    var {filter = [],labels,rotate = 0} = this.state[axis];
+    var start,step,end,labelItems,labelStep;
+    var labelStyle = this.controlPanel[axis + 'labelStyle'];
     if(labels){
       var fs = filter[0]?this.getIndex(labels,(label)=>label === filter[0]):0;
       var fe = filter[1]?this.getIndex(labels,(label)=>label === filter[1]):labels.length - 1;
@@ -90,21 +153,24 @@ export default class RChart extends Component {
       var [fs = range.start,fe = range.end] = filter;
       start = fs; step = range.step; end = fe; labelStep = range.step; 
     }
-    if(axis === 'x'){
-      if(rotation < 0){
-        labelStyle = {justifyContent:'flex-end',transform:`rotate(${rotation}deg)`,whiteSpace:'nowrap'}
-      }
-      else if(rotation > 0){
-        labelStyle = {justifyContent:'flex-start',transform:`rotate(${rotation}deg)`,whiteSpace:'nowrap'}
-      }
-      else{
-        labelStyle = {alignItems:'flex-start'}
+    var {left,right,top,bottom} = this.padding;
+    return {
+      start,end,step,
+      label:{items:labelItems,step:labelStep,style:labelStyle,rotate:axis === 'y'?0:rotate},
+      showPoint:false,lineStyle:{display:'none'},pointStyle:{display:'none'},
+      direction:axis === 'x'?'right':'top',className:`r-chart-labels r-chart-labels-${axis}`,
+      style:axis === 'x'?
+      {
+        padding:0,position:'absolute',
+        width:`calc(100% - ${left}px - ${right}px)`,
+        bottom:0,right:`${right}px`,height:bottom + 'px',fontSize:'inherit'
+      }:
+      {
+        padding:0,position:'absolute',
+        left:0,top:`${top}px`,width:left + 'px',
+        height:`calc(100% - ${bottom}px - ${top}px)`,fontSize:'inherit'
       }
     }
-    else{
-      labelStyle = {justifyContent:'flex-end'}
-    }
-    return {start,end,step,label:{items:labelItems,step:labelStep,style:labelStyle},showPoint:false}
   }
   getDetail(axis){
     var {gridColor} = this.state[axis];
@@ -249,6 +315,7 @@ export default class RChart extends Component {
     }
     s.x = this.getDetail('x');
     s.y = this.getDetail('y'); 
+
     if(s.y.labelSlider.label.items && !s.x.labelSlider.label.items){this.mainAxis = 'x'; this.secondAxis = 'y'; this.sign = -1;}
     else{this.mainAxis = 'y'; this.secondAxis = 'x'; this.sign = 1;}
     this.barCount = data.filter((d)=>{return d.type === 'bar'}).length;
@@ -281,30 +348,11 @@ export default class RChart extends Component {
     }
     return grid;
   }
-  getStyle(axis){
-    var {filter,padding,defaultPadding} = this.props;
-    var {
-      left = defaultPadding.left,top = defaultPadding.top,
-      right = defaultPadding.right,bottom = defaultPadding.bottom
-    } = padding;
-    return axis === 'x'?
-    {
-      bottom:0,
-      right:`${right}px`,
-      width:`calc(100% - ${left}px - ${right}px)`,
-      height:bottom + 'px',
-    }:
-    {
-      left:0,
-      top:`${top}px`,
-      width:left + 'px',
-      height:`calc(100% - ${bottom}px - ${top}px)`,
-    };
-  }
+  
   getLength(p1,p2) { 
     var a = Math.pow((parseFloat(p1.x) - p2.x) * this.width / 100, 2);
     var b = Math.pow((parseFloat(p1.y) - p2.y) * this.height / 100, 2);
-    return fix(Math.sqrt(a + b)); 
+    return this.fix(Math.sqrt(a + b)); 
   }
   
   filterPoint(filters,obj){
@@ -394,7 +442,7 @@ export default class RChart extends Component {
     var {data} = this.props;
     this.startOffset = {
       canvas:this.mousePosition,
-      body:getClient(e),
+      body:this.getClient(e),
       selected:this.selected.map((sel)=>{
         var stream = data[sel[0]].stream[sel[1]]; 
         return {x:parseFloat(stream.x),y:stream.y,stream} 
@@ -404,33 +452,33 @@ export default class RChart extends Component {
       this.setLimit = false;
       this.clickedItem = item;
       if(data[item[0]].stream[item[1]].selected){
-        eventHandler('window','mousemove',$.proxy(this.pointMouseMove,this));
+        this.eventHandler('window','mousemove',$.proxy(this.pointMouseMove,this));
       }
-      eventHandler('window','mouseup',$.proxy(this.pointMouseUp,this));
+      this.eventHandler('window','mouseup',$.proxy(this.pointMouseUp,this));
 
     }
     else{
-      eventHandler('window','mousemove',$.proxy(this.backgroundMouseMove,this));
-      eventHandler('window','mouseup',$.proxy(this.backgroundMouseUp,this));
+      this.eventHandler('window','mousemove',$.proxy(this.backgroundMouseMove,this));
+      this.eventHandler('window','mouseup',$.proxy(this.backgroundMouseUp,this));
       this.startOffset.client = this.getCanvasClient(e);
       $(this.dom.current).append('<div class="r-chart-select" style="position:absolute;left:'+this.startOffset.client.x+'px;top:'+this.startOffset.client.y+'px;background:rgba(100,100,100,.3);"></div>')
     }
     
   }
   pointMouseMove(e){
-    var {x,y} = getClient(e);
+    var {x,y} = this.getClient(e);
     var {data,changeStep} = this.props;
     var {start,end} = this.d[this.mainAxis].labelSlider;
     var {body,selected} = this.startOffset;
     var offset = {
-      x:-getPercentByValue(x - body.x,0,this.width),
-      y:getPercentByValue(y - body.y,0,this.height),
+      x:-this.getPercentByValue(x - body.x,0,this.width),
+      y:this.getPercentByValue(y - body.y,0,this.height),
     };
     var changed = false;
     for(var i = 0; i < selected.length; i++){
       let {stream} = selected[i];
       let axis = selected[i][this.mainAxis];
-      let value = axis - getValueByPercent(offset[this.mainAxis],0,end - start);
+      let value = axis - this.getValueByPercent(offset[this.mainAxis],0,end - start);
       value = Math.round(value / changeStep) * changeStep;
       if(stream[this.mainAxis] !== value){changed = true;}
       stream[this.mainAxis] = value;
@@ -438,12 +486,12 @@ export default class RChart extends Component {
     if(changed){this.onchange({data})}
   }
   pointMouseUp(){
-    eventHandler('window','mousemove',this.pointMouseMove,'unbind');
-    eventHandler('window','mouseup',this.pointMouseUp,'unbind');
+    this.eventHandler('window','mousemove',this.pointMouseMove,'unbind');
+    this.eventHandler('window','mouseup',this.pointMouseUp,'unbind');
     var point =this.getpoint(this.d.lines,this.mousePosition);
     var rect =this.getbar(this.d.rectangles,this.mousePosition);
     var item = point || rect || false;
-    if(item && compaire(this.clickedItem,item)){this.select(item[0],item[1])}
+    if(item && this.compaire(this.clickedItem,item)){this.select(item[0],item[1])}
     var {data} = this.props;
     this.setLimit = true;
     this.onchange({data}); 
@@ -486,8 +534,8 @@ export default class RChart extends Component {
 
   }
   backgroundMouseUp(){
-    eventHandler('window','mousemove',this.backgroundMouseMove,'unbind');
-    eventHandler('window','mouseup',this.backgroundMouseUp,'unbind');
+    this.eventHandler('window','mousemove',this.backgroundMouseMove,'unbind');
+    this.eventHandler('window','mouseup',this.backgroundMouseUp,'unbind');
     if(!this.moved){
       this.deselectAll();
     }
@@ -501,7 +549,7 @@ export default class RChart extends Component {
   getCanvasClient(e){ 
     var dom = $(this.dom.current);
     var {left,top} = dom.offset();
-    var {x,y} = getClient(e);
+    var {x,y} = this.getClient(e);
     return {
       x:x - left + window.pageXOffset,
       y:y - top + window.pageYOffset  
@@ -509,12 +557,12 @@ export default class RChart extends Component {
   }
   hover(){   
     $('.r-chart-detail-container').remove();  
-    var {data,padding,defaultPadding} = this.props;  
+    var {data} = this.props;  
     var result = []; 
     for(var i = 0; i < data.length; i++){ 
       var {stream = []} = data[i];    
       if(!this.state.open[i] || !stream.length){continue;}
-      var index = binarySearch(stream,this.mousePosition[this.secondAxis] * this.sign, 
+      var index = this.binarySearch(stream,this.mousePosition[this.secondAxis] * this.sign, 
       (a)=>{
         if(!a.center){return false;} 
         return a.center[this.secondAxis]},6);   
@@ -528,7 +576,7 @@ export default class RChart extends Component {
     }
     if(!result.length){return;}
     var Chart = $(this.dom.current);
-    var {left = defaultPadding.left,bottom = defaultPadding.bottom} = padding;
+    var {left,bottom} = this.padding;
     if(this.mainAxis === 'y'){
       var Left = left + result[0].obj.center.x * this.width / 100;
       var Bottom = bottom + 12 + parseFloat(this.mousePosition.y) * -this.height / 100;
@@ -594,14 +642,9 @@ export default class RChart extends Component {
     var {x,y} = this.state;
     var {zoom:zoomx} = x;
     var {zoom:zoomy} = y;
-    var {
-      left = defaultPadding.left,top = defaultPadding.top,
-      right = defaultPadding.right,bottom = defaultPadding.bottom
-    } = padding;
+    var {left,top,right,bottom} = this.padding;
     var d = this.updateData();
     this.d = d; 
-    var grids = [d.x.grid||{type:'group',id:'x-grid',items:[]},d.y.grid||{type:'group',id:'y-grid',items:[]}];
-    var items = grids.concat(d.rectangles,d.lines,d.arcs,d.shadows);
     var canvas = {
       mouseDown:(e)=>{this.mouseDown(e,d)},
       getSize:(w,h)=>{this.width = w; this.height = h;},
@@ -611,7 +654,7 @@ export default class RChart extends Component {
       }, 
       id:'canvas', 
       axisPosition:['0%','100%'],
-      items,
+      items:[d.x.grid||{},d.y.grid||{}].concat(d.rectangles,d.lines,d.arcs,d.shadows),
       style:{
         width:`calc(100% - ${left}px - ${right + 1}px)`,
         height:`calc(100% - ${bottom}px - ${top + 1}px)`,
@@ -621,75 +664,19 @@ export default class RChart extends Component {
         borderBottom:y.borderColor !== false?`1px solid ${y.borderColor || '#000'}`:undefined, 
       }
     }
-    
     return (
       <chartContext.Provider value={d}>
         <div className={`r-chart${className?' ' + className:''}`} id={id} style={$.extend({},{padding:0,direction:'ltr'},style)} ref={this.dom}>
-        <div className='r-chart-title' style={$.extend({},title.style || {},{height:top+'px'})}>{title.text || ''}</div>
+          <RChartTitle title={title} padding={this.padding} data={data}/>
           {this.props.setting !== false && <div className='r-chart-toggle-setting' style={{top:top+'px',right:right+'px'}} onClick={()=>this.setState({setting:true})}></div>}
-          {this.state.setting &&
-          <div className='r-chart-setting'>
-          <div style={{position:'absolute',left:0,top:0,width:'100%',height:'100%',zIndex:-1}} onClick={()=>this.setState({setting:false})}></div>
-            <div className='r-chart-close-setting' onClick={()=>this.setState({setting:false})}>Close</div>
-            {data.map((Data,i)=>{
-              return (
-                <div key={i} className='r-chart-data-list' style={{color:Data.color}} onClick={()=>{var o = this.state.open; o[i] = !o[i]; this.setState({open:this.state.open})  }}>
-                  <div className={`r-chart-check ${!this.state.open[i]?'unchecked':'checked'}`}></div>
-                  <div className='r-chart-title'>{Data.title || 'Untitle'}</div>
-                </div>
-              )
-            })}
-          </div>
-          }
           {
             this.selected.length !==0 &&
             <div className='r-chart-deselect-all' onClick={this.deselectAll.bind(this)} style={{right:right+'px',top:top+'px'}}>Deselect All</div>
           }
-          {
-            d.x.labelSlider && x.show !== false &&
-            <Slider {...d.x.labelSlider} style={this.getStyle('x')} className='r-chart-labels r-chart-labels-x'/>
-          }
-          {
-            d.y.labelSlider && y.show !== false &&
-            <Slider {...d.y.labelSlider} style={this.getStyle('y')} direction='up' className='r-chart-labels r-chart-labels-y'/>
-          }
-          {
-            zoomx && d.x.filterSlider && 
-            <Slider 
-              className='r-chart-filter r-chart-filter-x'
-              axis='x' 
-              start={d.x.filterSlider.start} end={d.x.filterSlider.end} 
-              points={d.x.filterSlider.points}
-              showValue={!d.x.labelSlider.label.items}
-              point_width={8} 
-              point_height={8}
-              ondrag={this.change.bind(this)}
-              style={{
-                width:`calc(100% - ${left}px - ${right}px)`,
-                bottom:`${bottom - 9}px`,
-                right:`${right}px`
-              }}
-            />
-          }
-          {
-            zoomy && d.y.filterSlider && 
-            <Slider 
-              className='r-chart-filter r-chart-filter-y'
-              axis='y'
-              direction='up'
-              start={d.y.filterSlider.start} end={d.y.filterSlider.end}
-              point_width={8}
-              point_height={8}
-              points={d.y.filterSlider.points}
-              showValue={!d.y.labelSlider.label.items}
-              ondrag={this.change.bind(this)}  
-              style={{
-                left:`${left - 9}px`,
-                height:`calc(100% - ${bottom}px - ${top}px)`,
-                top:`${top}px`
-              }}
-            />
-          }
+          {d.x.labelSlider && x.show !== false && <RRangeSlider {...d.x.labelSlider}/>}
+          {d.y.labelSlider && y.show !== false && <RRangeSlider {...d.y.labelSlider}/>}
+          {zoomx && d.x.filterSlider && <RRangeSlider {...d.x.filterSlider}/>}
+          {zoomy && d.y.filterSlider && <RRangeSlider {...d.y.filterSlider}/>}
           <Canvas {...canvas} 
         />
         </div>
@@ -697,6 +684,40 @@ export default class RChart extends Component {
     );
   }
 }
+
+
+class RChartTitle extends Component{
+  
+  render(){
+    var {title,padding,data} = this.props;
+    if(!title){return ''}
+    var {left,top} = padding;
+    var titleProps = {
+       className:'r-chart-title',style:$.extend({},title.style || {},{height:top+'px',width:`calc(100% - ${left+'px'})`,justifyContent:title.moveTo?undefined:'center'})
+    }
+    return (
+      <marquee ref={this.dom} scrollamount={title.speed?5:0} {...titleProps} direction={title.moveTo}>
+        <table style={{}}>
+        <tbody>
+          <tr>
+            <td style={{padding:'0 48px'}}><strong>{title.text || ''}</strong></td>
+            {
+              data.map((d,i)=>{return ( 
+                <td key={i}>
+                  <div style={{height:top,display:'flex',alignItems:'center',float:'left',margin:'0 6px',whiteSpace:'nowrap'}}>
+                    <div style={{width:'12px',height:'12px',background:d.color,float:'left',margin:'3px',borderRadius:'100%'}}></div>
+                    {d.title||'untitle'}
+                  </div>
+                </td>
+              )})
+            }
+          </tr>
+          </tbody>
+        </table>
+      </marquee>
+    );
+  }
+}
 RChart.defaultProps = {
-  filter:false,changeStep:1,padding:{},defaultPadding:{left:30,top:20,right:20,bottom:30},data:[],title:{}
+  filter:false,changeStep:1,padding:{},data:[]
 }

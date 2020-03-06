@@ -15,19 +15,17 @@ var _jquery = _interopRequireDefault(require("jquery"));
 
 require("./index.css");
 
-var _rActions = _interopRequireDefault(require("r-actions"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 function _instanceof(left, right) { if (right != null && typeof Symbol !== "undefined" && right[Symbol.hasInstance]) { return !!right[Symbol.hasInstance](left); } else { return left instanceof right; } }
 
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
 
@@ -55,20 +53,9 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
-var _ref = new _rActions.default(),
-    eventHandler = _ref.eventHandler,
-    getClient = _ref.getClient,
-    fix = _ref.fix,
-    getPercentByValue = _ref.getPercentByValue,
-    getValueByPercent = _ref.getValueByPercent,
-    binarySearch = _ref.binarySearch,
-    compaire = _ref.compaire;
-
 var chartContext = (0, _react.createContext)();
 
-var RChart =
-/*#__PURE__*/
-function (_Component) {
+var RChart = /*#__PURE__*/function (_Component) {
   _inherits(RChart, _Component);
 
   function RChart(props) {
@@ -82,7 +69,51 @@ function (_Component) {
         x = _this$props$x === void 0 ? {} : _this$props$x,
         _this$props$y = _this$props.y,
         y = _this$props$y === void 0 ? {} : _this$props$y,
-        data = _this$props.data;
+        data = _this$props.data,
+        padding = _this$props.padding;
+    var _padding$left = padding.left,
+        left = _padding$left === void 0 ? 30 : _padding$left,
+        _padding$top = padding.top,
+        top = _padding$top === void 0 ? 20 : _padding$top,
+        _padding$bottom = padding.bottom,
+        bottom = _padding$bottom === void 0 ? 30 : _padding$bottom,
+        _padding$right = padding.right,
+        right = _padding$right === void 0 ? 20 : _padding$right;
+    _this.padding = {
+      left: left,
+      top: top,
+      bottom: bottom,
+      right: right
+    };
+    _this.controlPanel = {
+      filterSlider: {
+        fillStyle: {
+          background: '#ccc'
+        },
+        lineStyle: {
+          display: 'none'
+        },
+        pointStyle: {
+          width: '13px',
+          height: '13px',
+          borderRadius: 0,
+          background: '#aaa',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }
+      },
+      xlabelStyle: {
+        top: '18px',
+        fontSize: 'inherit'
+      },
+      ylabelStyle: {
+        right: '15px',
+        left: 'unset',
+        justifyContent: 'flex-end',
+        fontSize: 'inherit'
+      }
+    };
 
     if (!Array.isArray(data)) {
       console.error('data property of RChart must be an array of objects!!!');
@@ -104,7 +135,7 @@ function (_Component) {
         return d.show !== false;
       })
     };
-    _this.isMobile = 'ontouchstart' in document.documentElement ? true : false;
+    _this.touch = _this.isMobile();
     _this.dom = (0, _react.createRef)();
     (0, _jquery.default)('body').on('mouseout', '.r-chart canvas', function () {
       (0, _jquery.default)('.r-chart-detail-container').remove();
@@ -113,6 +144,112 @@ function (_Component) {
   }
 
   _createClass(RChart, [{
+    key: "isMobile",
+    value: function isMobile() {
+      return 'ontouchstart' in document.documentElement;
+    }
+  }, {
+    key: "eventHandler",
+    value: function eventHandler(selector, event, action) {
+      var type = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 'bind';
+      var me = {
+        mousedown: "touchstart",
+        mousemove: "touchmove",
+        mouseup: "touchend"
+      };
+      event = this.touch ? me[event] : event;
+      var element = typeof selector === "string" ? selector === "window" ? (0, _jquery.default)(window) : (0, _jquery.default)(selector) : selector;
+      element.unbind(event, action);
+
+      if (type === 'bind') {
+        element.bind(event, action);
+      }
+    }
+  }, {
+    key: "getClient",
+    value: function getClient(e) {
+      return this.touch ? {
+        x: e.changedTouches[0].clientX,
+        y: e.changedTouches[0].clientY
+      } : {
+        x: e.clientX,
+        y: e.clientY
+      };
+    }
+  }, {
+    key: "fix",
+    value: function fix(number) {
+      var a = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 6;
+      return parseFloat(number.toFixed(a));
+    }
+  }, {
+    key: "getPercentByValue",
+    value: function getPercentByValue(value, start, end) {
+      return 100 * (value - start) / (end - start);
+    }
+  }, {
+    key: "getValueByPercent",
+    value: function getValueByPercent(percent, start, end) {
+      return start + percent * (end - start) / 100;
+    }
+  }, {
+    key: "binarySearch",
+    value: function binarySearch(arr, value, field) {
+      var limit = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+      var start = 0,
+          end = arr.length - 1;
+      var startValue = field(arr[start]);
+      var endValue = field(arr[end]);
+
+      if (value < startValue) {
+        return Math.abs(value - startValue) <= limit ? start : -1;
+      }
+
+      if (value > endValue) {
+        return Math.abs(value - endValue) <= limit ? end : -1;
+      }
+
+      if (value === startValue) {
+        return start;
+      }
+
+      if (value === endValue) {
+        return end;
+      }
+
+      while (end - start > 1) {
+        var mid = Math.floor((end + start) / 2);
+        var mp = field(arr[mid]);
+        var dif = value - mp;
+
+        if (dif === 0) {
+          return mid;
+        }
+
+        if (dif < 0) {
+          end = mid;
+        } //اگر مقدار در سمت چپ است
+        else {
+            start = mid;
+          } //اگر مقدار در سمت راست است
+
+      }
+
+      var startDif = Math.abs(field(arr[start]) - value);
+      var endDif = Math.abs(field(arr[end]) - value);
+
+      if (startDif <= endDif) {
+        return startDif <= limit ? start : -1;
+      } else {
+        return endDif <= limit ? end : -1;
+      }
+    }
+  }, {
+    key: "compaire",
+    value: function compaire(a, b) {
+      return JSON.stringify(a) === JSON.stringify(b);
+    }
+  }, {
     key: "change",
     value: function change(obj) {
       //change state.x or state.y by slider
@@ -141,7 +278,17 @@ function (_Component) {
           _this$state$axis$filt = _this$state$axis.filter,
           filter = _this$state$axis$filt === void 0 ? [] : _this$state$axis$filt,
           labels = _this$state$axis.labels;
-      var label, start, step, end;
+      var _this$padding = this.padding,
+          left = _this$padding.left,
+          right = _this$padding.right,
+          top = _this$padding.top,
+          bottom = _this$padding.bottom;
+      var _this$controlPanel$fi = this.controlPanel.filterSlider,
+          fillStyle = _this$controlPanel$fi.fillStyle,
+          lineStyle = _this$controlPanel$fi.lineStyle,
+          pointStyle = _this$controlPanel$fi.pointStyle,
+          style = _this$controlPanel$fi.style;
+      var label, start, step, end, points;
 
       if (labels) {
         var fs = filter[0] ? this.getIndex(labels, function (label) {
@@ -161,6 +308,12 @@ function (_Component) {
         start = 0;
         step = 1;
         end = labels.length - 1;
+        points = [{
+          value: fs
+        }, {
+          value: fe,
+          fillStyle: fillStyle
+        }];
       } else if (!range) {
         return false;
       } else {
@@ -173,28 +326,46 @@ function (_Component) {
             fs = _filter$ === void 0 ? start : _filter$,
             _filter$2 = _filter[1],
             fe = _filter$2 === void 0 ? end : _filter$2;
+
+        points = [{
+          value: fs
+        }, {
+          value: fe,
+          fillStyle: fillStyle
+        }];
       }
 
-      return {
+      var config = {
         start: start,
         step: step,
         end: end,
         label: label,
-        points: [{
-          value: fs,
-          style: {
-            color: '#444'
-          },
-          html: ''
-        }, {
-          value: fe,
-          style: {
-            color: '#444'
-          },
-          fillColor: '#ccc',
-          html: ''
-        }]
+        axis: axis,
+        points: points,
+        lineStyle: lineStyle,
+        pointStyle: pointStyle,
+        ondrag: this.change.bind(this),
+        direction: axis === 'y' ? 'top' : 'right',
+        className: "r-chart-filter r-chart-filter-".concat(axis),
+        style: axis === 'x' ? {
+          width: "calc(100% - ".concat(left, "px - ").concat(right, "px)"),
+          bottom: "".concat(bottom - 9, "px"),
+          right: "".concat(right, "px"),
+          position: 'absolute',
+          zIndex: 1000,
+          height: '5px',
+          padding: '0 12px'
+        } : {
+          left: "".concat(left - 9, "px"),
+          top: "".concat(top, "px"),
+          height: "calc(100% - ".concat(bottom, "px - ").concat(top, "px)"),
+          position: 'absolute',
+          zIndex: 1000,
+          width: '5px',
+          padding: '12px 0'
+        }
       };
+      return config;
     }
   }, {
     key: "getLabelSlider",
@@ -203,9 +374,10 @@ function (_Component) {
           _this$state$axis2$fil = _this$state$axis2.filter,
           filter = _this$state$axis2$fil === void 0 ? [] : _this$state$axis2$fil,
           labels = _this$state$axis2.labels,
-          _this$state$axis2$rot = _this$state$axis2.rotation,
-          rotation = _this$state$axis2$rot === void 0 ? 0 : _this$state$axis2$rot;
-      var start, step, end, labelItems, labelStep, labelStyle;
+          _this$state$axis2$rot = _this$state$axis2.rotate,
+          rotate = _this$state$axis2$rot === void 0 ? 0 : _this$state$axis2$rot;
+      var start, step, end, labelItems, labelStep;
+      var labelStyle = this.controlPanel[axis + 'labelStyle'];
 
       if (labels) {
         var fs = filter[0] ? this.getIndex(labels, function (label) {
@@ -240,30 +412,11 @@ function (_Component) {
         labelStep = range.step;
       }
 
-      if (axis === 'x') {
-        if (rotation < 0) {
-          labelStyle = {
-            justifyContent: 'flex-end',
-            transform: "rotate(".concat(rotation, "deg)"),
-            whiteSpace: 'nowrap'
-          };
-        } else if (rotation > 0) {
-          labelStyle = {
-            justifyContent: 'flex-start',
-            transform: "rotate(".concat(rotation, "deg)"),
-            whiteSpace: 'nowrap'
-          };
-        } else {
-          labelStyle = {
-            alignItems: 'flex-start'
-          };
-        }
-      } else {
-        labelStyle = {
-          justifyContent: 'flex-end'
-        };
-      }
-
+      var _this$padding2 = this.padding,
+          left = _this$padding2.left,
+          right = _this$padding2.right,
+          top = _this$padding2.top,
+          bottom = _this$padding2.bottom;
       return {
         start: start,
         end: end,
@@ -271,9 +424,35 @@ function (_Component) {
         label: {
           items: labelItems,
           step: labelStep,
-          style: labelStyle
+          style: labelStyle,
+          rotate: axis === 'y' ? 0 : rotate
         },
-        showPoint: false
+        showPoint: false,
+        lineStyle: {
+          display: 'none'
+        },
+        pointStyle: {
+          display: 'none'
+        },
+        direction: axis === 'x' ? 'right' : 'top',
+        className: "r-chart-labels r-chart-labels-".concat(axis),
+        style: axis === 'x' ? {
+          padding: 0,
+          position: 'absolute',
+          width: "calc(100% - ".concat(left, "px - ").concat(right, "px)"),
+          bottom: 0,
+          right: "".concat(right, "px"),
+          height: bottom + 'px',
+          fontSize: 'inherit'
+        } : {
+          padding: 0,
+          position: 'absolute',
+          left: 0,
+          top: "".concat(top, "px"),
+          width: left + 'px',
+          height: "calc(100% - ".concat(bottom, "px - ").concat(top, "px)"),
+          fontSize: 'inherit'
+        }
       };
     }
   }, {
@@ -667,10 +846,10 @@ function (_Component) {
     }
   }, {
     key: "getGridLines",
-    value: function getGridLines(_ref2, color, axis) {
-      var start = _ref2.start,
-          step = _ref2.step,
-          end = _ref2.end;
+    value: function getGridLines(_ref, color, axis) {
+      var start = _ref.start,
+          step = _ref.step,
+          end = _ref.end;
       var value = Math.round((start - step) / step) * step;
       var grid = {
         id: axis + '-grid',
@@ -698,38 +877,11 @@ function (_Component) {
       return grid;
     }
   }, {
-    key: "getStyle",
-    value: function getStyle(axis) {
-      var _this$props3 = this.props,
-          filter = _this$props3.filter,
-          padding = _this$props3.padding,
-          defaultPadding = _this$props3.defaultPadding;
-      var _padding$left = padding.left,
-          left = _padding$left === void 0 ? defaultPadding.left : _padding$left,
-          _padding$top = padding.top,
-          top = _padding$top === void 0 ? defaultPadding.top : _padding$top,
-          _padding$right = padding.right,
-          right = _padding$right === void 0 ? defaultPadding.right : _padding$right,
-          _padding$bottom = padding.bottom,
-          bottom = _padding$bottom === void 0 ? defaultPadding.bottom : _padding$bottom;
-      return axis === 'x' ? {
-        bottom: 0,
-        right: "".concat(right, "px"),
-        width: "calc(100% - ".concat(left, "px - ").concat(right, "px)"),
-        height: bottom + 'px'
-      } : {
-        left: 0,
-        top: "".concat(top, "px"),
-        width: left + 'px',
-        height: "calc(100% - ".concat(bottom, "px - ").concat(top, "px)")
-      };
-    }
-  }, {
     key: "getLength",
     value: function getLength(p1, p2) {
       var a = Math.pow((parseFloat(p1.x) - p2.x) * this.width / 100, 2);
       var b = Math.pow((parseFloat(p1.y) - p2.y) * this.height / 100, 2);
-      return fix(Math.sqrt(a + b));
+      return this.fix(Math.sqrt(a + b));
     }
   }, {
     key: "filterPoint",
@@ -897,7 +1049,7 @@ function (_Component) {
       var data = this.props.data;
       this.startOffset = {
         canvas: this.mousePosition,
-        body: getClient(e),
+        body: this.getClient(e),
         selected: this.selected.map(function (sel) {
           var stream = data[sel[0]].stream[sel[1]];
           return {
@@ -913,13 +1065,13 @@ function (_Component) {
         this.clickedItem = item;
 
         if (data[item[0]].stream[item[1]].selected) {
-          eventHandler('window', 'mousemove', _jquery.default.proxy(this.pointMouseMove, this));
+          this.eventHandler('window', 'mousemove', _jquery.default.proxy(this.pointMouseMove, this));
         }
 
-        eventHandler('window', 'mouseup', _jquery.default.proxy(this.pointMouseUp, this));
+        this.eventHandler('window', 'mouseup', _jquery.default.proxy(this.pointMouseUp, this));
       } else {
-        eventHandler('window', 'mousemove', _jquery.default.proxy(this.backgroundMouseMove, this));
-        eventHandler('window', 'mouseup', _jquery.default.proxy(this.backgroundMouseUp, this));
+        this.eventHandler('window', 'mousemove', _jquery.default.proxy(this.backgroundMouseMove, this));
+        this.eventHandler('window', 'mouseup', _jquery.default.proxy(this.backgroundMouseUp, this));
         this.startOffset.client = this.getCanvasClient(e);
         (0, _jquery.default)(this.dom.current).append('<div class="r-chart-select" style="position:absolute;left:' + this.startOffset.client.x + 'px;top:' + this.startOffset.client.y + 'px;background:rgba(100,100,100,.3);"></div>');
       }
@@ -927,13 +1079,13 @@ function (_Component) {
   }, {
     key: "pointMouseMove",
     value: function pointMouseMove(e) {
-      var _getClient = getClient(e),
-          x = _getClient.x,
-          y = _getClient.y;
+      var _this$getClient = this.getClient(e),
+          x = _this$getClient.x,
+          y = _this$getClient.y;
 
-      var _this$props4 = this.props,
-          data = _this$props4.data,
-          changeStep = _this$props4.changeStep;
+      var _this$props3 = this.props,
+          data = _this$props3.data,
+          changeStep = _this$props3.changeStep;
       var _this$d$this$mainAxis = this.d[this.mainAxis].labelSlider,
           start = _this$d$this$mainAxis.start,
           end = _this$d$this$mainAxis.end;
@@ -941,15 +1093,15 @@ function (_Component) {
           body = _this$startOffset.body,
           selected = _this$startOffset.selected;
       var offset = {
-        x: -getPercentByValue(x - body.x, 0, this.width),
-        y: getPercentByValue(y - body.y, 0, this.height)
+        x: -this.getPercentByValue(x - body.x, 0, this.width),
+        y: this.getPercentByValue(y - body.y, 0, this.height)
       };
       var changed = false;
 
       for (var i = 0; i < selected.length; i++) {
         var stream = selected[i].stream;
         var axis = selected[i][this.mainAxis];
-        var value = axis - getValueByPercent(offset[this.mainAxis], 0, end - start);
+        var value = axis - this.getValueByPercent(offset[this.mainAxis], 0, end - start);
         value = Math.round(value / changeStep) * changeStep;
 
         if (stream[this.mainAxis] !== value) {
@@ -968,13 +1120,13 @@ function (_Component) {
   }, {
     key: "pointMouseUp",
     value: function pointMouseUp() {
-      eventHandler('window', 'mousemove', this.pointMouseMove, 'unbind');
-      eventHandler('window', 'mouseup', this.pointMouseUp, 'unbind');
+      this.eventHandler('window', 'mousemove', this.pointMouseMove, 'unbind');
+      this.eventHandler('window', 'mouseup', this.pointMouseUp, 'unbind');
       var point = this.getpoint(this.d.lines, this.mousePosition);
       var rect = this.getbar(this.d.rectangles, this.mousePosition);
       var item = point || rect || false;
 
-      if (item && compaire(this.clickedItem, item)) {
+      if (item && this.compaire(this.clickedItem, item)) {
         this.select(item[0], item[1]);
       }
 
@@ -1068,8 +1220,8 @@ function (_Component) {
   }, {
     key: "backgroundMouseUp",
     value: function backgroundMouseUp() {
-      eventHandler('window', 'mousemove', this.backgroundMouseMove, 'unbind');
-      eventHandler('window', 'mouseup', this.backgroundMouseUp, 'unbind');
+      this.eventHandler('window', 'mousemove', this.backgroundMouseMove, 'unbind');
+      this.eventHandler('window', 'mouseup', this.backgroundMouseUp, 'unbind');
 
       if (!this.moved) {
         this.deselectAll();
@@ -1089,9 +1241,9 @@ function (_Component) {
           left = _dom$offset.left,
           top = _dom$offset.top;
 
-      var _getClient2 = getClient(e),
-          x = _getClient2.x,
-          y = _getClient2.y;
+      var _this$getClient2 = this.getClient(e),
+          x = _this$getClient2.x,
+          y = _this$getClient2.y;
 
       return {
         x: x - left + window.pageXOffset,
@@ -1104,10 +1256,7 @@ function (_Component) {
       var _this2 = this;
 
       (0, _jquery.default)('.r-chart-detail-container').remove();
-      var _this$props5 = this.props,
-          data = _this$props5.data,
-          padding = _this$props5.padding,
-          defaultPadding = _this$props5.defaultPadding;
+      var data = this.props.data;
       var result = [];
 
       for (var i = 0; i < data.length; i++) {
@@ -1118,7 +1267,7 @@ function (_Component) {
           continue;
         }
 
-        var index = binarySearch(stream, this.mousePosition[this.secondAxis] * this.sign, function (a) {
+        var index = this.binarySearch(stream, this.mousePosition[this.secondAxis] * this.sign, function (a) {
           if (!a.center) {
             return false;
           }
@@ -1147,10 +1296,9 @@ function (_Component) {
       }
 
       var Chart = (0, _jquery.default)(this.dom.current);
-      var _padding$left2 = padding.left,
-          left = _padding$left2 === void 0 ? defaultPadding.left : _padding$left2,
-          _padding$bottom2 = padding.bottom,
-          bottom = _padding$bottom2 === void 0 ? defaultPadding.bottom : _padding$bottom2;
+      var _this$padding3 = this.padding,
+          left = _this$padding3.left,
+          bottom = _this$padding3.bottom;
 
       if (this.mainAxis === 'y') {
         var Left = left + result[0].obj.center.x * this.width / 100;
@@ -1165,9 +1313,9 @@ function (_Component) {
     }
   }, {
     key: "getRange",
-    value: function getRange(_ref3) {
-      var min = _ref3.min,
-          max = _ref3.max;
+    value: function getRange(_ref2) {
+      var min = _ref2.min,
+          max = _ref2.max;
       var range = max - min,
           i = 1;
 
@@ -1275,40 +1423,27 @@ function (_Component) {
     value: function render() {
       var _this3 = this;
 
-      var _this$props6 = this.props,
-          zoom = _this$props6.zoom,
-          style = _this$props6.style,
-          padding = _this$props6.padding,
-          defaultPadding = _this$props6.defaultPadding,
-          id = _this$props6.id,
-          className = _this$props6.className,
-          data = _this$props6.data,
-          title = _this$props6.title;
+      var _this$props4 = this.props,
+          zoom = _this$props4.zoom,
+          style = _this$props4.style,
+          padding = _this$props4.padding,
+          defaultPadding = _this$props4.defaultPadding,
+          id = _this$props4.id,
+          className = _this$props4.className,
+          data = _this$props4.data,
+          title = _this$props4.title;
       var _this$state2 = this.state,
           x = _this$state2.x,
           y = _this$state2.y;
       var zoomx = x.zoom;
       var zoomy = y.zoom;
-      var _padding$left3 = padding.left,
-          left = _padding$left3 === void 0 ? defaultPadding.left : _padding$left3,
-          _padding$top2 = padding.top,
-          top = _padding$top2 === void 0 ? defaultPadding.top : _padding$top2,
-          _padding$right2 = padding.right,
-          right = _padding$right2 === void 0 ? defaultPadding.right : _padding$right2,
-          _padding$bottom3 = padding.bottom,
-          bottom = _padding$bottom3 === void 0 ? defaultPadding.bottom : _padding$bottom3;
+      var _this$padding4 = this.padding,
+          left = _this$padding4.left,
+          top = _this$padding4.top,
+          right = _this$padding4.right,
+          bottom = _this$padding4.bottom;
       var d = this.updateData();
       this.d = d;
-      var grids = [d.x.grid || {
-        type: 'group',
-        id: 'x-grid',
-        items: []
-      }, d.y.grid || {
-        type: 'group',
-        id: 'y-grid',
-        items: []
-      }];
-      var items = grids.concat(d.rectangles, d.lines, d.arcs, d.shadows);
       var canvas = {
         mouseDown: function mouseDown(e) {
           _this3.mouseDown(e, d);
@@ -1329,7 +1464,7 @@ function (_Component) {
         },
         id: 'canvas',
         axisPosition: ['0%', '100%'],
-        items: items,
+        items: [d.x.grid || {}, d.y.grid || {}].concat(d.rectangles, d.lines, d.arcs, d.shadows),
         style: {
           width: "calc(100% - ".concat(left, "px - ").concat(right + 1, "px)"),
           height: "calc(100% - ".concat(bottom, "px - ").concat(top + 1, "px)"),
@@ -1349,12 +1484,11 @@ function (_Component) {
           direction: 'ltr'
         }, style),
         ref: this.dom
-      }, _react.default.createElement("div", {
-        className: "r-chart-title",
-        style: _jquery.default.extend({}, title.style || {}, {
-          height: top + 'px'
-        })
-      }, title.text || ''), this.props.setting !== false && _react.default.createElement("div", {
+      }, _react.default.createElement(RChartTitle, {
+        title: title,
+        padding: this.padding,
+        data: data
+      }), this.props.setting !== false && _react.default.createElement("div", {
         className: "r-chart-toggle-setting",
         style: {
           top: top + 'px',
@@ -1365,95 +1499,14 @@ function (_Component) {
             setting: true
           });
         }
-      }), this.state.setting && _react.default.createElement("div", {
-        className: "r-chart-setting"
-      }, _react.default.createElement("div", {
-        style: {
-          position: 'absolute',
-          left: 0,
-          top: 0,
-          width: '100%',
-          height: '100%',
-          zIndex: -1
-        },
-        onClick: function onClick() {
-          return _this3.setState({
-            setting: false
-          });
-        }
-      }), _react.default.createElement("div", {
-        className: "r-chart-close-setting",
-        onClick: function onClick() {
-          return _this3.setState({
-            setting: false
-          });
-        }
-      }, "Close"), data.map(function (Data, i) {
-        return _react.default.createElement("div", {
-          key: i,
-          className: "r-chart-data-list",
-          style: {
-            color: Data.color
-          },
-          onClick: function onClick() {
-            var o = _this3.state.open;
-            o[i] = !o[i];
-
-            _this3.setState({
-              open: _this3.state.open
-            });
-          }
-        }, _react.default.createElement("div", {
-          className: "r-chart-check ".concat(!_this3.state.open[i] ? 'unchecked' : 'checked')
-        }), _react.default.createElement("div", {
-          className: "r-chart-title"
-        }, Data.title || 'Untitle'));
-      })), this.selected.length !== 0 && _react.default.createElement("div", {
+      }), this.selected.length !== 0 && _react.default.createElement("div", {
         className: "r-chart-deselect-all",
         onClick: this.deselectAll.bind(this),
         style: {
           right: right + 'px',
           top: top + 'px'
         }
-      }, "Deselect All"), d.x.labelSlider && x.show !== false && _react.default.createElement(_rRangeSlider.default, _extends({}, d.x.labelSlider, {
-        style: this.getStyle('x'),
-        className: "r-chart-labels r-chart-labels-x"
-      })), d.y.labelSlider && y.show !== false && _react.default.createElement(_rRangeSlider.default, _extends({}, d.y.labelSlider, {
-        style: this.getStyle('y'),
-        direction: "up",
-        className: "r-chart-labels r-chart-labels-y"
-      })), zoomx && d.x.filterSlider && _react.default.createElement(_rRangeSlider.default, {
-        className: "r-chart-filter r-chart-filter-x",
-        axis: "x",
-        start: d.x.filterSlider.start,
-        end: d.x.filterSlider.end,
-        points: d.x.filterSlider.points,
-        showValue: !d.x.labelSlider.label.items,
-        point_width: 8,
-        point_height: 8,
-        ondrag: this.change.bind(this),
-        style: {
-          width: "calc(100% - ".concat(left, "px - ").concat(right, "px)"),
-          bottom: "".concat(bottom - 9, "px"),
-          right: "".concat(right, "px")
-        }
-      }), zoomy && d.y.filterSlider && _react.default.createElement(_rRangeSlider.default, {
-        className: "r-chart-filter r-chart-filter-y",
-        axis: "y",
-        direction: "up",
-        start: d.y.filterSlider.start,
-        end: d.y.filterSlider.end,
-        point_width: 8,
-        point_height: 8,
-        points: d.y.filterSlider.points,
-        showValue: !d.y.labelSlider.label.items,
-        ondrag: this.change.bind(this),
-        style: {
-          left: "".concat(left - 9, "px"),
-          height: "calc(100% - ".concat(bottom, "px - ").concat(top, "px)"),
-          top: "".concat(top, "px")
-        }
-      }), _react.default.createElement(_rCanvas.default, canvas)));
+      }, "Deselect All"), d.x.labelSlider && x.show !== false && _react.default.createElement(_rRangeSlider.default, d.x.labelSlider), d.y.labelSlider && y.show !== false && _react.default.createElement(_rRangeSlider.default, d.y.labelSlider), zoomx && d.x.filterSlider && _react.default.createElement(_rRangeSlider.default, d.x.filterSlider), zoomy && d.y.filterSlider && _react.default.createElement(_rRangeSlider.default, d.y.filterSlider), _react.default.createElement(_rCanvas.default, canvas)));
     }
   }], [{
     key: "getDerivedStateFromProps",
@@ -1493,16 +1546,81 @@ function (_Component) {
 }(_react.Component);
 
 exports.default = RChart;
+
+var RChartTitle = /*#__PURE__*/function (_Component2) {
+  _inherits(RChartTitle, _Component2);
+
+  function RChartTitle() {
+    _classCallCheck(this, RChartTitle);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(RChartTitle).apply(this, arguments));
+  }
+
+  _createClass(RChartTitle, [{
+    key: "render",
+    value: function render() {
+      var _this$props5 = this.props,
+          title = _this$props5.title,
+          padding = _this$props5.padding,
+          data = _this$props5.data;
+
+      if (!title) {
+        return '';
+      }
+
+      var left = padding.left,
+          top = padding.top;
+      var titleProps = {
+        className: 'r-chart-title',
+        style: _jquery.default.extend({}, title.style || {}, {
+          height: top + 'px',
+          width: "calc(100% - ".concat(left + 'px', ")"),
+          justifyContent: title.moveTo ? undefined : 'center'
+        })
+      };
+      return _react.default.createElement("marquee", _extends({
+        ref: this.dom,
+        scrollamount: title.speed ? 5 : 0
+      }, titleProps, {
+        direction: title.moveTo
+      }), _react.default.createElement("table", {
+        style: {}
+      }, _react.default.createElement("tbody", null, _react.default.createElement("tr", null, _react.default.createElement("td", {
+        style: {
+          padding: '0 48px'
+        }
+      }, _react.default.createElement("strong", null, title.text || '')), data.map(function (d, i) {
+        return _react.default.createElement("td", {
+          key: i
+        }, _react.default.createElement("div", {
+          style: {
+            height: top,
+            display: 'flex',
+            alignItems: 'center',
+            float: 'left',
+            margin: '0 6px',
+            whiteSpace: 'nowrap'
+          }
+        }, _react.default.createElement("div", {
+          style: {
+            width: '12px',
+            height: '12px',
+            background: d.color,
+            float: 'left',
+            margin: '3px',
+            borderRadius: '100%'
+          }
+        }), d.title || 'untitle'));
+      })))));
+    }
+  }]);
+
+  return RChartTitle;
+}(_react.Component);
+
 RChart.defaultProps = {
   filter: false,
   changeStep: 1,
   padding: {},
-  defaultPadding: {
-    left: 30,
-    top: 20,
-    right: 20,
-    bottom: 30
-  },
-  data: [],
-  title: {}
+  data: []
 };

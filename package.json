@@ -1,6 +1,6 @@
 {
   "name": "r-chart",
-  "version": "2.0.16",
+  "version": "3.0.0",
   "description": "chart component written by react js,support line charts and bar charts,resposive,zoomable,editable,dragable",
   "main": "index.js",
   "scripts": {
@@ -12,9 +12,8 @@
   },
   "dependencies": {
     "jquery": "^3.4.1",
-    "r-actions": "^1.0.11",
-    "r-canvas": "^2.0.23",
-    "r-range-slider": "^2.1.3",
+    "r-canvas": "^2.0.25",
+    "r-range-slider": "^3.0.3",
     "react": "^16.12.0",
     "react-dom": "^16.12.0"
   },
