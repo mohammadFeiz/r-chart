@@ -113,11 +113,10 @@ export default class RChart extends Component {
     var {filter = [],labels} = this.state[axis];
     var {left,right,top,bottom} = this.padding;
     var {fillStyle,lineStyle,pointStyle,style} = this.controlPanel.filterSlider;
-    var label,start,step,end,points;
+    var start,step,end,points;
     if(labels){
       var fs = filter[0]?this.getIndex(labels,(label)=>label === filter[0]):0;
       var fe = filter[1]?this.getIndex(labels,(label)=>label === filter[1]):labels.length - 1; 
-      label = {items:labels.map((m,i)=>{return {text:m,value:i}})};
       start = 0; step = 1; end = labels.length - 1;
       points = [{value:fs},{value:fe,fillStyle}]
     }
@@ -128,7 +127,7 @@ export default class RChart extends Component {
       points = [{value:fs},{value:fe,fillStyle}]   
     }
     var config = {
-      start,step,end,label,axis,points,lineStyle,pointStyle,
+      start,step,end,axis,points,lineStyle,pointStyle,
       ondrag:this.change.bind(this),
       direction:axis === 'y'?'top':'right',
       className:`r-chart-filter r-chart-filter-${axis}`,

@@ -288,7 +288,7 @@ var RChart = /*#__PURE__*/function (_Component) {
           lineStyle = _this$controlPanel$fi.lineStyle,
           pointStyle = _this$controlPanel$fi.pointStyle,
           style = _this$controlPanel$fi.style;
-      var label, start, step, end, points;
+      var start, step, end, points;
 
       if (labels) {
         var fs = filter[0] ? this.getIndex(labels, function (label) {
@@ -297,14 +297,6 @@ var RChart = /*#__PURE__*/function (_Component) {
         var fe = filter[1] ? this.getIndex(labels, function (label) {
           return label === filter[1];
         }) : labels.length - 1;
-        label = {
-          items: labels.map(function (m, i) {
-            return {
-              text: m,
-              value: i
-            };
-          })
-        };
         start = 0;
         step = 1;
         end = labels.length - 1;
@@ -339,7 +331,6 @@ var RChart = /*#__PURE__*/function (_Component) {
         start: start,
         step: step,
         end: end,
-        label: label,
         axis: axis,
         points: points,
         lineStyle: lineStyle,
