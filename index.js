@@ -59,6 +59,8 @@ var RChart = /*#__PURE__*/function (_Component) {
   _inherits(RChart, _Component);
 
   function RChart(props) {
+    var _ref;
+
     var _this;
 
     _classCallCheck(this, RChart);
@@ -97,11 +99,21 @@ var RChart = /*#__PURE__*/function (_Component) {
           width: '13px',
           height: '13px',
           borderRadius: 0,
-          background: '#aaa',
+          background: 'none',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center'
-        }
+        },
+        pointHTML: _react.default.createElement("div", {
+          style: (_ref = {
+            width: '6px',
+            height: '6px',
+            background: '#aaa',
+            position: 'absolute',
+            left: 0,
+            top: 0
+          }, _defineProperty(_ref, "top", 'calc(50% - 3px)'), _defineProperty(_ref, "left", 'calc(50% - 3px)'), _ref)
+        })
       },
       xlabelStyle: {
         top: '18px',
@@ -287,7 +299,8 @@ var RChart = /*#__PURE__*/function (_Component) {
           fillStyle = _this$controlPanel$fi.fillStyle,
           lineStyle = _this$controlPanel$fi.lineStyle,
           pointStyle = _this$controlPanel$fi.pointStyle,
-          style = _this$controlPanel$fi.style;
+          style = _this$controlPanel$fi.style,
+          pointHTML = _this$controlPanel$fi.pointHTML;
       var start, step, end, points;
 
       if (labels) {
@@ -301,10 +314,12 @@ var RChart = /*#__PURE__*/function (_Component) {
         step = 1;
         end = labels.length - 1;
         points = [{
-          value: fs
+          value: fs,
+          html: pointHTML
         }, {
           value: fe,
-          fillStyle: fillStyle
+          fillStyle: fillStyle,
+          html: pointHTML
         }];
       } else if (!range) {
         return false;
@@ -320,10 +335,12 @@ var RChart = /*#__PURE__*/function (_Component) {
             fe = _filter$2 === void 0 ? end : _filter$2;
 
         points = [{
-          value: fs
+          value: fs,
+          html: pointHTML
         }, {
           value: fe,
-          fillStyle: fillStyle
+          fillStyle: fillStyle,
+          html: pointHTML
         }];
       }
 
@@ -837,10 +854,10 @@ var RChart = /*#__PURE__*/function (_Component) {
     }
   }, {
     key: "getGridLines",
-    value: function getGridLines(_ref, color, axis) {
-      var start = _ref.start,
-          step = _ref.step,
-          end = _ref.end;
+    value: function getGridLines(_ref2, color, axis) {
+      var start = _ref2.start,
+          step = _ref2.step,
+          end = _ref2.end;
       var value = Math.round((start - step) / step) * step;
       var grid = {
         id: axis + '-grid',
@@ -1304,9 +1321,9 @@ var RChart = /*#__PURE__*/function (_Component) {
     }
   }, {
     key: "getRange",
-    value: function getRange(_ref2) {
-      var min = _ref2.min,
-          max = _ref2.max;
+    value: function getRange(_ref3) {
+      var min = _ref3.min,
+          max = _ref3.max;
       var range = max - min,
           i = 1;
 

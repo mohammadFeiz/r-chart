@@ -13,7 +13,11 @@ export default class RChart extends Component {
     this.controlPanel = {
       filterSlider:{
         fillStyle:{background:'#ccc'},lineStyle:{display:'none'},
-        pointStyle:{width:'13px',height:'13px',borderRadius:0,background:'#aaa',display:'flex',justifyContent:'center',alignItems:'center'},
+        pointStyle:{width:'13px',height:'13px',borderRadius:0,background:'none',display:'flex',justifyContent:'center',alignItems:'center'},
+        pointHTML:<div style={{
+          width:'6px',height:'6px',background:'#aaa',position:'absolute',left:0,top:0,
+          top:'calc(50% - 3px)',left:'calc(50% - 3px)'
+        }}></div>
       },
       xlabelStyle:{top:'18px',fontSize:'inherit'},
       ylabelStyle:{right:'15px',left:'unset',justifyContent:'flex-end',fontSize:'inherit'}
@@ -112,19 +116,19 @@ export default class RChart extends Component {
   getFilterSlider(axis,range){
     var {filter = [],labels} = this.state[axis];
     var {left,right,top,bottom} = this.padding;
-    var {fillStyle,lineStyle,pointStyle,style} = this.controlPanel.filterSlider;
+    var {fillStyle,lineStyle,pointStyle,style,pointHTML} = this.controlPanel.filterSlider;
     var start,step,end,points;
     if(labels){
       var fs = filter[0]?this.getIndex(labels,(label)=>label === filter[0]):0;
       var fe = filter[1]?this.getIndex(labels,(label)=>label === filter[1]):labels.length - 1; 
       start = 0; step = 1; end = labels.length - 1;
-      points = [{value:fs},{value:fe,fillStyle}]
+      points = [{value:fs,html:pointHTML},{value:fe,fillStyle,html:pointHTML}]
     }
     else if(!range){return false;}
     else{
       start = range.start; step = range.step; end = range.end;
       var [fs = start,fe = end] = filter;  
-      points = [{value:fs},{value:fe,fillStyle}]   
+      points = [{value:fs,html:pointHTML},{value:fe,fillStyle,html:pointHTML}]   
     }
     var config = {
       start,step,end,axis,points,lineStyle,pointStyle,
