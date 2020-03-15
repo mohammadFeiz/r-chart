@@ -151,7 +151,7 @@ export default class RChart extends Component {
       labelItems = labels.map((m,i)=>{return {text:m,value:i}}).slice(fs,fe + 1);
       start = fs - 0.5; step = 1; end = fe + 0.5; 
     }
-    else if(!range){return {label:{}};}
+    else if(!range){return false;} 
     else{
       var [fs = range.start,fe = range.end] = filter;
       start = fs; step = range.step; end = fe; labelStep = range.step; 
@@ -171,18 +171,18 @@ export default class RChart extends Component {
       {
         padding:0,position:'absolute',
         left:0,top:`${top}px`,width:left + 'px',
-        height:`calc(100% - ${bottom}px - ${top}px)`,fontSize:'inherit' 
+        height:`calc(100% - ${bottom}px - ${top}px)`,fontSize:'inherit'
       }
     }
-  } 
-  getDetail(axis){ 
-    var {gridColor,zoom} = this.state[axis];
+  }
+  getDetail(axis){
+    var {gridColor} = this.state[axis];
     var limit = this.limit[axis];
     var range = limit?this.getRange(limit):false;
-    var labelSlider = range?this.getLabelSlider(axis,range):false;
-    var filterSlider = zoom?this.getFilterSlider(axis,range):false;
-    return {
-      filterSlider, 
+    var labelSlider = this.getLabelSlider(axis,range);
+    var filterSlider = this.getFilterSlider(axis,range);
+    return { 
+      filterSlider,  
       labelSlider,
       grid:gridColor?this.getGridLines(labelSlider,gridColor,axis):undefined
     }
@@ -318,12 +318,13 @@ export default class RChart extends Component {
     }
     s.x = this.getDetail('x');
     s.y = this.getDetail('y'); 
-    var labelSliderX = s.x.labelSlider;
-    var labelSliderY = s.y.labelSlider;
-    if(labelSliderX && LabelSliderY && labelSliderY.label.items && !labelSliderX.label.items){this.mainAxis = 'x'; this.secondAxis = 'y'; this.sign = -1;}
+    //debugger;
+    var xlsl = s.x.labelSlider.label;
+    var ylsl = s.y.labelSlider.label;
+    if(ylsl && ylsl.items && xlsl && !xlsl.items){this.mainAxis = 'x'; this.secondAxis = 'y'; this.sign = -1;}
     else{this.mainAxis = 'y'; this.secondAxis = 'x'; this.sign = 1;}
     this.barCount = data.filter((d)=>{return d.type === 'bar'}).length;
-    this.barCounter = -1; 
+    this.barCounter = -1;
     for (var i = 0; i < data.length; i++) {
       var {type = 'line',show = true} = data[i];
       if(!this.state.open[i]){continue;}
