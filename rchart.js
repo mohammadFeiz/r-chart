@@ -171,16 +171,16 @@ export default class RChart extends Component {
       {
         padding:0,position:'absolute',
         left:0,top:`${top}px`,width:left + 'px',
-        height:`calc(100% - ${bottom}px - ${top}px)`,fontSize:'inherit'
+        height:`calc(100% - ${bottom}px - ${top}px)`,fontSize:'inherit' 
       }
     }
-  }
-  getDetail(axis){
-    var {gridColor} = this.state[axis];
+  } 
+  getDetail(axis){ 
+    var {gridColor,zoom} = this.state[axis];
     var limit = this.limit[axis];
     var range = limit?this.getRange(limit):false;
-    var labelSlider = this.getLabelSlider(axis,range);
-    var filterSlider = this.getFilterSlider(axis,range);
+    var labelSlider = range?this.getLabelSlider(axis,range):false;
+    var filterSlider = zoom?this.getFilterSlider(axis,range):false;
     return {
       filterSlider, 
       labelSlider,
@@ -318,18 +318,19 @@ export default class RChart extends Component {
     }
     s.x = this.getDetail('x');
     s.y = this.getDetail('y'); 
-
-    if(s.y.labelSlider.label.items && !s.x.labelSlider.label.items){this.mainAxis = 'x'; this.secondAxis = 'y'; this.sign = -1;}
+    var labelSliderX = s.x.labelSlider;
+    var labelSliderY = s.y.labelSlider;
+    if(labelSliderX && LabelSliderY && labelSliderY.label.items && !labelSliderX.label.items){this.mainAxis = 'x'; this.secondAxis = 'y'; this.sign = -1;}
     else{this.mainAxis = 'y'; this.secondAxis = 'x'; this.sign = 1;}
     this.barCount = data.filter((d)=>{return d.type === 'bar'}).length;
-    this.barCounter = -1;
+    this.barCounter = -1; 
     for (var i = 0; i < data.length; i++) {
       var {type = 'line',show = true} = data[i];
       if(!this.state.open[i]){continue;}
       if(type === 'line'){
         this.getlineChart(s,i);  
       }
-      else{
+      else{ 
         this.getbarChart(s,i);
       }
       //this[`get${type}Chart`](data[i],s,i);    

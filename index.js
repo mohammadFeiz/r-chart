@@ -466,11 +466,13 @@ var RChart = /*#__PURE__*/function (_Component) {
   }, {
     key: "getDetail",
     value: function getDetail(axis) {
-      var gridColor = this.state[axis].gridColor;
+      var _this$state$axis3 = this.state[axis],
+          gridColor = _this$state$axis3.gridColor,
+          zoom = _this$state$axis3.zoom;
       var limit = this.limit[axis];
       var range = limit ? this.getRange(limit) : false;
-      var labelSlider = this.getLabelSlider(axis, range);
-      var filterSlider = this.getFilterSlider(axis, range);
+      var labelSlider = range ? this.getLabelSlider(axis, range) : false;
+      var filterSlider = zoom ? this.getFilterSlider(axis, range) : false;
       return {
         filterSlider: filterSlider,
         labelSlider: labelSlider,
@@ -815,8 +817,10 @@ var RChart = /*#__PURE__*/function (_Component) {
 
       s.x = this.getDetail('x');
       s.y = this.getDetail('y');
+      var labelSliderX = s.x.labelSlider;
+      var labelSliderY = s.y.labelSlider;
 
-      if (s.y.labelSlider.label.items && !s.x.labelSlider.label.items) {
+      if (labelSliderX && LabelSliderY && labelSliderY.label.items && !labelSliderX.label.items) {
         this.mainAxis = 'x';
         this.secondAxis = 'y';
         this.sign = -1;
