@@ -1,6 +1,6 @@
 {
   "name": "r-chart",
-  "version": "3.0.4",
+  "version": "4.0.0",
   "description": "chart component written by react js,support line charts and bar charts,resposive,zoomable,editable,dragable",
   "main": "index.js",
   "scripts": {
@@ -11,11 +11,14 @@
     "url": "git+https://github.com/mohammadFeiz/r-chart.git"
   },
   "dependencies": {
-    "jquery": "^3.4.1",
-    "r-canvas": "^2.0.25",
-    "r-range-slider": "^3.0.3",
-    "react": "^16.12.0",
-    "react-dom": "^16.12.0"
+    "jquery": "^3.5.0",
+    "r-canvas": "^2.0.28",
+    "r-range-slider": "^3.0.12",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
+  "devDependencies": {
+    "react-scripts": "latest"
   },
   "keywords": [
     "chart","r-chart","line chart","bar chart","diagram","zoom","responsive",
