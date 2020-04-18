@@ -454,7 +454,8 @@ var RChart = /*#__PURE__*/function (_Component) {
           _ref4$color = _ref4.color,
           color = _ref4$color === void 0 ? '#000' : _ref4$color,
           pointRadius = _ref4.pointRadius,
-          lineWidth = _ref4.lineWidth,
+          _ref4$lineWidth = _ref4.lineWidth,
+          lineWidth = _ref4$lineWidth === void 0 ? 3 : _ref4$lineWidth,
           area = _ref4.area;
       var points = [],
           line = {
