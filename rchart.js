@@ -37,8 +37,7 @@ var RChartContext = createContext();
       if(changed){return change}
       return null;
     }
-    getStyle(size){
-      var [x = 40,y = 40] = size;
+    getStyle(x,y){
       return {
         gridTemplateColumns:`${x}px auto`,
         gridTemplateRows:`auto ${y}px`,
@@ -84,17 +83,22 @@ var RChartContext = createContext();
       var maxCount = size?Math.ceil(size / 60):10;
       while (count > maxCount){step *= 2; count = (end - start) / step;}
       var [fs = start,fe = end] = filter;
-      var filteredRange = {start,end,step,p1:fs,p2:fe} 
+      var filteredRange = {start,end,step,p1:fs,p2:fe}  
       return {start:fs,step,end:fe,filter:filteredRange}; 
-    }
-    getRangeTypeString(axis,{filter = [],labels,labelStep}){
+    } 
+    getRangeTypeString(axis,{filter = [],labels,width = 60,height = 30}){
       var {limit} = this.details;
+      var size = this.details[axis === 'x'?'width':'height']
       var [start,end] = limit[axis];
       var fs = filter[0]?labels.indexOf(filter[0]):0;
       var fe = filter[1]?labels.indexOf(filter[1]):labels.length - 1;
       var filteredRange = {start:0,end:labels.length - 1,p1:fs,p2:fe};
+      var count = fe - fs + 1;
+      var approveCount = Math.floor(size / (axis === 'x'?width:height));
+      var approveCount = approveCount < 1 ? 1:approveCount;
+      var labelStep = Math.floor(count / approveCount);
       return {
-        start:fs - 0.5,step:labelStep || 1,end:fe + 0.5,count:fe - fs + 1,filter:filteredRange
+        start:fs - 0.5,step:labelStep,end:fe + 0.5,count,filter:filteredRange
       };
     }
     getRange(X,Y){
@@ -388,18 +392,18 @@ var RChartContext = createContext();
       }
       else{
         filterSlider.hide();
-        labelSlider.show();
+        labelSlider.show(); 
       }
     }
     render(){
-      var {size,data,html,add} = this.props;  
+      var {data,html,add} = this.props;  
       var {X,Y,popup} = this.state; 
+      var {width:xWidth = 60,height:xHeight = 50} = X;
+      var {width:yWidth = 50} = Y;
       this.getDetails(); 
       var d = this.details;
       var xType = d.type.x,yType = d.type.y,xRange = d.range.x,yRange = d.range.y;
-
       var xFilter = xRange?xRange.filter:undefined,yFilter = yRange?yRange.filter:undefined,items = d.width?this.getElements():[];
-      var [xSize,ySize] = size;
       return (
         <RChartContext.Provider value={{data,X,Y}}>
         <div className='r-chart' ref={this.dom}>
@@ -418,11 +422,11 @@ var RChartContext = createContext();
               )
             })}
           </div>
-        <div className='r-chart-container' style={this.getStyle(size)}>
+        <div className='r-chart-container' style={this.getStyle(yWidth,xHeight)}>
           <div className='r-chart-popup-container'></div>
           {
             popup !== false &&
-            <RChartEdit {...popup}
+            <RChartEdit {...popup} 
               onChange={(obj)=>{
                 for(let prop in obj){popup[prop] = obj[prop]}
                 this.SetState({popup});
@@ -484,7 +488,7 @@ var RChartContext = createContext();
               items={items}
               mouseMove={(e,[x,y,px,py])=>{
                 this.mousePosition = [x,y,px,py];
-                this.popupPosition = [x + ySize,d.height + y];
+                this.popupPosition = [x + yWidth,d.height + y];
                 this.mouseValue = [this.getValueByPercent(px,'x'),this.getValueByPercent(-py,'y')]
                 var container = $(this.dom.current).find('.r-chart-popup-container');
                 var popup = container.find('.r-chart-popup');
@@ -522,7 +526,6 @@ var RChartContext = createContext();
     }
   }
  RChart.defaultProps = {
-    size:[40,40],
     data:[],X:{},Y:{}
  }
 

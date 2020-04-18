@@ -115,13 +115,7 @@ var RChart = /*#__PURE__*/function (_Component) {
 
   _createClass(RChart, [{
     key: "getStyle",
-    value: function getStyle(size) {
-      var _size = _slicedToArray(size, 2),
-          _size$ = _size[0],
-          x = _size$ === void 0 ? 40 : _size$,
-          _size$2 = _size[1],
-          y = _size$2 === void 0 ? 40 : _size$2;
-
+    value: function getStyle(x, y) {
       return {
         gridTemplateColumns: "".concat(x, "px auto"),
         gridTemplateRows: "auto ".concat(y, "px"),
@@ -264,8 +258,12 @@ var RChart = /*#__PURE__*/function (_Component) {
       var _ref2$filter = _ref2.filter,
           filter = _ref2$filter === void 0 ? [] : _ref2$filter,
           labels = _ref2.labels,
-          labelStep = _ref2.labelStep;
+          _ref2$width = _ref2.width,
+          width = _ref2$width === void 0 ? 60 : _ref2$width,
+          _ref2$height = _ref2.height,
+          height = _ref2$height === void 0 ? 30 : _ref2$height;
       var limit = this.details.limit;
+      var size = this.details[axis === 'x' ? 'width' : 'height'];
 
       var _limit$axis2 = _slicedToArray(limit[axis], 2),
           start = _limit$axis2[0],
@@ -279,11 +277,15 @@ var RChart = /*#__PURE__*/function (_Component) {
         p1: fs,
         p2: fe
       };
+      var count = fe - fs + 1;
+      var approveCount = Math.floor(size / (axis === 'x' ? width : height));
+      var approveCount = approveCount < 1 ? 1 : approveCount;
+      var labelStep = Math.floor(count / approveCount);
       return {
         start: fs - 0.5,
-        step: labelStep || 1,
+        step: labelStep,
         end: fe + 0.5,
-        count: fe - fs + 1,
+        count: count,
         filter: filteredRange
       };
     }
@@ -931,7 +933,6 @@ var RChart = /*#__PURE__*/function (_Component) {
       var _this2 = this;
 
       var _this$props4 = this.props,
-          size = _this$props4.size,
           data = _this$props4.data,
           html = _this$props4.html,
           add = _this$props4.add;
@@ -939,6 +940,12 @@ var RChart = /*#__PURE__*/function (_Component) {
           X = _this$state3.X,
           Y = _this$state3.Y,
           popup = _this$state3.popup;
+      var _X$width = X.width,
+          xWidth = _X$width === void 0 ? 60 : _X$width,
+          _X$height = X.height,
+          xHeight = _X$height === void 0 ? 50 : _X$height;
+      var _Y$width = Y.width,
+          yWidth = _Y$width === void 0 ? 50 : _Y$width;
       this.getDetails();
       var d = this.details;
       var xType = d.type.x,
@@ -948,11 +955,6 @@ var RChart = /*#__PURE__*/function (_Component) {
       var xFilter = xRange ? xRange.filter : undefined,
           yFilter = yRange ? yRange.filter : undefined,
           items = d.width ? this.getElements() : [];
-
-      var _size2 = _slicedToArray(size, 2),
-          xSize = _size2[0],
-          ySize = _size2[1];
-
       return /*#__PURE__*/_react.default.createElement(RChartContext.Provider, {
         value: {
           data: data,
@@ -990,7 +992,7 @@ var RChart = /*#__PURE__*/function (_Component) {
         }, d.title || 'untitle'));
       })), /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-container",
-        style: this.getStyle(size)
+        style: this.getStyle(yWidth, xHeight)
       }, /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-popup-container"
       }), popup !== false && /*#__PURE__*/_react.default.createElement(RChartEdit, _extends({}, popup, {
@@ -1108,7 +1110,7 @@ var RChart = /*#__PURE__*/function (_Component) {
               py = _ref10[3];
 
           _this2.mousePosition = [x, y, px, py];
-          _this2.popupPosition = [x + ySize, d.height + y];
+          _this2.popupPosition = [x + yWidth, d.height + y];
           _this2.mouseValue = [_this2.getValueByPercent(px, 'x'), _this2.getValueByPercent(-py, 'y')];
           var container = (0, _jquery.default)(_this2.dom.current).find('.r-chart-popup-container');
           var popup = container.find('.r-chart-popup');
@@ -1196,7 +1198,6 @@ var RChart = /*#__PURE__*/function (_Component) {
 
 exports.default = RChart;
 RChart.defaultProps = {
-  size: [40, 40],
   data: [],
   X: {},
   Y: {}
