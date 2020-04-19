@@ -412,7 +412,7 @@ var RChartContext = createContext();
         <div className='r-chart' ref={this.dom}>
           {html && html(this.props)}
           <div className='r-chart-title'>
-            {data.map((d,i)=>{
+            {data.filter((d)=>d.title !== undefined).map((d,i)=>{
               let {show = true,color} = d;
               let style = show?{background:color}:{boxShadow:`inset 0 0 0 2px ${color}`};
               return (

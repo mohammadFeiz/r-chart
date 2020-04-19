@@ -981,7 +981,9 @@ var RChart = /*#__PURE__*/function (_Component) {
         ref: this.dom
       }, html && html(this.props), /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-title"
-      }, data.map(function (d, i) {
+      }, data.filter(function (d) {
+        return d.title !== undefined;
+      }).map(function (d, i) {
         var _d$show = d.show,
             show = _d$show === void 0 ? true : _d$show,
             color = d.color;
