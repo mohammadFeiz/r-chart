@@ -77,7 +77,18 @@ var RChart = /*#__PURE__*/function (_Component) {
     var _this$props = _this.props,
         X = _this$props.X,
         Y = _this$props.Y,
+        x = _this$props.x,
+        y = _this$props.y,
         data = _this$props.data;
+
+    if (x) {
+      console.error('RChart error => you set x props for RChart. did you mean X');
+    }
+
+    if (y) {
+      console.error('RChart error => you set y props for RChart. did you mean Y');
+    }
+
     _this.touch = 'ontouchstart' in document.documentElement;
     _this.state = {
       X: X,
@@ -478,7 +489,7 @@ var RChart = /*#__PURE__*/function (_Component) {
           console.error("RChart => Receive \"".concat(x, "\" in data[").concat(index, "].stream[").concat(j, "].x . but there is not \"").concat(x, "\" in X.labels array"));
           continue;
         } else if (xp === 'number error') {
-          console.error("RChart => data[".concat(index, "].stream[").concat(j, "].x is not a number."));
+          console.error("RChart => data[".concat(index, "].stream[").concat(j, "].x is not a number. if type of x value of stream is an string you must set labels property as array of strings in X props"));
           continue;
         } else {
           xp += '%';
@@ -488,7 +499,7 @@ var RChart = /*#__PURE__*/function (_Component) {
           console.error("RChart => Receive \"".concat(y, "\" in data[").concat(index, "].stream[").concat(j, "].y . but there is not \"").concat(y, "\" in Y.labels array"));
           continue;
         } else if (yp === 'number error') {
-          console.error("RChart => data[".concat(index, "].stream[").concat(j, "].y is not a number"));
+          console.error("RChart => data[".concat(index, "].stream[").concat(j, "].y is not a number. if type of y value of stream is an string you must set labels property as array of strings in Y props"));
           continue;
         } else {
           yp *= -1;
@@ -771,7 +782,10 @@ var RChart = /*#__PURE__*/function (_Component) {
       d.barCount = data.filter(function (d) {
         return d.type === 'bar';
       }).length;
-      d.barWidth = barWidth / d.range[d.barAxis].count / d.barCount;
+
+      if (d.barAxis) {
+        d.barWidth = barWidth / d.range[d.barAxis].count / d.barCount;
+      }
     }
   }, {
     key: "changeFilter",

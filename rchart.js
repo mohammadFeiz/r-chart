@@ -8,7 +8,9 @@ var RChartContext = createContext();
  export default class RChart extends Component{
     constructor(props){
       super(props);
-      var {X,Y,data} = this.props;
+      var {X,Y,x,y,data} = this.props;
+      if(x){console.error('RChart error => you set x props for RChart. did you mean X')}
+      if(y){console.error('RChart error => you set y props for RChart. did you mean Y')}
       this.touch = 'ontouchstart' in document.documentElement;
       this.state = {X,Y,prevx:JSON.stringify(X),prevy:JSON.stringify(Y),popup:false};
       this.slider = {
@@ -175,7 +177,7 @@ var RChartContext = createContext();
           continue;
         }
         else if(xp === 'number error'){
-          console.error(`RChart => data[${index}].stream[${j}].x is not a number.`)
+          console.error(`RChart => data[${index}].stream[${j}].x is not a number. if type of x value of stream is an string you must set labels property as array of strings in X props`)
           continue;
         }
         else{xp+='%';}
@@ -184,7 +186,7 @@ var RChartContext = createContext();
           continue;
         }
         else if(yp === 'number error'){
-          console.error(`RChart => data[${index}].stream[${j}].y is not a number`)
+          console.error(`RChart => data[${index}].stream[${j}].y is not a number. if type of y value of stream is an string you must set labels property as array of strings in Y props`)
           continue;
         }
         else{yp *= -1; yp += '%';}
@@ -303,7 +305,7 @@ var RChartContext = createContext();
             Value = axis === 'x'?X.labels.indexOf(value):Y.labels.indexOf(value);
             if(Value === -1){return 'string error';}
           }
-          return 100 * (Value - start) / (end - start)
+          return 100 * (Value - start) / (end - start) 
         };
         this.getValueByPercent = (p,axis)=>{
           if(!d.range[axis]){return '';}
@@ -315,8 +317,9 @@ var RChartContext = createContext();
       if(this.setLimit !== false){this.details.limit = this.getLimit(data,X,Y);}  
       this.details.range = this.getRange(X,Y); 
       d.barCount = data.filter((d)=>d.type === 'bar').length;
-      d.barWidth = barWidth / d.range[d.barAxis].count/d.barCount;
-          
+      if(d.barAxis){
+        d.barWidth = barWidth / d.range[d.barAxis].count/d.barCount;
+      }
     }
     changeFilter(p1,p2,axis){
       var obj = JSON.parse(JSON.stringify(this.state[axis])) 
