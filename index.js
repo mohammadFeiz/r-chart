@@ -290,8 +290,10 @@ var RChart = /*#__PURE__*/function (_Component) {
       };
       var count = fe - fs + 1;
       var approveCount = Math.floor(size / (axis === 'x' ? width : height));
-      var approveCount = approveCount < 1 ? 1 : approveCount;
+      approveCount = approveCount < 1 ? 1 : approveCount;
       var labelStep = Math.floor(count / approveCount);
+      labelStep = labelStep < 1 ? 1 : labelStep;
+      console.log('labelStep', labelStep);
       return {
         start: fs - 0.5,
         step: labelStep,
@@ -904,15 +906,15 @@ var RChart = /*#__PURE__*/function (_Component) {
     }
   }, {
     key: "zoomHover",
-    value: function zoomHover(e, state) {
+    value: function zoomHover(e, axis) {
       e.stopPropagation();
-      this.hoverAxis = state;
+      this.hoverAxis = axis;
 
       if (this.zoomDown) {
         return;
       }
 
-      this.hadleShowSliders(state);
+      this.hadleShowSliders(axis);
     }
   }, {
     key: "zoomMouseDown",
@@ -932,15 +934,17 @@ var RChart = /*#__PURE__*/function (_Component) {
     }
   }, {
     key: "hadleShowSliders",
-    value: function hadleShowSliders(state) {
-      var container = (0, _jquery.default)(this.dom.current);
-      var filterSlider = container.find('.filterSlider');
-      var labelSlider = container.find('.labelSlider');
-
-      if (state) {
+    value: function hadleShowSliders(axis) {
+      if (axis) {
+        var container = (0, _jquery.default)(this.dom.current).find('.r-chart-axis-' + axis);
+        var filterSlider = container.find('.filterSlider');
+        var labelSlider = container.find('.labelSlider');
         filterSlider.show();
         labelSlider.hide();
       } else {
+        var container = (0, _jquery.default)(this.dom.current);
+        var filterSlider = container.find('.filterSlider');
+        var labelSlider = container.find('.labelSlider');
         filterSlider.hide();
         labelSlider.show();
       }
@@ -1080,7 +1084,7 @@ var RChart = /*#__PURE__*/function (_Component) {
       })), /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-axis r-chart-axis-y",
         onMouseEnter: function onMouseEnter(e) {
-          _this2.zoomHover(e, true);
+          _this2.zoomHover(e, 'y');
         },
         onMouseLeave: function onMouseLeave(e) {
           _this2.zoomHover(e, false);
@@ -1146,7 +1150,7 @@ var RChart = /*#__PURE__*/function (_Component) {
       }), /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-axis r-chart-axis-x",
         onMouseEnter: function onMouseEnter(e) {
-          _this2.zoomHover(e, true);
+          _this2.zoomHover(e, 'x');
         },
         onMouseLeave: function onMouseLeave(e) {
           _this2.zoomHover(e, false);

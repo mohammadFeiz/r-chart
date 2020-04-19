@@ -97,8 +97,10 @@ var RChartContext = createContext();
       var filteredRange = {start:0,end:labels.length - 1,p1:fs,p2:fe};
       var count = fe - fs + 1;
       var approveCount = Math.floor(size / (axis === 'x'?width:height));
-      var approveCount = approveCount < 1 ? 1:approveCount;
+      approveCount = approveCount < 1 ? 1:approveCount;
       var labelStep = Math.floor(count / approveCount);
+      labelStep = labelStep < 1 ? 1:labelStep;
+      console.log('labelStep',labelStep)
       return {
         start:fs - 0.5,step:labelStep,end:fe + 0.5,count,filter:filteredRange
       };
@@ -371,11 +373,11 @@ var RChartContext = createContext();
     }
     setSetLimit(state){this.setLimit = state;}
     closePopup(){this.SetState({popup:false})}
-    zoomHover(e,state){
+    zoomHover(e,axis){
       e.stopPropagation();
-      this.hoverAxis = state;
+      this.hoverAxis = axis;
       if(this.zoomDown){return;}
-      this.hadleShowSliders(state)
+      this.hadleShowSliders(axis)
     }
     zoomMouseDown(){
       this.zoomDown = true;
@@ -385,15 +387,18 @@ var RChartContext = createContext();
       if(this.hoverAxis){return;}
       this.hadleShowSliders(false)
     }
-    hadleShowSliders(state){
-      var container = $(this.dom.current);
-      var filterSlider = container.find('.filterSlider');
-      var labelSlider = container.find('.labelSlider');
-      if(state){ 
+    hadleShowSliders(axis){
+      if(axis){ 
+        var container = $(this.dom.current).find('.r-chart-axis-' + axis);
+        var filterSlider = container.find('.filterSlider');
+        var labelSlider = container.find('.labelSlider');
         filterSlider.show();
         labelSlider.hide();
       }
       else{
+        var container = $(this.dom.current);
+        var filterSlider = container.find('.filterSlider');
+        var labelSlider = container.find('.labelSlider');
         filterSlider.hide();
         labelSlider.show(); 
       }
@@ -465,7 +470,7 @@ var RChartContext = createContext();
             />
           }
           <div className='r-chart-axis r-chart-axis-y' 
-            onMouseEnter={(e)=>{this.zoomHover(e,true)}} onMouseLeave={(e)=>{this.zoomHover(e,false)}}> 
+            onMouseEnter={(e)=>{this.zoomHover(e,'y')}} onMouseLeave={(e)=>{this.zoomHover(e,false)}}> 
             {
               Y.show !== false && yRange &&
               <RSlider {...this.slider} direction='top' start={yRange.start} end={yRange.end}
@@ -503,7 +508,7 @@ var RChartContext = createContext();
           </div>
           <div className='r-chart-corner'></div>
           <div className='r-chart-axis r-chart-axis-x' 
-            onMouseEnter={(e)=>{this.zoomHover(e,true)}} onMouseLeave={(e)=>{this.zoomHover(e,false)}}>
+            onMouseEnter={(e)=>{this.zoomHover(e,'x')}} onMouseLeave={(e)=>{this.zoomHover(e,false)}}>
             {
               X.show !== false && xRange && 
               <RSlider {...this.slider} start={xRange.start} end={xRange.end}
