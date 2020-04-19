@@ -1,6 +1,6 @@
 {
   "name": "r-chart",
-  "version": "4.0.6",
+  "version": "4.0.7",
   "description": "chart component written by react js,support line charts and bar charts,resposive,zoomable,editable,dragable",
   "main": "index.js",
   "scripts": {

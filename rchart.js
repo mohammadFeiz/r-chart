@@ -166,8 +166,8 @@ var RChartContext = createContext();
       var {onChange} = this.props;
       onChange({data});
     }
-    getLineChart(stream,{fill = '#fff',color = '#000',pointRadius = 4,lineWidth = 2,area},index){ 
-      var points = [],line = {points:[],lineWidth,stroke:color},Area;
+    getLineChart(stream,{fill = '#fff',color = '#000',pointRadius = 4,lineWidth = 2,area,dash},index){ 
+      var points = [],line = {points:[],lineWidth,stroke:color,dash},Area;
       for(var j = 0; j < stream.length; j++){
         var {x,y,pointRadius:PointRadius} = stream[j];  
         //if(x === 'msf'){debugger;}
