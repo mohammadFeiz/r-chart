@@ -90,12 +90,25 @@ var RChart = /*#__PURE__*/function (_Component) {
     }
 
     _this.touch = 'ontouchstart' in document.documentElement;
+    var preventData = {};
+
+    for (var i = 0; i < data.length; i++) {
+      var d = data[i];
+
+      if (d.title === undefined) {
+        continue;
+      }
+
+      preventData[d.title] = false;
+    }
+
     _this.state = {
       X: X,
       Y: Y,
       prevx: JSON.stringify(X),
       prevy: JSON.stringify(Y),
-      popup: false
+      popup: false,
+      preventData: preventData
     };
     _this.slider = {
       style: {
@@ -677,7 +690,8 @@ var RChart = /*#__PURE__*/function (_Component) {
       var data = this.props.data;
       var _this$state = this.state,
           X = _this$state.X,
-          Y = _this$state.Y;
+          Y = _this$state.Y,
+          preventData = _this$state.preventData;
       var barAxis = this.details.barAxis;
       var xGridLines = X.gridColor ? this.getGridLines('x') : [];
       var yGridLines = Y.gridColor ? this.getGridLines('y') : [];
@@ -687,15 +701,14 @@ var RChart = /*#__PURE__*/function (_Component) {
 
       for (var i = 0; i < data.length; i++) {
         var _data$i = data[i],
+            title = _data$i.title,
             stream = _data$i.stream,
             _data$i$type = _data$i.type,
             chartType = _data$i$type === void 0 ? 'line' : _data$i$type,
             _data$i$color = _data$i.color,
-            color = _data$i$color === void 0 ? '#000' : _data$i$color,
-            _data$i$show = _data$i.show,
-            show = _data$i$show === void 0 ? true : _data$i$show;
+            color = _data$i$color === void 0 ? '#000' : _data$i$color;
 
-        if (!show) {
+        if (preventData[title]) {
           continue;
         }
 
@@ -908,6 +921,20 @@ var RChart = /*#__PURE__*/function (_Component) {
     key: "zoomHover",
     value: function zoomHover(e, axis) {
       e.stopPropagation();
+      var _this$state3 = this.state,
+          _this$state3$X = _this$state3.X,
+          X = _this$state3$X === void 0 ? {} : _this$state3$X,
+          _this$state3$Y = _this$state3.Y,
+          Y = _this$state3$Y === void 0 ? {} : _this$state3$Y;
+
+      if (axis === 'x' && !X.zoom) {
+        return;
+      }
+
+      if (axis === 'y' && !Y.zoom) {
+        return;
+      }
+
       this.hoverAxis = axis;
 
       if (this.zoomDown) {
@@ -958,10 +985,11 @@ var RChart = /*#__PURE__*/function (_Component) {
           data = _this$props4.data,
           html = _this$props4.html,
           add = _this$props4.add;
-      var _this$state3 = this.state,
-          X = _this$state3.X,
-          Y = _this$state3.Y,
-          popup = _this$state3.popup;
+      var _this$state4 = this.state,
+          X = _this$state4.X,
+          Y = _this$state4.Y,
+          popup = _this$state4.popup,
+          preventData = _this$state4.preventData;
       var _X$width = X.width,
           xWidth = _X$width === void 0 ? 60 : _X$width,
           _X$height = X.height,
@@ -991,10 +1019,9 @@ var RChart = /*#__PURE__*/function (_Component) {
       }, data.filter(function (d) {
         return d.title !== undefined;
       }).map(function (d, i) {
-        var _d$show = d.show,
-            show = _d$show === void 0 ? true : _d$show,
-            color = d.color;
-        var style = show ? {
+        var color = d.color,
+            title = d.title;
+        var style = !preventData[d.title] ? {
           background: color
         } : {
           boxShadow: "inset 0 0 0 2px ".concat(color)
@@ -1003,10 +1030,12 @@ var RChart = /*#__PURE__*/function (_Component) {
           key: i,
           className: "r-chart-title-item",
           onClick: function onClick() {
-            show = !show;
-            d.show = show;
+            preventData[title] = preventData[title] === undefined ? false : preventData[title];
+            preventData[title] = !preventData[title];
 
-            _this2.onChange(data);
+            _this2.SetState({
+              preventData: preventData
+            });
           }
         }, /*#__PURE__*/_react.default.createElement("div", {
           className: "r-chart-title-color",

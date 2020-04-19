@@ -12,7 +12,13 @@ var RChartContext = createContext();
       if(x){console.error('RChart error => you set x props for RChart. did you mean X')}
       if(y){console.error('RChart error => you set y props for RChart. did you mean Y')}
       this.touch = 'ontouchstart' in document.documentElement;
-      this.state = {X,Y,prevx:JSON.stringify(X),prevy:JSON.stringify(Y),popup:false};
+      var preventData = {};
+      for(var i = 0; i < data.length; i++){
+        let d = data[i];
+        if(d.title === undefined){continue;}
+        preventData[d.title] = false;
+      }
+      this.state = {X,Y,prevx:JSON.stringify(X),prevy:JSON.stringify(Y),popup:false,preventData};
       this.slider = {
         style:{position:'absolute',left:0,top:0,width:'100%',height:'100%',padding:0},
         lineStyle:{display:'none'},editable:false,showValue:false,
@@ -264,7 +270,7 @@ var RChartContext = createContext();
     getElements(){ 
       var points = [],lines = [],rects = [],areas = []; 
       var {data} = this.props;
-      var {X,Y} = this.state;
+      var {X,Y,preventData} = this.state;
       var {barAxis} = this.details;
       var xGridLines = X.gridColor?this.getGridLines('x'):[];
       var yGridLines = Y.gridColor?this.getGridLines('y'):[]; 
@@ -272,8 +278,8 @@ var RChartContext = createContext();
       var yIndicator = Y.indicator?[this.getGridLine(Y.indicator.value,'y',X.indicator)]:[];
       var barCounter = 0; 
       for(var i = 0; i < data.length; i++){  
-        let {stream,type:chartType = 'line',color = '#000',show = true} = data[i];
-        if(!show){continue;}
+        let {title,stream,type:chartType = 'line',color = '#000'} = data[i];
+        if(preventData[title]){continue;}
         if(chartType === 'line'){
           var result = this.getLineChart(stream,data[i],i);
           points = points.concat(result.points) 
@@ -375,6 +381,9 @@ var RChartContext = createContext();
     closePopup(){this.SetState({popup:false})}
     zoomHover(e,axis){
       e.stopPropagation();
+      var {X = {},Y = {}} = this.state;
+      if(axis === 'x' && !X.zoom){return;}
+      if(axis === 'y' && !Y.zoom){return;}
       this.hoverAxis = axis;
       if(this.zoomDown){return;}
       this.hadleShowSliders(axis)
@@ -405,7 +414,7 @@ var RChartContext = createContext();
     }
     render(){
       var {data,html,add} = this.props;  
-      var {X,Y,popup} = this.state; 
+      var {X,Y,popup,preventData} = this.state; 
       var {width:xWidth = 60,height:xHeight = 50} = X;
       var {width:yWidth = 50} = Y;
       this.getDetails(); 
@@ -418,11 +427,13 @@ var RChartContext = createContext();
           {html && html(this.props)}
           <div className='r-chart-title'>
             {data.filter((d)=>d.title !== undefined).map((d,i)=>{
-              let {show = true,color} = d;
-              let style = show?{background:color}:{boxShadow:`inset 0 0 0 2px ${color}`};
+              let {color,title} = d;
+              let style = !preventData[d.title]?{background:color}:{boxShadow:`inset 0 0 0 2px ${color}`};
               return (
                 <div key={i} className='r-chart-title-item' onClick={()=>{
-                  show = !show; d.show = show; this.onChange(data);
+                  preventData[title] = preventData[title] === undefined?false:preventData[title];
+                  preventData[title] = !preventData[title];
+                  this.SetState({preventData})
                 }}>
                   <div className='r-chart-title-color' style={style}></div>
                   <div className='r-chart-title-text'>{d.title || 'untitle'}</div>
