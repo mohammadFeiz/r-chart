@@ -535,6 +535,10 @@ var RChart = /*#__PURE__*/function (_Component) {
             stroke: color,
             dataIndex: index,
             streamIndex: j,
+            value: {
+              x: x,
+              y: y
+            },
             event: {
               mousedown: this.pointMouseDown.bind(this)
             }
@@ -893,16 +897,36 @@ var RChart = /*#__PURE__*/function (_Component) {
   }, {
     key: "mouseDown",
     value: function mouseDown() {
-      var add = this.props.add;
+      var _this2 = this;
+
+      var _this$props4 = this.props,
+          add = _this$props4.add,
+          data = _this$props4.data;
 
       if (!add || !add.enabled) {
+        return;
+      }
+
+      var dataIndex;
+      var addableData = data.filter(function (d, i) {
+        for (var _i2 = 0; _i2 < d.stream.length; _i2++) {
+          if (d.stream[_i2].x === _this2.mouseValue[0]) {
+            return false;
+          }
+        }
+
+        dataIndex = dataIndex === undefined ? i : dataIndex;
+        return true;
+      });
+
+      if (addableData.length === 0) {
         return;
       }
 
       this.SetState({
         popup: {
           type: 'Add Point',
-          dataIndex: 0,
+          dataIndex: dataIndex,
           value: this.mouseValue[1],
           mouseValue: this.mouseValue
         }
@@ -982,12 +1006,12 @@ var RChart = /*#__PURE__*/function (_Component) {
   }, {
     key: "render",
     value: function render() {
-      var _this2 = this;
+      var _this3 = this;
 
-      var _this$props4 = this.props,
-          data = _this$props4.data,
-          html = _this$props4.html,
-          add = _this$props4.add;
+      var _this$props5 = this.props,
+          data = _this$props5.data,
+          html = _this$props5.html,
+          add = _this$props5.add;
       var _this$state4 = this.state,
           X = _this$state4.X,
           Y = _this$state4.Y,
@@ -1018,7 +1042,10 @@ var RChart = /*#__PURE__*/function (_Component) {
         className: "r-chart",
         ref: this.dom
       }, /*#__PURE__*/_react.default.createElement("div", {
-        className: "r-chart-title"
+        className: "r-chart-title",
+        style: {
+          paddingLeft: yWidth + 'px'
+        }
       }, data.filter(function (d) {
         return d.title !== undefined;
       }).map(function (d, i) {
@@ -1036,7 +1063,7 @@ var RChart = /*#__PURE__*/function (_Component) {
             preventData[title] = preventData[title] === undefined ? false : preventData[title];
             preventData[title] = !preventData[title];
 
-            _this2.SetState({
+            _this3.SetState({
               preventData: preventData
             });
           }
@@ -1057,7 +1084,7 @@ var RChart = /*#__PURE__*/function (_Component) {
             popup[prop] = obj[prop];
           }
 
-          _this2.SetState({
+          _this3.SetState({
             popup: popup
           });
         },
@@ -1068,9 +1095,9 @@ var RChart = /*#__PURE__*/function (_Component) {
               value = popup.value;
           data[dataIndex].stream[streamIndex].y = value;
 
-          _this2.onChange(data);
+          _this3.onChange(data);
 
-          _this2.closePopup();
+          _this3.closePopup();
         },
         onAdd: function onAdd() {
           var dataIndex = popup.dataIndex,
@@ -1085,7 +1112,7 @@ var RChart = /*#__PURE__*/function (_Component) {
             },
                 addIndex;
 
-            var index = _this2.binerySearch(stream, X.labels.indexOf(_this2.mouseValue[0]), function (m) {
+            var index = _this3.binerySearch(stream, X.labels.indexOf(_this3.mouseValue[0]), function (m) {
               return X.labels.indexOf(m.x);
             });
 
@@ -1095,6 +1122,10 @@ var RChart = /*#__PURE__*/function (_Component) {
               addIndex = 0;
             } else if (Array.isArray(index)) {
               addIndex = index[1];
+            } else {
+              _this3.closePopup();
+
+              return;
             }
 
             if (add.callback) {
@@ -1106,20 +1137,20 @@ var RChart = /*#__PURE__*/function (_Component) {
             } else {
               stream.splice(addIndex, 0, addObject);
 
-              _this2.onChange(data);
+              _this3.onChange(data);
             }
           }
 
-          _this2.closePopup();
+          _this3.closePopup();
         },
         onRemove: function onRemove() {}
       })), /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-axis r-chart-axis-y",
         onMouseEnter: function onMouseEnter(e) {
-          _this2.zoomHover(e, 'y');
+          _this3.zoomHover(e, 'y');
         },
         onMouseLeave: function onMouseLeave(e) {
-          _this2.zoomHover(e, false);
+          _this3.zoomHover(e, false);
         }
       }, Y.show !== false && yRange && /*#__PURE__*/_react.default.createElement(_rRangeSlider.default, _extends({}, this.slider, {
         direction: "top",
@@ -1145,7 +1176,7 @@ var RChart = /*#__PURE__*/function (_Component) {
         },
         ondrag: function ondrag(_ref8) {
           var points = _ref8.points;
-          return _this2.changeFilter(points[0].value, points[1].value, 'Y');
+          return _this3.changeFilter(points[0].value, points[1].value, 'Y');
         },
         onmousedown: this.zoomMouseDown.bind(this),
         onmouseup: this.zoomMouseUp.bind(this)
@@ -1153,8 +1184,8 @@ var RChart = /*#__PURE__*/function (_Component) {
         className: "r-chart-canvas"
       }, html && html(this.elements, d), /*#__PURE__*/_react.default.createElement(_rCanvas.default, {
         getSize: function getSize(width, height) {
-          _this2.details.width = width;
-          _this2.details.height = height;
+          _this3.details.width = width;
+          _this3.details.height = height;
         },
         axisPosition: ['0%', '100%'],
         items: items,
@@ -1165,16 +1196,16 @@ var RChart = /*#__PURE__*/function (_Component) {
               px = _ref10[2],
               py = _ref10[3];
 
-          _this2.mousePosition = [x, y, px, py];
-          _this2.popupPosition = [x + yWidth, d.height + y];
-          _this2.mouseValue = [_this2.getValueByPercent(px, 'x'), _this2.getValueByPercent(-py, 'y')];
-          var container = (0, _jquery.default)(_this2.dom.current).find('.r-chart-popup-container');
+          _this3.mousePosition = [x, y, px, py];
+          _this3.popupPosition = [x + yWidth, d.height + y];
+          _this3.mouseValue = [_this3.getValueByPercent(px, 'x'), _this3.getValueByPercent(-py, 'y')];
+          var container = (0, _jquery.default)(_this3.dom.current).find('.r-chart-popup-container');
           var popup = container.find('.r-chart-popup');
           container.css({
-            left: _this2.popupPosition[0],
-            top: _this2.popupPosition[1]
+            left: _this3.popupPosition[0],
+            top: _this3.popupPosition[1]
           });
-          container.html('<div class="r-chart-popup">' + _this2.mouseValue[0] + '  ' + _this2.mouseValue[1] + '</div>');
+          container.html('<div class="r-chart-popup">' + _this3.mouseValue[0] + '  ' + _this3.mouseValue[1] + '</div>');
         },
         mouseDown: this.mouseDown.bind(this)
       })), /*#__PURE__*/_react.default.createElement("div", {
@@ -1182,10 +1213,10 @@ var RChart = /*#__PURE__*/function (_Component) {
       }), /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-axis r-chart-axis-x",
         onMouseEnter: function onMouseEnter(e) {
-          _this2.zoomHover(e, 'x');
+          _this3.zoomHover(e, 'x');
         },
         onMouseLeave: function onMouseLeave(e) {
-          _this2.zoomHover(e, false);
+          _this3.zoomHover(e, false);
         }
       }, X.show !== false && xRange && /*#__PURE__*/_react.default.createElement(_rRangeSlider.default, _extends({}, this.slider, {
         start: xRange.start,
@@ -1209,7 +1240,7 @@ var RChart = /*#__PURE__*/function (_Component) {
         },
         ondrag: function ondrag(_ref11) {
           var points = _ref11.points;
-          return _this2.changeFilter(points[0].value, points[1].value, 'X');
+          return _this3.changeFilter(points[0].value, points[1].value, 'X');
         },
         onmousedown: this.zoomMouseDown.bind(this),
         onmouseup: this.zoomMouseUp.bind(this)
@@ -1273,15 +1304,15 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
   _createClass(RChartEdit, [{
     key: "render",
     value: function render() {
-      var _this$props5 = this.props,
-          type = _this$props5.type,
-          _onChange = _this$props5.onChange,
-          onClose = _this$props5.onClose,
-          mouseValue = _this$props5.mouseValue,
-          onAdd = _this$props5.onAdd,
-          onEdit = _this$props5.onEdit,
-          dataIndex = _this$props5.dataIndex,
-          value = _this$props5.value;
+      var _this$props6 = this.props,
+          type = _this$props6.type,
+          _onChange = _this$props6.onChange,
+          onClose = _this$props6.onClose,
+          mouseValue = _this$props6.mouseValue,
+          onAdd = _this$props6.onAdd,
+          onEdit = _this$props6.onEdit,
+          dataIndex = _this$props6.dataIndex,
+          value = _this$props6.value;
       var _this$context = this.context,
           data = _this$context.data,
           X = _this$context.X,

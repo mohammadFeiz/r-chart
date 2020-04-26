@@ -200,7 +200,7 @@ var RChartContext = createContext();
         var radius = PointRadius || pointRadius;
         if(radius){
           points.push({
-            r: radius,lineWidth:lineWidth * 2,x:xp,y:yp,fill,stroke:color,dataIndex:index,streamIndex:j,
+            r: radius,lineWidth:lineWidth * 2,x:xp,y:yp,fill,stroke:color,dataIndex:index,streamIndex:j,value:{x,y},
             event:{mousedown:this.pointMouseDown.bind(this)}
           })
         }
@@ -291,7 +291,7 @@ var RChartContext = createContext();
           barCounter++;
         } 
       }
-      this.elements = {arcs:points,rects};
+      this.elements = {arcs:points,rects}; 
       return xGridLines.concat(yGridLines,rects,areas,lines,points,xIndicator,yIndicator);
     }
     componentDidMount(){this.setState({})}
@@ -371,10 +371,19 @@ var RChartContext = createContext();
       else{this.onChange(data)}
     }
     mouseDown(){
-      var {add} = this.props;
+      var {add,data} = this.props;  
       if(!add || !add.enabled){return;}
+      var dataIndex;
+      var addableData = data.filter((d,i)=>{
+        for(let i = 0; i < d.stream.length; i++){
+          if(d.stream[i].x === this.mouseValue[0]){return false}
+        }
+        dataIndex = dataIndex === undefined?i:dataIndex;
+        return true;
+      })
+      if(addableData.length === 0){return;}
       this.SetState({
-        popup:{type:'Add Point',dataIndex:0,value:this.mouseValue[1],mouseValue:this.mouseValue}
+        popup:{type:'Add Point',dataIndex,value:this.mouseValue[1],mouseValue:this.mouseValue}
       })
     }
     setSetLimit(state){this.setLimit = state;}
@@ -424,7 +433,7 @@ var RChartContext = createContext();
       return (
         <RChartContext.Provider value={{data,X,Y}}>
         <div className='r-chart' ref={this.dom}>
-          <div className='r-chart-title'>
+          <div className='r-chart-title' style={{paddingLeft:yWidth + 'px'}}>
             {data.filter((d)=>d.title !== undefined).map((d,i)=>{
               let {color,title} = d;
               let style = !preventData[d.title]?{background:color}:{boxShadow:`inset 0 0 0 2px ${color}`};
@@ -465,6 +474,7 @@ var RChartContext = createContext();
                   if(index === Infinity){addIndex = stream.length;}
                   else if(index === -Infinity){addIndex = 0;}
                   else if(Array.isArray(index)){addIndex = index[1];}
+                  else{this.closePopup(); return;}
                   if(add.callback){
                     add.callback({object:addObject,dataIndex,streamIndex:addIndex})
                   } 
