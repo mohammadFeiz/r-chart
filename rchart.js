@@ -106,7 +106,6 @@ var RChartContext = createContext();
       approveCount = approveCount < 1 ? 1:approveCount;
       var labelStep = Math.floor(count / approveCount);
       labelStep = labelStep < 1 ? 1:labelStep;
-      console.log('labelStep',labelStep)
       return {
         start:fs - 0.5,step:labelStep,end:fe + 0.5,count,filter:filteredRange
       };
@@ -283,7 +282,7 @@ var RChartContext = createContext();
         if(chartType === 'line'){
           var result = this.getLineChart(stream,data[i],i);
           points = points.concat(result.points) 
-          lines = lines.concat(result.line) ;
+          lines = lines.concat(result.line) ; 
           areas = areas.concat(result.area);
         } 
         else if(chartType === 'bar' && barAxis){
@@ -292,6 +291,7 @@ var RChartContext = createContext();
           barCounter++;
         } 
       }
+      this.elements = {arcs:points,rects};
       return xGridLines.concat(yGridLines,rects,areas,lines,points,xIndicator,yIndicator);
     }
     componentDidMount(){this.setState({})}
@@ -424,7 +424,6 @@ var RChartContext = createContext();
       return (
         <RChartContext.Provider value={{data,X,Y}}>
         <div className='r-chart' ref={this.dom}>
-          {html && html(this.props)}
           <div className='r-chart-title'>
             {data.filter((d)=>d.title !== undefined).map((d,i)=>{
               let {color,title} = d;
@@ -488,7 +487,7 @@ var RChartContext = createContext();
                 label={this.getLabelConfig('y',Y)}
               />
             } 
-            {
+            { 
               Y.zoom && yFilter &&
               <RSlider direction='top' start={yFilter.start} end={yFilter.end} className='filterSlider'
                 points={[{value:yFilter.p1},{value:yFilter.p2,fillStyle:{width:'3px',background:'#eee'}}]}
@@ -501,6 +500,7 @@ var RChartContext = createContext();
             }
           </div> 
           <div className='r-chart-canvas'>
+            {html && html(this.elements,d)}
             <RCanvas 
               getSize={(width,height)=>{this.details.width = width; this.details.height = height;}} 
               axisPosition={['0%','100%']}

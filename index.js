@@ -306,7 +306,6 @@ var RChart = /*#__PURE__*/function (_Component) {
       approveCount = approveCount < 1 ? 1 : approveCount;
       var labelStep = Math.floor(count / approveCount);
       labelStep = labelStep < 1 ? 1 : labelStep;
-      console.log('labelStep', labelStep);
       return {
         start: fs - 0.5,
         step: labelStep,
@@ -724,6 +723,10 @@ var RChart = /*#__PURE__*/function (_Component) {
         }
       }
 
+      this.elements = {
+        arcs: points,
+        rects: rects
+      };
       return xGridLines.concat(yGridLines, rects, areas, lines, points, xIndicator, yIndicator);
     }
   }, {
@@ -1014,7 +1017,7 @@ var RChart = /*#__PURE__*/function (_Component) {
       }, /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart",
         ref: this.dom
-      }, html && html(this.props), /*#__PURE__*/_react.default.createElement("div", {
+      }, /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-title"
       }, data.filter(function (d) {
         return d.title !== undefined;
@@ -1148,7 +1151,7 @@ var RChart = /*#__PURE__*/function (_Component) {
         onmouseup: this.zoomMouseUp.bind(this)
       }, this.getZoomStyle('y')))), /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-canvas"
-      }, /*#__PURE__*/_react.default.createElement(_rCanvas.default, {
+      }, html && html(this.elements, d), /*#__PURE__*/_react.default.createElement(_rCanvas.default, {
         getSize: function getSize(width, height) {
           _this2.details.width = width;
           _this2.details.height = height;
