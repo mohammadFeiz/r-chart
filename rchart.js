@@ -1,4 +1,4 @@
-import React,{Component,createRef,createContext} from 'react';
+import React,{Component,createRef,createContext,Fragment} from 'react';
 import RSlider from 'r-range-slider';
 import RCanvas from 'r-canvas';
 import $ from 'jquery';
@@ -19,11 +19,6 @@ var RChartContext = createContext();
         preventData[d.title] = false;
       }
       this.state = {X,Y,prevx:JSON.stringify(X),prevy:JSON.stringify(Y),popup:false,preventData};
-      this.slider = {
-        style:{position:'absolute',left:0,top:0,width:'100%',height:'100%',padding:0},
-        lineStyle:{display:'none'},editable:false,showValue:false,
-        pointStyle:{display:'none'},className:'labelSlider'
-      }
       this.dom = createRef();
       this.details = {};
       $('body').on('mouseout','.r-chart-canvas',()=>{$('.r-chart-popup-container').html('')})
@@ -75,17 +70,19 @@ var RChartContext = createContext();
       var [min,max] = limit[axis];
       if(min === undefined || max === undefined){return false;}
       var range = max - min,i = 1;
+      var start,step,end;
       if(range === 0){
-        if(min < 0){return {start:2 * min,step:Math.abs(min),end:0,}}
-        else if(min > 0){return {start:0,step:min,end:2 * min,}}
-        else {return {start:-1,step:1,end:1}}
+        if(min < 0){start = 2 * min; step = Math.abs(min); end = 0;}
+        else if(min > 0){start = 0; step = min; end = 2 * min;}
+        else {start = -1; step = 1; end = 1;}
       }
-      while(range / 10 > 1){i *= 10; range /= 10;}
-      var step;
-      if(range >= 0 && range <= 3){step = 0.2 * i;}
-      else{step = i;}
-      var start = Math.round(min / step) * step - step;
-      var end = Math.round(max / step) * step + step;
+      else{
+        while(range / 10 > 1){i *= 10; range /= 10;}
+        if(range >= 0 && range <= 3){step = 0.2 * i;}
+        else{step = i;}
+        start = Math.round(min / step) * step - step;
+        end = Math.round(max / step) * step + step;
+      }
       var count = (end - start) / step; 
       var size = axis === 'x'?width:height; 
       var maxCount = size?Math.ceil(size / 60):10;
@@ -120,44 +117,6 @@ var RChartContext = createContext();
       this.getRangeTypeString('y',Y);
       return {x:xRange,y:yRange};
     }
-    getLabelConfig(axis,{rotate,labels}){
-      var {type,range} = this.details;
-      return {
-        rotate:axis === 'y'?0:rotate,
-        edit:type[axis] === 'string'?(value)=>labels[value]:undefined,
-        step:range[axis].step,
-        style:axis === 'x'?
-        {top:'24px',fontSize:'inherit'}:
-        {left:'unset',right:'16px',fontSize:'inherit',justifyContent:'flex-end'}
-      } 
-    }
-    binerySearch(array,value,field){
-      var sI = 0,eI = array.length - 1;
-      while(eI - sI > 1){
-        var midIndex = Math.floor((eI + sI) / 2);
-        var midValue = field(array[midIndex],array);
-        if(value === midValue){return midIndex;}
-        if(value < midValue){eI = midIndex;}
-        if(value > midValue){sI = midIndex;}
-      }
-      var endValue = field(array[eI],array);
-      var startValue = field(array[sI],array);
-      if(value === endValue){return eI}
-      if(value === startValue){return sI}
-      if(value > endValue){return Infinity}
-      if(value < startValue){return -Infinity}
-      return [sI,eI];
-    }
-    getZoomStyle(axis){
-      return {
-        style:axis === 'x'?
-        {position:'absolute',display:'none',width:'100%',height:'36px',padding:'0 12px',top:0}:
-        {position:'absolute',display:'none',width:'36px',height:'100%',padding:'12px 0',right:0},
-        lineStyle:{display:'none'},
-        pointStyle:{width:'16px',height:'16px',borderRadius:'100%',background:'#fff',border:'3px solid #eee'},
-        showValue:true
-      }
-    }
     eventHandler(selector, event, action,type = 'bind'){
       var me = { mousedown: "touchstart", mousemove: "touchmove", mouseup: "touchend" }; 
       event = this.touch ? me[event] : event;
@@ -173,10 +132,10 @@ var RChartContext = createContext();
       var {onChange} = this.props;
       onChange({data});
     }
-    getLineChart(stream,{fill = '#fff',color = '#000',pointRadius = 4,lineWidth = 2,area,dash},index){ 
+    getLineChart({stream,fill = '#fff',color = '#000',pointRadius = 4,lineWidth = 2,area,dash,title,editable},index){ 
       var points = [],line = {points:[],lineWidth,stroke:color,dash},Area;
       for(var j = 0; j < stream.length; j++){
-        var {x,y,pointRadius:PointRadius} = stream[j];  
+        let {x,y,pointRadius:PointRadius,lineWidth:LineWidth,fill:Fill} = stream[j];  
         //if(x === 'msf'){debugger;}
         var xp = this.getPercentByValue(x,'x'),yp = this.getPercentByValue(y,'y');
         if(xp === 'string error'){
@@ -200,7 +159,7 @@ var RChartContext = createContext();
         var radius = PointRadius || pointRadius;
         if(radius){
           points.push({
-            r: radius,lineWidth:lineWidth * 2,x:xp,y:yp,fill,stroke:color,dataIndex:index,streamIndex:j,value:{x,y},
+            r: radius,lineWidth:LineWidth || lineWidth * 2,x:xp,y:yp,fill:Fill || fill,stroke:color,dataIndex:index,streamIndex:j,value:{x,y},
             event:{mousedown:this.pointMouseDown.bind(this)}
           })
         }
@@ -211,9 +170,9 @@ var RChartContext = createContext();
         Area.points.splice(0,0,[line.points[0][0],0]);
         Area.points.push([line.points[line.points.length - 1][0],0]);
       }
-      return {points,line,area:area?Area:[]};
+      return {points,line,area:area?Area:[],type:'line',title,index,editable};
     }
-    getBarChart(stream,{color},barCounter,index){
+    getBarChart({color,title,editable},barCounter,index){
       var rects = [];
       var {barAxis,barCount,barWidth} = this.details;
       for(var j = 0; j < stream.length; j++){
@@ -239,14 +198,14 @@ var RChartContext = createContext();
         }
         else{
           rects.push({
-            width:xp + '%',height:barWidth + '%',y:yp,fill:color,
+            width:xp + '%',height:barWidth + '%',y:yp,fill:color,value:{x,y},
             pivot:[0,barWidth * (barCount / 2 - barCounter) + '%'],
             event:{mousedown:this.pointMouseDown.bind(this)},
             dataIndex:index,streamIndex:j
           })
         }
       }
-      return rects;
+      return {rects,type:'bar',title,index,editable};
     } 
     getGridLine(value,axis,{color = 'red',lineWidth = 0.7,dash}){
       var range = this.details.range[axis];
@@ -267,8 +226,8 @@ var RChartContext = createContext();
       return gridLines; 
     }
     getElements(){ 
-      var points = [],lines = [],rects = [],areas = []; 
-      var {data} = this.props;
+      var points = [],lines = [],rects = [],areas = [],Shapes = []; 
+      var {data,shapes} = this.props;
       var {X,Y,preventData} = this.state;
       var {barAxis} = this.details;
       var xGridLines = X.gridColor?this.getGridLines('x'):[];
@@ -276,23 +235,36 @@ var RChartContext = createContext();
       var xIndicator = X.indicator?[this.getGridLine(X.indicator.value,'x',X.indicator)]:[];
       var yIndicator = Y.indicator?[this.getGridLine(Y.indicator.value,'y',X.indicator)]:[];
       var barCounter = 0; 
+      this.data = [];
       for(var i = 0; i < data.length; i++){  
         let {title,stream,type:chartType = 'line',color = '#000'} = data[i];
         if(preventData[title]){continue;}
         if(chartType === 'line'){
-          var result = this.getLineChart(stream,data[i],i);
+          var result = this.getLineChart(data[i],i);
+          this.data.push(result);
           points = points.concat(result.points) 
           lines = lines.concat(result.line) ; 
           areas = areas.concat(result.area);
         } 
         else if(chartType === 'bar' && barAxis){
-          var result = this.getBarChart(stream,data[i],barCounter,i);
-          rects = rects.concat(result);
+          var result = this.getBarChart(data[i],barCounter,i);
+          this.data.push(result);
+          rects = rects.concat(result.rects);
           barCounter++;
         } 
       }
-      this.elements = {arcs:points,rects}; 
-      return xGridLines.concat(yGridLines,rects,areas,lines,points,xIndicator,yIndicator);
+      if(shapes){
+        var res = shapes();
+        for(var i = 0; i < res.length; i++){
+          let {element,x,y} = res[i];
+          let obj = {...element};
+          obj.x = this.getPercentByValue(x,'x') + '%';
+          obj.y = -this.getPercentByValue(y,'y') + '%'; 
+          Shapes.push(obj)  
+        }
+      }
+      this.elements = {arcs:points,rects};
+      return xGridLines.concat(yGridLines,rects,areas,lines,points,xIndicator,yIndicator,Shapes);
     }
     componentDidMount(){this.setState({})}
     getDetails(){
@@ -335,10 +307,9 @@ var RChartContext = createContext();
       this.SetState({[axis]:obj});
     } 
     pointMouseDown({dataIndex,streamIndex}){
-      let {data,edit} = this.props;
-      if(!edit || !edit.enabled){return;}
-      if(edit.callback){edit.callback({dataIndex,streamIndex}); return;}
-      let stream = data[dataIndex].stream[streamIndex];
+      let {data,edit,remove} = this.props;
+      if(data[dataIndex].stream[streamIndex].editable === false){return;}
+      if(!edit && !remove){return;}
       this.setSetLimit(false);
       this.eventHandler('window','mousemove',$.proxy(this.pointMouseMove,this))
       this.eventHandler('window','mouseup',$.proxy(this.pointMouseUp,this))
@@ -346,48 +317,106 @@ var RChartContext = createContext();
       this.moved = false;
     }
     pointMouseMove(){
-      var {data} = this.props,stream = data[this.so.dataIndex].stream[this.so.streamIndex];
+      var {data,edit} = this.props,stream = data[this.so.dataIndex].stream[this.so.streamIndex];
       if(!this.moved){
         if(Math.abs(this.mousePosition[1] - this.so.y) < 8){return;}
         if(stream.y === this.mouseValue[1]){return;}
       }
       this.moved = true;
-      stream.y = this.mouseValue[1];
-      this.onChange(data)
+      if(!edit){return;}
+      edit({dataIndex:this.so.dataIndex,streamIndex:this.so.streamIndex,value:this.mouseValue[1]})
     }
     pointMouseUp(){
       this.eventHandler('window','mousemove',this.pointMouseMove,'unbind')
       this.eventHandler('window','mouseup',this.pointMouseUp,'unbind');
       this.setSetLimit(true);
-      var {data} = this.props;
+      var {data,edit,remove} = this.props;
       if(!this.moved){
         var stream = data[this.so.dataIndex].stream[this.so.streamIndex];
+        var title = !edit?'Remove Point':'Edit Point';
         this.SetState({
-          popup:{type:'Edit Point',dataIndex:this.so.dataIndex,streamIndex:this.so.streamIndex,
-            value:stream.y,mouseValue:this.mouseValue
+          popup:{
+            dataIndex:this.so.dataIndex,streamIndex:this.so.streamIndex,
+            dynamicValue:stream.y,staticValue:this.mouseValue[0],
+            onEdit:edit,onRemove:remove,title
           }
         })
       }
-      else{this.onChange(data)}
+      else if(edit){edit({dataIndex:this.so.dataIndex,streamIndex:this.so.streamIndex,value:this.mouseValue[1]})}
     }
+    //کلیک روی بک گراند چارت
     mouseDown(){
-      var {add,data} = this.props;  
-      if(!add || !add.enabled){return;}
-      var dataIndex;
-      var addableData = data.filter((d,i)=>{
-        for(let i = 0; i < d.stream.length; i++){
-          if(d.stream[i].x === this.mouseValue[0]){return false}
+      var {add,multiselect,data} = this.props;
+      // اگر مد افزودن فعال بود و در موقعیت فعلی موس دیتا یا دیتا هایی آمادگی دریافت نقطه جدید در این موقعیت را داشتند
+      if(add && this.addDataIndexes.length){
+          this.SetState({
+            popup:{
+              dataIndexes:this.addDataIndexes,
+              dataIndex:this.addDataIndexes[0],
+              dynamicValue:this.mouseValue[1],
+              staticValue:this.mouseValue[0],
+              onAdd:add,title:'Add Point'
+            }
+          })
+      }
+      else if(multiselect){
+        this.multiselect = {};
+        this.multiselect.selectRect = $(this.dom.current).find('.r-chart-multiselect');
+        this.multiselect.selectRect.css({display:'block',left:this.mousePosition[2] + '%',width:'0%'})
+        this.eventHandler('window','mousemove',$.proxy(this.multiselectMove,this));
+        this.eventHandler('window','mouseup',$.proxy(this.multiselectUp,this));
+        this.multiselect.position = this.mousePosition[2];
+      }
+    }
+    multiselectMove(){
+      var m = this.multiselect,mp = this.mousePosition[2];
+      if(mp < m.position){m.end = m.position; m.start = mp;}
+      else{m.start = m.position; m.end = mp;}
+      m.selectRect.css({width:(m.end - m.start) + '%',left:m.start + '%'})
+    }
+    hideSelectRect(){
+      if(!this.multiselect || !this.multiselect.selectRect){return;}
+      this.multiselect.selectRect.css({display:'none'});
+    }
+    multiselectUp(){
+      var {multiselect} = this.props;
+      this.eventHandler('window','mousemove',this.multiselectMove,'unbind');
+      this.eventHandler('window','mouseup',this.multiselectUp,'unbind');
+      if(!this.multiselect.start || !this.multiselect.end || 
+      Math.abs(this.multiselect.start - this.multiselect.end) < 3) {this.hideSelectRect(); return;}
+      this.multiselect.points = this.getPointsBySelectRect();
+      if(this.multiselect.points.length === 0){
+        this.hideSelectRect();
+        return;
+      } 
+      this.setState({ 
+        popup:{
+          title:'Multi Select',
+          points:this.multiselect.points 
         }
-        dataIndex = dataIndex === undefined?i:dataIndex;
-        return true;
       })
-      if(addableData.length === 0){return;}
-      this.SetState({
-        popup:{type:'Add Point',dataIndex,value:this.mouseValue[1],mouseValue:this.mouseValue}
-      })
+    }
+    getPointsBySelectRect(){
+      var {preventData} = this.state;
+      var {start,end} = this.multiselect;
+      var result = [];
+      for(var i = 0; i < this.data.length; i++){
+        var {index,title,points,editable} = this.data[i];
+        if(editable === false){continue;}
+        if(preventData[title]){continue}
+        for(var j = 0; j < points.length; j++){
+          var x = parseFloat(points[j].x);
+          if(x < start || x > end){continue;}
+          result.push([index,j])
+        }
+      }
+      return result;
     }
     setSetLimit(state){this.setLimit = state;}
-    closePopup(){this.SetState({popup:false})}
+    closePopup(){
+      this.SetState({popup:false})
+      this.hideSelectRect();
+    }
     zoomHover(e,axis){
       e.stopPropagation();
       var {X = {},Y = {}} = this.state;
@@ -421,19 +450,21 @@ var RChartContext = createContext();
         labelSlider.show(); 
       }
     }
-    render(){
-      var {data,html,add} = this.props;  
-      var {X,Y,popup,preventData} = this.state; 
-      var {width:xWidth = 60,height:xHeight = 50} = X;
-      var {width:yWidth = 50} = Y;
-      this.getDetails(); 
-      var d = this.details;
-      var xType = d.type.x,yType = d.type.y,xRange = d.range.x,yRange = d.range.y;
-      var xFilter = xRange?xRange.filter:undefined,yFilter = yRange?yRange.filter:undefined,items = d.width?this.getElements():[];
+    getPopup(popup){
+      var {X,Y} = this.state,{data,add,edit,remove} = this.props,d = this.details;
+      var xType = d.type.x,yType = d.type.y;
+      return <RChartEdit {...popup} 
+        onChange={(obj)=>{
+          for(let prop in obj){popup[prop] = obj[prop]}
+          this.SetState({popup});
+        }}
+        onClose={this.closePopup.bind(this)} 
+      />
+    }
+    getHeader(yWidth){
+      var {data} = this.props,{preventData} = this.state;
       return (
-        <RChartContext.Provider value={{data,X,Y}}>
-        <div className='r-chart' ref={this.dom}>
-          <div className='r-chart-title' style={{paddingLeft:yWidth + 'px'}}>
+        <div className='r-chart-title' style={{paddingLeft:yWidth + 'px'}}>
             {data.filter((d)=>d.title !== undefined).map((d,i)=>{
               let {color,title} = d;
               let style = !preventData[d.title]?{background:color}:{boxShadow:`inset 0 0 0 2px ${color}`};
@@ -449,156 +480,283 @@ var RChartContext = createContext();
               )
             })}
           </div>
-        <div className='r-chart-container' style={this.getStyle(yWidth,xHeight)}>
-          <div className='r-chart-popup-container'></div>
-          {
-            popup !== false &&
-            <RChartEdit {...popup} 
-              onChange={(obj)=>{
-                for(let prop in obj){popup[prop] = obj[prop]}
-                this.SetState({popup});
-              }}
-              onClose={this.closePopup.bind(this)} 
-              onEdit={()=>{
-                let {dataIndex,streamIndex,value} = popup;
-                data[dataIndex].stream[streamIndex].y = value;
-                this.onChange(data)
-                this.closePopup();
-              }}
-              onAdd={()=>{
-                var {dataIndex,mouseValue,value} = popup; 
-                var stream = data[dataIndex].stream
-                if(xType === 'string'){
-                  var addObject = {x:mouseValue[0],y:value},addIndex;
-                  var index = this.binerySearch(stream,X.labels.indexOf(this.mouseValue[0]),(m)=>X.labels.indexOf(m.x))
-                  if(index === Infinity){addIndex = stream.length;}
-                  else if(index === -Infinity){addIndex = 0;}
-                  else if(Array.isArray(index)){addIndex = index[1];}
-                  else{this.closePopup(); return;}
-                  if(add.callback){
-                    add.callback({object:addObject,dataIndex,streamIndex:addIndex})
-                  } 
-                  else{ 
-                    stream.splice(addIndex,0,addObject) 
-                    this.onChange(data)
-                  }
-                }
-                this.closePopup();
-              }}
-              onRemove={()=>{ 
-              }}
-            />
-          }
-          <div className='r-chart-axis r-chart-axis-y' 
-            onMouseEnter={(e)=>{this.zoomHover(e,'y')}} onMouseLeave={(e)=>{this.zoomHover(e,false)}}> 
-            {
-              Y.show !== false && yRange &&
-              <RSlider {...this.slider} direction='top' start={yRange.start} end={yRange.end}
-                label={this.getLabelConfig('y',Y)}
-              />
-            } 
-            { 
-              Y.zoom && yFilter &&
-              <RSlider direction='top' start={yFilter.start} end={yFilter.end} className='filterSlider'
-                points={[{value:yFilter.p1},{value:yFilter.p2,fillStyle:{width:'3px',background:'#eee'}}]}
-                editValue={(point)=>yType === 'string'?Y.labels[point.value]:point.value}
-                ondrag={({points})=>this.changeFilter(points[0].value,points[1].value,'Y')}
-                onmousedown={this.zoomMouseDown.bind(this)}
-                onmouseup={this.zoomMouseUp.bind(this)}
-                {...this.getZoomStyle('y')}
-              />
-            }
-          </div> 
-          <div className='r-chart-canvas'>
-            {html && html(this.elements,d)}
-            <RCanvas 
-              getSize={(width,height)=>{this.details.width = width; this.details.height = height;}} 
-              axisPosition={['0%','100%']}
-              items={items}
-              mouseMove={(e,[x,y,px,py])=>{
-                this.mousePosition = [x,y,px,py];
-                this.popupPosition = [x + yWidth,d.height + y];
-                this.mouseValue = [this.getValueByPercent(px,'x'),this.getValueByPercent(-py,'y')]
-                var container = $(this.dom.current).find('.r-chart-popup-container');
-                var popup = container.find('.r-chart-popup');
-                container.css({left:this.popupPosition[0],top:this.popupPosition[1]});
-                container.html('<div class="r-chart-popup">' + this.mouseValue[0]  + '  ' + this.mouseValue[1] + '</div>');
-              }}
-              mouseDown={this.mouseDown.bind(this)}
-            />
+      )
+    }
+    getLabelSlider(axis){
+      var type = this.details.type[axis],{start,end,step} = this.details.range[axis]; 
+      var labelStyle = {x:{top:'24px'},y:{left:'unset',right:'16px',justifyContent:'flex-end'}};
+      var {rotate = 0,labels} = this.state[axis.toUpperCase()];
+      return (
+        <RSlider 
+          className='labelSlider' editable={false} showValue={false}
+          style={{position:'absolute',left:0,top:0,width:'100%',height:'100%',padding:0}}
+          pointStyle={{display:'none'}} lineStyle={{display:'none'}}
+          direction={axis === 'x'?'right':'top'} start={start} end={end}
+          label={{
+            step,rotate:axis === 'y'?0:rotate,
+            edit:type === 'string'?(value)=>labels[value]:undefined,
+            style:{fontSize:'inherit',...labelStyle[axis]}
+          }}
+        />
+      ) 
+    }
+    getFilterSlider(axis){  
+      var {labels} = this.state[axis.toUpperCase()]; 
+      var type = this.details.type[axis],{p1,p2,start,end} = this.details.range[axis].filter;
+      var points = [{value:p1},{value:p2,fillStyle:{[axis === 'y'?'width':'height']:'3px',background:'#eee'}}]
+      var style = {
+        x:{width:'100%',height:'36px',padding:'0 12px',top:0},
+        y:{width:'36px',height:'100%',padding:'12px 0',right:0}
+      }
+      return (
+        <RSlider direction={axis === 'x'?'right':'top'} start={start} end={end} className='filterSlider'
+          points={points}
+          editValue={(point)=>type === 'string'?labels[point.value]:point.value} 
+          ondrag={({points})=>this.changeFilter(points[0].value,points[1].value,axis.toUpperCase())}
+          onmousedown={this.zoomMouseDown.bind(this)} 
+          onmouseup={this.zoomMouseUp.bind(this)}
+          style={{position:'absolute',display:'none',...style[axis]}}
+          lineStyle={{display:'none'}}
+          pointStyle={{width:'16px',height:'16px',borderRadius:'100%',background:'#fff',border:'3px solid #eee'}}
+          showValue={true}
+        />
+      )
+    }
+    getStreamIndexByLabel({stream},label){
+      for(let j = 0; j < stream.length; j++){if(stream[j].x === label){return j}}
+      return false;
+    }
+    getAddableDataIndexes(label){
+      var {data} = this.props;
+      var indexes = [];
+      for(var i = 0; i < data.length; i++){
+        var {editable} = data[i];
+        if(editable === false){continue;}
+        if(this.getStreamIndexByLabel(data[i],label) === false){
+          indexes.push(i);
+        }
+      }
+      return indexes;
+    }
+    render(){
+      var {data,html,add,multiselect} = this.props;  
+      var {X,Y,popup,preventData} = this.state; 
+      var {width:xWidth = 60,height:xHeight = 50} = X;
+      var {width:yWidth = 50} = Y;
+      this.getDetails(); 
+      var d = this.details;
+      var xRange = d.range.x,yRange = d.range.y;
+      var items = d.width?this.getElements():[];
+      return (
+        <RChartContext.Provider value={{data,X,Y,multiselect}}>
+          <div className='r-chart' ref={this.dom}>
+            {this.getHeader(yWidth)}
+            <div className='r-chart-container' style={this.getStyle(yWidth,xHeight)}>
+              <div className='r-chart-popup-container'></div>
+              {popup !== false && this.getPopup(popup)}
+              <div className='r-chart-axis r-chart-axis-y' 
+                onMouseEnter={(e)=>{this.zoomHover(e,'y')}} onMouseLeave={(e)=>{this.zoomHover(e,false)}}> 
+                {Y.show !== false && yRange && this.getLabelSlider('y')} 
+                {Y.zoom && yRange && this.getFilterSlider('y')}
+              </div> 
+              <div className='r-chart-canvas'>
+                {html && html(this.elements,d)} 
+                <div className='r-chart-multiselect'></div>
+                <RCanvas 
+                  getSize={(width,height)=>{this.details.width = width; this.details.height = height;}} 
+                  axisPosition={['0%','100%']}
+                  items={items}
+                  mouseMove={(e,[x,y,px,py])=>{
+                    this.mousePosition = [x,y,px,py];
+                    this.popupPosition = [x + yWidth,d.height + y];
+                    this.mouseValue = [this.getValueByPercent(px,'x'),this.getValueByPercent(-py,'y')];
+                    var addIndicator = '';
+                    this.addDataIndexes = false;
+                    if(add){
+                      this.addDataIndexes = this.getAddableDataIndexes(this.mouseValue[0]);
+                      addIndicator = this.addDataIndexes.length?`<div class="add-indicator" style="background:${data[this.addDataIndexes[0]].color}">+</div>`:''
+                    }
+                    var container = $(this.dom.current).find('.r-chart-popup-container');
+                    var popup = container.find('.r-chart-popup');
+                    container.css({left:this.popupPosition[0],top:this.popupPosition[1]});
+                    container.html('<div class="r-chart-popup">' + addIndicator + this.mouseValue[0]  + '  ' + this.mouseValue[1] + '</div>');
+                  }}
+                  mouseDown={this.mouseDown.bind(this)}
+                />
+              </div>
+              <div className='r-chart-corner'></div>
+              <div className='r-chart-axis r-chart-axis-x' onMouseEnter={(e)=>{this.zoomHover(e,'x')}} onMouseLeave={(e)=>{this.zoomHover(e,false)}}>
+                {X.show !== false && xRange && this.getLabelSlider('x')}
+                {X.zoom && xRange && this.getFilterSlider('x')}
+              </div>  
+            </div>
           </div>
-          <div className='r-chart-corner'></div>
-          <div className='r-chart-axis r-chart-axis-x' 
-            onMouseEnter={(e)=>{this.zoomHover(e,'x')}} onMouseLeave={(e)=>{this.zoomHover(e,false)}}>
-            {
-              X.show !== false && xRange && 
-              <RSlider {...this.slider} start={xRange.start} end={xRange.end}
-                label={this.getLabelConfig('x',X)} 
-              />
-            }
-            {
-              X.zoom && xFilter &&
-              <RSlider start={xFilter.start} end={xFilter.end} className='filterSlider'
-                points={[{value:xFilter.p1},{value:xFilter.p2,fillStyle:{height:'3px',background:'#eee'}}]}
-                editValue={(point)=>xType === 'string'?X.labels[point.value]:point.value}
-                ondrag={({points})=>this.changeFilter(points[0].value,points[1].value,'X')}
-                onmousedown={this.zoomMouseDown.bind(this)}
-                onmouseup={this.zoomMouseUp.bind(this)}
-                {...this.getZoomStyle('x')}
-              />
-            }
-          </div>  
-        </div>
-        </div>
         </RChartContext.Provider>
       )
     }
   }
- RChart.defaultProps = {
-    data:[],X:{},Y:{}
- }
+ RChart.defaultProps = {data:[],X:{},Y:{}}
 
  class RChartEdit extends Component{
    static contextType = RChartContext;
-
-
+   binerySearch(array,value,field){
+    var sI = 0,eI = array.length - 1;
+    while(eI - sI > 1){
+      var midIndex = Math.floor((eI + sI) / 2);
+      var midValue = field(array[midIndex],array);
+      if(value === midValue){return midIndex;}
+      if(value < midValue){eI = midIndex;}
+      if(value > midValue){sI = midIndex;}
+    }
+    var endValue = field(array[eI],array);
+    var startValue = field(array[sI],array);
+    if(value === endValue){return eI}
+    if(value === startValue){return sI}
+    if(value > endValue){return Infinity}
+    if(value < startValue){return -Infinity}
+    return [sI,eI];
+  }
    render(){
-     var {type,onChange,onClose,mouseValue,onAdd,onEdit,dataIndex,value,} = this.props;
-     var {data,X,Y} = this.context;
+     var {points,title,onChange,onClose,onAdd,onEdit,onRemove,dataIndex,streamIndex,dynamicValue,staticValue,dataIndexes} = this.props;
+     var {data,X,Y,multiselect = {}} = this.context;
+     var {items = [],actions = []} = multiselect;
      return (
        <div className='r-chart-edit'>
           <div className='r-chart-edit-backdrop'></div>
           <div className='r-chart-edit-header'>
-            <div className='r-chart-edit-title'>{type}</div>
+            <div className='r-chart-edit-title'>{title}</div>
             <div className='r-chart-edit-close' onClick={onClose}></div>
           </div>
           <div className='r-chart-edit-item'>
             <div className='r-chart-edit-data-name'>
-              <div style={{background:data[dataIndex].color}}></div>
-              <select value={dataIndex} onChange={(e)=>onChange({dataIndex:e.target.value})}>
+              <div className='r-chart-edit-data-list'>
                 {
-                  type === 'Add Point' &&
-                  data.map((d,i)=><option key={i} value={i}>{d.title || 'untitle'}</option>)
+                  onAdd &&
+                  dataIndexes.map((index)=>{
+                    return (
+                      <div 
+                        onClick={()=>onChange({dataIndex:index})}
+                        className={`r-chart-edit-data-list-item${dataIndex === index?' active':''}`} 
+                        key={index} 
+                        style={{color:data[index].color,background:data[index].color}} 
+                      ></div>
+                    )
+                  })
                 }
                 {
-                  type === 'Edit Point' &&
-                  <option key={dataIndex} value={dataIndex}>{data[dataIndex].title || 'untitle'}</option>
+                  onEdit &&
+                  <div 
+                    className='r-chart-edit-data-list-item active' 
+                    key={dataIndex} 
+                    style={{color:data[dataIndex].color,background:data[dataIndex].color}} 
+                  ></div>
                 }
-              </select>
+              </div>
+              
+              
             </div>
-            <div className='r-chart-edit-form'>
-              <div className="r-chart-edit-label">{(X.title || 'X untitle') + ' : '}</div>
-              <div className="r-chart-detail-value">{mouseValue[0]}</div>
+            {
+              (onAdd || onEdit || onRemove) &&
+              <Fragment>
+                <div className='r-chart-edit-form'>
+                  <div className="r-chart-edit-label">{(X.title || 'X untitle') + ' : '}</div>
+                  <div className="r-chart-detail-value">{staticValue}</div>
+                </div>
+                <div className='r-chart-edit-form'>
+                  <div className="r-chart-edit-label">{(Y.title || 'Y untitle') + ' : '}</div>
+                  <input 
+                    className='r-chart-edit-value' type='number' value={dynamicValue} 
+                    onChange={(e)=>{
+                      if(!onEdit && !onAdd){return;}
+                      onChange({dynamicValue:e.target.value})
+                    }}
+                  />
+                </div>
+              </Fragment>
+            }
+            {
+              items.length > 0 &&
+              <Fragment>
+                {
+                  items.filter((item)=>item.show !== false).map((item)=>{
+                    return ( 
+                      <div className='r-chart-edit-form'>
+                      <div className="r-chart-edit-label">{item.title}</div>
+                      {
+                        item.type === 'number' &&
+                        <input className='r-chart-edit-value' type='number' value={item.value} onChange={(e)=>{
+                          let value = parseFloat(e.target.value);
+                          item.onChange(value)
+                        }}/>      
+                      }
+                      {
+                        item.type === 'select' && 
+                        <select  
+                          className='r-chart-edit-value' 
+                          title={item.value}
+                          onChange={({nativeEvent})=>{
+                            var {selectedIndex,options} = nativeEvent.target;
+                            var {text,value} = options[selectedIndex];
+                            item.onChange({index:selectedIndex,text,value})
+                          }} 
+                          defaultValue={item.value}>
+                          {item.options.map((o)=><option value={o.value}>{o.text}</option>)}
+                        </select>        
+                      } 
+                      {
+                        item.type === 'checkbox' &&
+                        <input type='checkbox' value={item.value}/>
+                      }
+                    </div>      
+                    )
+                  })
+                }
+              </Fragment>
+            }
+          </div> 
+          <div className='r-chart-edit-footer'>
+              <button className='r-chart-edit-button' onClick={onClose} style={{flex:1}}>Close</button>
+                {
+                  actions.filter((a)=>a.show !== false).map((a,i)=>{
+                    return (
+                      <button key={i} 
+                        className='r-chart-edit-button' 
+                        onClick={()=>{a.callback(points); onClose();}}
+                      >{a.text}</button>    
+                    )
+                  }) 
+                }
+                {
+                  onAdd && 
+                  <button 
+                    className='r-chart-edit-button' 
+                    onClick={()=>{
+                      let streamIndex;
+                      let stream = data[dataIndex].stream;
+                      var index = this.binerySearch(stream,X.labels.indexOf(staticValue),(m)=>X.labels.indexOf(m.x))
+                      if(index === Infinity){streamIndex = stream.length;}
+                      else if(index === -Infinity){streamIndex = 0;}
+                      else if(Array.isArray(index)){streamIndex = index[1];}
+                      onAdd({dataIndex,streamIndex,object:{x:staticValue,y:dynamicValue}}); 
+                      onClose();
+                    }}
+                  >Add</button>
+                }
+                {
+                  onRemove &&
+                  <button 
+                    className='r-chart-edit-button' 
+                    onClick={()=>{onRemove({dataIndex,streamIndex}); onClose();}}
+                  >Remove</button>
+                }
+                {
+                  onEdit &&
+                  <button 
+                    className='r-chart-edit-button' 
+                    onClick={()=>{onEdit({dataIndex,streamIndex,value:dynamicValue}); onClose();}}
+                  >Edit</button>
+                } 
             </div>
-            <div className='r-chart-edit-form'>
-              <div className="r-chart-edit-label">{(Y.title || 'Y untitle') + ' : '}</div>
-              <input 
-                className='r-chart-edit-value' type='number' value={value} 
-                onChange={(e)=>onChange({value:e.target.value})}
-              />
-            </div>
-            <button className='r-chart-edit-button' onClick={type === 'Add Point'?onAdd:onEdit}>{type}</button>
-          </div>
         </div>
      )
    }
