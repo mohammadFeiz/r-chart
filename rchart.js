@@ -8,6 +8,7 @@ var RChartContext = createContext();
  export default class RChart extends Component{
     constructor(props){
       super(props);
+      this.mouseDownDetail = {};
       var {X,Y,x,y,data} = this.props;
       if(x){console.error('RChart error => you set x props for RChart. did you mean X')}
       if(y){console.error('RChart error => you set y props for RChart. did you mean Y')}
@@ -290,16 +291,19 @@ var RChartContext = createContext();
         this.getValueByPercent = (p,axis)=>{
           if(!d.range[axis]){return '';}
           let {start,end} = d.range[axis],Value = (end - start) * p / 100;
-          if(d.type[axis] === 'number'){return Math.round(Value + start)}
+          if(d.type[axis] === 'number'){return parseFloat((Value + start).toFixed(2))}
           else{return (axis === 'x'?X:Y).labels[Math.round(Value - 0.5)]}
         }
       } //نوع چارت و تابع گرفتن درصد با مقدار یکبار تایین می شود
-      if(this.setLimit !== false){this.details.limit = this.getLimit(data,X,Y);}  
+      if(this.mouseDownDetail.target !== 'point'){this.details.limit = this.getLimit(data,X,Y);}  
       this.details.range = this.getRange(X,Y); 
       d.barCount = data.filter((d)=>d.type === 'bar').length;
       if(d.barAxis){
         d.barWidth = barWidth / d.range[d.barAxis].count/d.barCount;
       }
+    }
+    getPixedlByValue(value,axis){
+      return this.getPercentByValue(value,axis) * this.details[axis === 'x'?'width':'height'] / 100;
     }
     changeFilter(p1,p2,axis){
       var obj = JSON.parse(JSON.stringify(this.state[axis])) 
@@ -308,9 +312,10 @@ var RChartContext = createContext();
     } 
     pointMouseDown({dataIndex,streamIndex}){
       let {data,edit,remove} = this.props;
-      if(data[dataIndex].stream[streamIndex].editable === false){return;}
+      if(data[dataIndex].editable === false){return;}
       if(!edit && !remove){return;}
-      this.setSetLimit(false);
+      var stream = data[dataIndex].stream[streamIndex];
+      this.mouseDownDetail = {target:'point',x:stream.x,y:stream.y};
       this.eventHandler('window','mousemove',$.proxy(this.pointMouseMove,this))
       this.eventHandler('window','mouseup',$.proxy(this.pointMouseUp,this))
       this.so = {dataIndex,streamIndex,y:this.mousePosition[1]}; 
@@ -329,14 +334,16 @@ var RChartContext = createContext();
     pointMouseUp(){
       this.eventHandler('window','mousemove',this.pointMouseMove,'unbind')
       this.eventHandler('window','mouseup',this.pointMouseUp,'unbind');
-      this.setSetLimit(true);
+      this.mouseDownDetail = {};
       var {data,edit,remove} = this.props;
       if(!this.moved){
         var stream = data[this.so.dataIndex].stream[this.so.streamIndex];
         var title = !edit?'Remove Point':'Edit Point';
+        var d = data[this.so.dataIndex];
         this.SetState({
           popup:{
             dataIndex:this.so.dataIndex,streamIndex:this.so.streamIndex,
+            dataIndexes:[this.so.dataIndex],
             dynamicValue:stream.y,staticValue:this.mouseValue[0],
             onEdit:edit,onRemove:remove,title
           }
@@ -351,11 +358,12 @@ var RChartContext = createContext();
       if(add && this.addDataIndexes.length){
           this.SetState({
             popup:{
+              type:'add',
               dataIndexes:this.addDataIndexes,
               dataIndex:this.addDataIndexes[0],
               dynamicValue:this.mouseValue[1],
               staticValue:this.mouseValue[0],
-              onAdd:add,title:'Add Point'
+              onAdd:add,title:'Add Point',
             }
           })
       }
@@ -391,6 +399,7 @@ var RChartContext = createContext();
       } 
       this.setState({ 
         popup:{
+          type:'multiselect',
           title:'Multi Select',
           points:this.multiselect.points 
         }
@@ -412,7 +421,6 @@ var RChartContext = createContext();
       }
       return result;
     }
-    setSetLimit(state){this.setLimit = state;}
     closePopup(){
       this.SetState({popup:false})
       this.hideSelectRect();
@@ -539,7 +547,7 @@ var RChartContext = createContext();
       return indexes;
     }
     render(){
-      var {data,html,add,multiselect} = this.props;  
+      var {data,html,add,multiselect,style} = this.props;  
       var {X,Y,popup,preventData} = this.state; 
       var {width:xWidth = 60,height:xHeight = 50} = X;
       var {width:yWidth = 50} = Y;
@@ -549,7 +557,7 @@ var RChartContext = createContext();
       var items = d.width?this.getElements():[];
       return (
         <RChartContext.Provider value={{data,X,Y,multiselect}}>
-          <div className='r-chart' ref={this.dom}>
+          <div className='r-chart' ref={this.dom} style={style}>
             {this.getHeader(yWidth)}
             <div className='r-chart-container' style={this.getStyle(yWidth,xHeight)}>
               <div className='r-chart-popup-container'></div>
@@ -568,18 +576,23 @@ var RChartContext = createContext();
                   items={items}
                   mouseMove={(e,[x,y,px,py])=>{
                     this.mousePosition = [x,y,px,py];
-                    this.popupPosition = [x + yWidth,d.height + y];
                     this.mouseValue = [this.getValueByPercent(px,'x'),this.getValueByPercent(-py,'y')];
+                    console.log(this.mouseValue)
+                    var xValue = this.mouseDownDetail.target === 'point'?this.mouseDownDetail.x:this.mouseValue[0];
+                    this.popupPosition = [
+                      this.getPixedlByValue(xValue,'x') + yWidth,
+                      d.height + y
+                    ]; 
                     var addIndicator = '';
                     this.addDataIndexes = false;
-                    if(add){
+                    if(add && this.mouseDownDetail.target !== 'point'){
                       this.addDataIndexes = this.getAddableDataIndexes(this.mouseValue[0]);
                       addIndicator = this.addDataIndexes.length?`<div class="add-indicator" style="background:${data[this.addDataIndexes[0]].color}">+</div>`:''
                     }
                     var container = $(this.dom.current).find('.r-chart-popup-container');
                     var popup = container.find('.r-chart-popup');
                     container.css({left:this.popupPosition[0],top:this.popupPosition[1]});
-                    container.html('<div class="r-chart-popup">' + addIndicator + this.mouseValue[0]  + '  ' + this.mouseValue[1] + '</div>');
+                    container.html('<div class="r-chart-popup">' + addIndicator + xValue  + '  ' + this.mouseValue[1] + '</div>');
                   }}
                   mouseDown={this.mouseDown.bind(this)}
                 />
@@ -599,6 +612,10 @@ var RChartContext = createContext();
 
  class RChartEdit extends Component{
    static contextType = RChartContext;
+   constructor(props){
+     super(props);
+     this.dom = createRef();
+   }
    binerySearch(array,value,field){
     var sI = 0,eI = array.length - 1;
     while(eI - sI > 1){
@@ -616,107 +633,94 @@ var RChartContext = createContext();
     if(value < startValue){return -Infinity}
     return [sI,eI];
   }
+  componentDidMount(){
+    $(this.dom.current).find('input').eq(0).focus().select();
+  }
    render(){
-     var {points,title,onChange,onClose,onAdd,onEdit,onRemove,dataIndex,streamIndex,dynamicValue,staticValue,dataIndexes} = this.props;
+     var {points,type,title,onChange,onClose,onAdd,onEdit,onRemove,dataIndex,streamIndex,dynamicValue,staticValue,dataIndexes = []} = this.props;
      var {data,X,Y,multiselect = {}} = this.context;
      var {items = [],actions = []} = multiselect;
      return (
-       <div className='r-chart-edit'>
+       <div className='r-chart-edit' ref={this.dom}>
           <div className='r-chart-edit-backdrop'></div>
           <div className='r-chart-edit-header'>
             <div className='r-chart-edit-title'>{title}</div>
             <div className='r-chart-edit-close' onClick={onClose}></div>
           </div>
-          <div className='r-chart-edit-item'>
-            <div className='r-chart-edit-data-name'>
-              <div className='r-chart-edit-data-list'>
-                {
-                  onAdd &&
-                  dataIndexes.map((index)=>{
-                    return (
-                      <div 
-                        onClick={()=>onChange({dataIndex:index})}
-                        className={`r-chart-edit-data-list-item${dataIndex === index?' active':''}`} 
-                        key={index} 
-                        style={{color:data[index].color,background:data[index].color}} 
-                      ></div>
-                    )
-                  })
-                }
-                {
-                  onEdit &&
-                  <div 
-                    className='r-chart-edit-data-list-item active' 
-                    key={dataIndex} 
-                    style={{color:data[dataIndex].color,background:data[dataIndex].color}} 
-                  ></div>
-                }
-              </div>
-              
-              
+          <div className='r-chart-edit-body'>
+            <div className='r-chart-edit-data-list'>
+              {
+                dataIndexes.map((index)=>{
+                  return (
+                    <div 
+                      onClick={()=>onChange({dataIndex:index})}
+                      className={`r-chart-edit-data-list-item${dataIndex === index?' active':''}`} 
+                      key={index} 
+                      style={{color:data[index].color,background:data[index].color}} 
+                    ></div>
+                  )
+                })
+              }
             </div>
             {
-              (onAdd || onEdit || onRemove) &&
-              <Fragment>
-                <div className='r-chart-edit-form'>
-                  <div className="r-chart-edit-label">{(X.title || 'X untitle') + ' : '}</div>
-                  <div className="r-chart-detail-value">{staticValue}</div>
-                </div>
-                <div className='r-chart-edit-form'>
-                  <div className="r-chart-edit-label">{(Y.title || 'Y untitle') + ' : '}</div>
-                  <input 
-                    className='r-chart-edit-value' type='number' value={dynamicValue} 
-                    onChange={(e)=>{
-                      if(!onEdit && !onAdd){return;}
-                      onChange({dynamicValue:e.target.value})
-                    }}
-                  />
-                </div>
-              </Fragment>
+              staticValue !== undefined &&
+              <div className='r-chart-edit-form'>
+                <div className="r-chart-edit-label">{(X.title || 'X untitle') + ' : '}</div>
+                <div className="r-chart-detail-value">{staticValue}</div>
+              </div>
             }
             {
-              items.length > 0 &&
-              <Fragment>
-                {
-                  items.filter((item)=>item.show !== false).map((item)=>{
-                    return ( 
-                      <div className='r-chart-edit-form'>
-                      <div className="r-chart-edit-label">{item.title}</div>
-                      {
-                        item.type === 'number' &&
-                        <input className='r-chart-edit-value' type='number' value={item.value} onChange={(e)=>{
-                          let value = parseFloat(e.target.value);
-                          item.onChange(value)
-                        }}/>      
-                      }
-                      {
-                        item.type === 'select' && 
-                        <select  
-                          className='r-chart-edit-value' 
-                          title={item.value}
-                          onChange={({nativeEvent})=>{
-                            var {selectedIndex,options} = nativeEvent.target;
-                            var {text,value} = options[selectedIndex];
-                            item.onChange({index:selectedIndex,text,value})
-                          }} 
-                          defaultValue={item.value}>
-                          {item.options.map((o)=><option value={o.value}>{o.text}</option>)}
-                        </select>        
-                      } 
-                      {
-                        item.type === 'checkbox' &&
-                        <input type='checkbox' value={item.value}/>
-                      }
-                    </div>      
-                    )
-                  })
-                }
-              </Fragment>
+              dynamicValue !== undefined &&
+              <div className='r-chart-edit-form'>
+                <div className="r-chart-edit-label">{(Y.title || 'Y untitle') + ' : '}</div>
+                <input 
+                  className='r-chart-edit-value' type='number' value={dynamicValue} 
+                  onChange={(e)=>{
+                    if(!onEdit && !onAdd){return;}
+                    onChange({dynamicValue:e.target.value})
+                  }}
+                />
+              </div>
+            }
+            {
+              type === 'multiselect' &&
+              items.filter((item)=>item.show !== false).map((item,i)=>{
+                return ( 
+                  <div key={i} className='r-chart-edit-form'>
+                    <div className="r-chart-edit-label">{item.title}</div> 
+                    {
+                      item.type === 'number' &&
+                      <input className='r-chart-edit-value' type='number' value={item.value} onChange={(e)=>{
+                        let value = parseFloat(e.target.value);
+                        item.onChange(value)
+                      }}/>      
+                    }
+                    {
+                      item.type === 'select' && 
+                      <select  
+                        className='r-chart-edit-value' 
+                        title={item.value}
+                        onChange={({nativeEvent})=>{
+                          var {selectedIndex,options} = nativeEvent.target;
+                          var {text,value} = options[selectedIndex];
+                          item.onChange({index:selectedIndex,text,value})
+                        }} 
+                        defaultValue={item.value}>
+                        {item.options.map((o,i)=><option key={i} value={o.value}>{o.text}</option>)}
+                      </select>        
+                    } 
+                    {
+                      item.type === 'checkbox' &&
+                      <input type='checkbox' value={item.value} onChange={(e)=>item.onChange(e.target.checked)}/>
+                    }
+                  </div>      
+                )
+              })
             }
           </div> 
           <div className='r-chart-edit-footer'>
               <button className='r-chart-edit-button' onClick={onClose} style={{flex:1}}>Close</button>
-                {
+                { type === 'multiselect' &&
                   actions.filter((a)=>a.show !== false).map((a,i)=>{
                     return (
                       <button key={i} 

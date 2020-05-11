@@ -74,6 +74,7 @@ var RChart = /*#__PURE__*/function (_Component) {
     _classCallCheck(this, RChart);
 
     _this = _super.call(this, props);
+    _this.mouseDownDetail = {};
     var _this$props = _this.props,
         X = _this$props.X,
         Y = _this$props.Y,
@@ -708,7 +709,7 @@ var RChart = /*#__PURE__*/function (_Component) {
               Value = (end - start) * p / 100;
 
           if (d.type[axis] === 'number') {
-            return Math.round(Value + start);
+            return parseFloat((Value + start).toFixed(2));
           } else {
             return (axis === 'x' ? X : Y).labels[Math.round(Value - 0.5)];
           }
@@ -716,7 +717,7 @@ var RChart = /*#__PURE__*/function (_Component) {
       } //نوع چارت و تابع گرفتن درصد با مقدار یکبار تایین می شود
 
 
-      if (this.setLimit !== false) {
+      if (this.mouseDownDetail.target !== 'point') {
         this.details.limit = this.getLimit(data, X, Y);
       }
 
@@ -728,6 +729,11 @@ var RChart = /*#__PURE__*/function (_Component) {
       if (d.barAxis) {
         d.barWidth = barWidth / d.range[d.barAxis].count / d.barCount;
       }
+    }
+  }, {
+    key: "getPixedlByValue",
+    value: function getPixedlByValue(value, axis) {
+      return this.getPercentByValue(value, axis) * this.details[axis === 'x' ? 'width' : 'height'] / 100;
     }
   }, {
     key: "changeFilter",
@@ -746,7 +752,7 @@ var RChart = /*#__PURE__*/function (_Component) {
           edit = _this$props4.edit,
           remove = _this$props4.remove;
 
-      if (data[dataIndex].stream[streamIndex].editable === false) {
+      if (data[dataIndex].editable === false) {
         return;
       }
 
@@ -754,7 +760,12 @@ var RChart = /*#__PURE__*/function (_Component) {
         return;
       }
 
-      this.setSetLimit(false);
+      var stream = data[dataIndex].stream[streamIndex];
+      this.mouseDownDetail = {
+        target: 'point',
+        x: stream.x,
+        y: stream.y
+      };
       this.eventHandler('window', 'mousemove', _jquery.default.proxy(this.pointMouseMove, this));
       this.eventHandler('window', 'mouseup', _jquery.default.proxy(this.pointMouseUp, this));
       this.so = {
@@ -799,7 +810,7 @@ var RChart = /*#__PURE__*/function (_Component) {
     value: function pointMouseUp() {
       this.eventHandler('window', 'mousemove', this.pointMouseMove, 'unbind');
       this.eventHandler('window', 'mouseup', this.pointMouseUp, 'unbind');
-      this.setSetLimit(true);
+      this.mouseDownDetail = {};
       var _this$props6 = this.props,
           data = _this$props6.data,
           edit = _this$props6.edit,
@@ -808,10 +819,12 @@ var RChart = /*#__PURE__*/function (_Component) {
       if (!this.moved) {
         var stream = data[this.so.dataIndex].stream[this.so.streamIndex];
         var title = !edit ? 'Remove Point' : 'Edit Point';
+        var d = data[this.so.dataIndex];
         this.SetState({
           popup: {
             dataIndex: this.so.dataIndex,
             streamIndex: this.so.streamIndex,
+            dataIndexes: [this.so.dataIndex],
             dynamicValue: stream.y,
             staticValue: this.mouseValue[0],
             onEdit: edit,
@@ -839,6 +852,7 @@ var RChart = /*#__PURE__*/function (_Component) {
       if (add && this.addDataIndexes.length) {
         this.SetState({
           popup: {
+            type: 'add',
             dataIndexes: this.addDataIndexes,
             dataIndex: this.addDataIndexes[0],
             dynamicValue: this.mouseValue[1],
@@ -911,6 +925,7 @@ var RChart = /*#__PURE__*/function (_Component) {
 
       this.setState({
         popup: {
+          type: 'multiselect',
           title: 'Multi Select',
           points: this.multiselect.points
         }
@@ -952,11 +967,6 @@ var RChart = /*#__PURE__*/function (_Component) {
       }
 
       return result;
-    }
-  }, {
-    key: "setSetLimit",
-    value: function setSetLimit(state) {
-      this.setLimit = state;
     }
   }, {
     key: "closePopup",
@@ -1259,7 +1269,8 @@ var RChart = /*#__PURE__*/function (_Component) {
           data = _this$props9.data,
           html = _this$props9.html,
           add = _this$props9.add,
-          multiselect = _this$props9.multiselect;
+          multiselect = _this$props9.multiselect,
+          style = _this$props9.style;
       var _this$state5 = this.state,
           X = _this$state5.X,
           Y = _this$state5.Y,
@@ -1285,7 +1296,8 @@ var RChart = /*#__PURE__*/function (_Component) {
         }
       }, /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart",
-        ref: this.dom
+        ref: this.dom,
+        style: style
       }, this.getHeader(yWidth), /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-container",
         style: this.getStyle(yWidth, xHeight)
@@ -1318,12 +1330,14 @@ var RChart = /*#__PURE__*/function (_Component) {
               py = _ref10[3];
 
           _this5.mousePosition = [x, y, px, py];
-          _this5.popupPosition = [x + yWidth, d.height + y];
           _this5.mouseValue = [_this5.getValueByPercent(px, 'x'), _this5.getValueByPercent(-py, 'y')];
+          console.log(_this5.mouseValue);
+          var xValue = _this5.mouseDownDetail.target === 'point' ? _this5.mouseDownDetail.x : _this5.mouseValue[0];
+          _this5.popupPosition = [_this5.getPixedlByValue(xValue, 'x') + yWidth, d.height + y];
           var addIndicator = '';
           _this5.addDataIndexes = false;
 
-          if (add) {
+          if (add && _this5.mouseDownDetail.target !== 'point') {
             _this5.addDataIndexes = _this5.getAddableDataIndexes(_this5.mouseValue[0]);
             addIndicator = _this5.addDataIndexes.length ? "<div class=\"add-indicator\" style=\"background:".concat(data[_this5.addDataIndexes[0]].color, "\">+</div>") : '';
           }
@@ -1334,7 +1348,7 @@ var RChart = /*#__PURE__*/function (_Component) {
             left: _this5.popupPosition[0],
             top: _this5.popupPosition[1]
           });
-          container.html('<div class="r-chart-popup">' + addIndicator + _this5.mouseValue[0] + '  ' + _this5.mouseValue[1] + '</div>');
+          container.html('<div class="r-chart-popup">' + addIndicator + xValue + '  ' + _this5.mouseValue[1] + '</div>');
         },
         mouseDown: this.mouseDown.bind(this)
       })), /*#__PURE__*/_react.default.createElement("div", {
@@ -1398,10 +1412,14 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
 
   var _super2 = _createSuper(RChartEdit);
 
-  function RChartEdit() {
+  function RChartEdit(props) {
+    var _this6;
+
     _classCallCheck(this, RChartEdit);
 
-    return _super2.apply(this, arguments);
+    _this6 = _super2.call(this, props);
+    _this6.dom = (0, _react.createRef)();
+    return _this6;
   }
 
   _createClass(RChartEdit, [{
@@ -1449,12 +1467,18 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
       return [sI, eI];
     }
   }, {
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      (0, _jquery.default)(this.dom.current).find('input').eq(0).focus().select();
+    }
+  }, {
     key: "render",
     value: function render() {
-      var _this6 = this;
+      var _this7 = this;
 
       var _this$props10 = this.props,
           points = _this$props10.points,
+          type = _this$props10.type,
           title = _this$props10.title,
           _onChange = _this$props10.onChange,
           onClose = _this$props10.onClose,
@@ -1465,7 +1489,8 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
           streamIndex = _this$props10.streamIndex,
           dynamicValue = _this$props10.dynamicValue,
           staticValue = _this$props10.staticValue,
-          dataIndexes = _this$props10.dataIndexes;
+          _this$props10$dataInd = _this$props10.dataIndexes,
+          dataIndexes = _this$props10$dataInd === void 0 ? [] : _this$props10$dataInd;
       var _this$context = this.context,
           data = _this$context.data,
           X = _this$context.X,
@@ -1477,7 +1502,8 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
           _multiselect$actions = multiselect.actions,
           actions = _multiselect$actions === void 0 ? [] : _multiselect$actions;
       return /*#__PURE__*/_react.default.createElement("div", {
-        className: "r-chart-edit"
+        className: "r-chart-edit",
+        ref: this.dom
       }, /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-edit-backdrop"
       }), /*#__PURE__*/_react.default.createElement("div", {
@@ -1488,12 +1514,10 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
         className: "r-chart-edit-close",
         onClick: onClose
       })), /*#__PURE__*/_react.default.createElement("div", {
-        className: "r-chart-edit-item"
-      }, /*#__PURE__*/_react.default.createElement("div", {
-        className: "r-chart-edit-data-name"
+        className: "r-chart-edit-body"
       }, /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-edit-data-list"
-      }, onAdd && dataIndexes.map(function (index) {
+      }, dataIndexes.map(function (index) {
         return /*#__PURE__*/_react.default.createElement("div", {
           onClick: function onClick() {
             return _onChange({
@@ -1507,20 +1531,13 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
             background: data[index].color
           }
         });
-      }), onEdit && /*#__PURE__*/_react.default.createElement("div", {
-        className: "r-chart-edit-data-list-item active",
-        key: dataIndex,
-        style: {
-          color: data[dataIndex].color,
-          background: data[dataIndex].color
-        }
-      }))), (onAdd || onEdit || onRemove) && /*#__PURE__*/_react.default.createElement(_react.Fragment, null, /*#__PURE__*/_react.default.createElement("div", {
+      })), staticValue !== undefined && /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-edit-form"
       }, /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-edit-label"
       }, (X.title || 'X untitle') + ' : '), /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-detail-value"
-      }, staticValue)), /*#__PURE__*/_react.default.createElement("div", {
+      }, staticValue)), dynamicValue !== undefined && /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-edit-form"
       }, /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-edit-label"
@@ -1537,10 +1554,11 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
             dynamicValue: e.target.value
           });
         }
-      }))), items.length > 0 && /*#__PURE__*/_react.default.createElement(_react.Fragment, null, items.filter(function (item) {
+      })), type === 'multiselect' && items.filter(function (item) {
         return item.show !== false;
-      }).map(function (item) {
+      }).map(function (item, i) {
         return /*#__PURE__*/_react.default.createElement("div", {
+          key: i,
           className: "r-chart-edit-form"
         }, /*#__PURE__*/_react.default.createElement("div", {
           className: "r-chart-edit-label"
@@ -1570,15 +1588,19 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
             });
           },
           defaultValue: item.value
-        }, item.options.map(function (o) {
+        }, item.options.map(function (o, i) {
           return /*#__PURE__*/_react.default.createElement("option", {
+            key: i,
             value: o.value
           }, o.text);
         })), item.type === 'checkbox' && /*#__PURE__*/_react.default.createElement("input", {
           type: "checkbox",
-          value: item.value
+          value: item.value,
+          onChange: function onChange(e) {
+            return item.onChange(e.target.checked);
+          }
         }));
-      }))), /*#__PURE__*/_react.default.createElement("div", {
+      })), /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-edit-footer"
       }, /*#__PURE__*/_react.default.createElement("button", {
         className: "r-chart-edit-button",
@@ -1586,7 +1608,7 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
         style: {
           flex: 1
         }
-      }, "Close"), actions.filter(function (a) {
+      }, "Close"), type === 'multiselect' && actions.filter(function (a) {
         return a.show !== false;
       }).map(function (a, i) {
         return /*#__PURE__*/_react.default.createElement("button", {
@@ -1603,7 +1625,7 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
           var streamIndex;
           var stream = data[dataIndex].stream;
 
-          var index = _this6.binerySearch(stream, X.labels.indexOf(staticValue), function (m) {
+          var index = _this7.binerySearch(stream, X.labels.indexOf(staticValue), function (m) {
             return X.labels.indexOf(m.x);
           });
 
