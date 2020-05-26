@@ -377,7 +377,12 @@ var RChart = /*#__PURE__*/function (_Component) {
             y = _stream$j.y,
             PointRadius = _stream$j.pointRadius,
             LineWidth = _stream$j.lineWidth,
-            Fill = _stream$j.fill; //if(x === 'msf'){debugger;}
+            Fill = _stream$j.fill;
+
+        if (x === null || y === null) {
+          continue;
+        } //if(x === 'msf'){debugger;}
+
 
         var xp = this.getPercentByValue(x, 'x'),
             yp = this.getPercentByValue(y, 'y');
@@ -587,9 +592,7 @@ var RChart = /*#__PURE__*/function (_Component) {
           rects = [],
           areas = [],
           Shapes = [];
-      var _this$props2 = this.props,
-          data = _this$props2.data,
-          shapes = _this$props2.shapes;
+      var data = this.props.data;
       var _this$state = this.state,
           X = _this$state.X,
           Y = _this$state.Y,
@@ -609,7 +612,8 @@ var RChart = /*#__PURE__*/function (_Component) {
             _data$i$type = _data$i.type,
             chartType = _data$i$type === void 0 ? 'line' : _data$i$type,
             _data$i$color = _data$i.color,
-            color = _data$i$color === void 0 ? '#000' : _data$i$color;
+            color = _data$i$color === void 0 ? '#000' : _data$i$color,
+            shapes = _data$i.shapes;
 
         if (preventData[title]) {
           continue;
@@ -627,22 +631,8 @@ var RChart = /*#__PURE__*/function (_Component) {
           rects = rects.concat(result.rects);
           barCounter++;
         }
-      }
 
-      if (shapes) {
-        var res = shapes();
-
-        for (var i = 0; i < res.length; i++) {
-          var _res$i = res[i],
-              element = _res$i.element,
-              x = _res$i.x,
-              y = _res$i.y;
-          var obj = { ...element
-          };
-          obj.x = this.getPercentByValue(x, 'x') + '%';
-          obj.y = -this.getPercentByValue(y, 'y') + '%';
-          Shapes.push(obj);
-        }
+        Shapes = shapes ? Shapes.concat(this.getShapes(shapes(data, X, Y))) : Shapes;
       }
 
       this.elements = {
@@ -652,6 +642,38 @@ var RChart = /*#__PURE__*/function (_Component) {
       return xGridLines.concat(yGridLines, rects, areas, lines, points, xIndicator, yIndicator, Shapes);
     }
   }, {
+    key: "getShapes",
+    value: function getShapes(shapes) {
+      var Shapes = [];
+
+      for (var i = 0; i < shapes.length; i++) {
+        var shape = shapes[i];
+        var obj = { ...shape
+        };
+
+        if (shape.points) {
+          obj.points = [];
+
+          for (var j = 0; j < shape.points.length; j++) {
+            var _shape$points$j = _slicedToArray(shape.points[j], 2),
+                x = _shape$points$j[0],
+                y = _shape$points$j[1];
+
+            obj.points.push([this.getPercentByValue(x, 'x') + '%', -this.getPercentByValue(y, 'y') + '%']);
+          }
+        } else if (shape.r) {
+          var _x = shape.x,
+              _y = shape.y;
+          obj.x = this.getPercentByValue(_x, 'x') + '%';
+          obj.y = -this.getPercentByValue(_y, 'y') + '%';
+        }
+
+        Shapes.push(obj);
+      }
+
+      return Shapes;
+    }
+  }, {
     key: "componentDidMount",
     value: function componentDidMount() {
       this.setState({});
@@ -659,10 +681,10 @@ var RChart = /*#__PURE__*/function (_Component) {
   }, {
     key: "getDetails",
     value: function getDetails() {
-      var _this$props3 = this.props,
-          data = _this$props3.data,
-          _this$props3$barWidth = _this$props3.barWidth,
-          barWidth = _this$props3$barWidth === void 0 ? 80 : _this$props3$barWidth,
+      var _this$props2 = this.props,
+          data = _this$props2.data,
+          _this$props2$barWidth = _this$props2.barWidth,
+          barWidth = _this$props2$barWidth === void 0 ? 80 : _this$props2$barWidth,
           _this$state2 = this.state,
           X = _this$state2.X,
           Y = _this$state2.Y,
@@ -731,8 +753,8 @@ var RChart = /*#__PURE__*/function (_Component) {
       }
     }
   }, {
-    key: "getPixedlByValue",
-    value: function getPixedlByValue(value, axis) {
+    key: "getPixelByValue",
+    value: function getPixelByValue(value, axis) {
       return this.getPercentByValue(value, axis) * this.details[axis === 'x' ? 'width' : 'height'] / 100;
     }
   }, {
@@ -747,10 +769,10 @@ var RChart = /*#__PURE__*/function (_Component) {
     value: function pointMouseDown(_ref6) {
       var dataIndex = _ref6.dataIndex,
           streamIndex = _ref6.streamIndex;
-      var _this$props4 = this.props,
-          data = _this$props4.data,
-          edit = _this$props4.edit,
-          remove = _this$props4.remove;
+      var _this$props3 = this.props,
+          data = _this$props3.data,
+          edit = _this$props3.edit,
+          remove = _this$props3.remove;
 
       if (data[dataIndex].editable === false) {
         return;
@@ -778,9 +800,9 @@ var RChart = /*#__PURE__*/function (_Component) {
   }, {
     key: "pointMouseMove",
     value: function pointMouseMove() {
-      var _this$props5 = this.props,
-          data = _this$props5.data,
-          edit = _this$props5.edit,
+      var _this$props4 = this.props,
+          data = _this$props4.data,
+          edit = _this$props4.edit,
           stream = data[this.so.dataIndex].stream[this.so.streamIndex];
 
       if (!this.moved) {
@@ -811,10 +833,10 @@ var RChart = /*#__PURE__*/function (_Component) {
       this.eventHandler('window', 'mousemove', this.pointMouseMove, 'unbind');
       this.eventHandler('window', 'mouseup', this.pointMouseUp, 'unbind');
       this.mouseDownDetail = {};
-      var _this$props6 = this.props,
-          data = _this$props6.data,
-          edit = _this$props6.edit,
-          remove = _this$props6.remove;
+      var _this$props5 = this.props,
+          data = _this$props5.data,
+          edit = _this$props5.edit,
+          remove = _this$props5.remove;
 
       if (!this.moved) {
         var stream = data[this.so.dataIndex].stream[this.so.streamIndex];
@@ -844,10 +866,10 @@ var RChart = /*#__PURE__*/function (_Component) {
   }, {
     key: "mouseDown",
     value: function mouseDown() {
-      var _this$props7 = this.props,
-          add = _this$props7.add,
-          multiselect = _this$props7.multiselect,
-          data = _this$props7.data; // اگر مد افزودن فعال بود و در موقعیت فعلی موس دیتا یا دیتا هایی آمادگی دریافت نقطه جدید در این موقعیت را داشتند
+      var _this$props6 = this.props,
+          add = _this$props6.add,
+          multiselect = _this$props6.multiselect,
+          data = _this$props6.data; // اگر مد افزودن فعال بود و در موقعیت فعلی موس دیتا یا دیتا هایی آمادگی دریافت نقطه جدید در این موقعیت را داشتند
 
       if (add && this.addDataIndexes.length) {
         this.SetState({
@@ -1043,11 +1065,11 @@ var RChart = /*#__PURE__*/function (_Component) {
       var _this$state4 = this.state,
           X = _this$state4.X,
           Y = _this$state4.Y,
-          _this$props8 = this.props,
-          data = _this$props8.data,
-          add = _this$props8.add,
-          edit = _this$props8.edit,
-          remove = _this$props8.remove,
+          _this$props7 = this.props,
+          data = _this$props7.data,
+          add = _this$props7.add,
+          edit = _this$props7.edit,
+          remove = _this$props7.remove,
           d = this.details;
       var xType = d.type.x,
           yType = d.type.y;
@@ -1265,12 +1287,12 @@ var RChart = /*#__PURE__*/function (_Component) {
     value: function render() {
       var _this5 = this;
 
-      var _this$props9 = this.props,
-          data = _this$props9.data,
-          html = _this$props9.html,
-          add = _this$props9.add,
-          multiselect = _this$props9.multiselect,
-          style = _this$props9.style;
+      var _this$props8 = this.props,
+          data = _this$props8.data,
+          html = _this$props8.html,
+          add = _this$props8.add,
+          multiselect = _this$props8.multiselect,
+          style = _this$props8.style;
       var _this$state5 = this.state,
           X = _this$state5.X,
           Y = _this$state5.Y,
@@ -1331,9 +1353,8 @@ var RChart = /*#__PURE__*/function (_Component) {
 
           _this5.mousePosition = [x, y, px, py];
           _this5.mouseValue = [_this5.getValueByPercent(px, 'x'), _this5.getValueByPercent(-py, 'y')];
-          console.log(_this5.mouseValue);
           var xValue = _this5.mouseDownDetail.target === 'point' ? _this5.mouseDownDetail.x : _this5.mouseValue[0];
-          _this5.popupPosition = [_this5.getPixedlByValue(xValue, 'x') + yWidth, d.height + y];
+          _this5.popupPosition = [_this5.getPixelByValue(xValue, 'x') + yWidth, d.height + y];
           var addIndicator = '';
           _this5.addDataIndexes = false;
 
@@ -1412,14 +1433,10 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
 
   var _super2 = _createSuper(RChartEdit);
 
-  function RChartEdit(props) {
-    var _this6;
-
+  function RChartEdit() {
     _classCallCheck(this, RChartEdit);
 
-    _this6 = _super2.call(this, props);
-    _this6.dom = (0, _react.createRef)();
-    return _this6;
+    return _super2.apply(this, arguments);
   }
 
   _createClass(RChartEdit, [{
@@ -1474,23 +1491,23 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
   }, {
     key: "render",
     value: function render() {
-      var _this7 = this;
+      var _this6 = this;
 
-      var _this$props10 = this.props,
-          points = _this$props10.points,
-          type = _this$props10.type,
-          title = _this$props10.title,
-          _onChange = _this$props10.onChange,
-          onClose = _this$props10.onClose,
-          onAdd = _this$props10.onAdd,
-          onEdit = _this$props10.onEdit,
-          onRemove = _this$props10.onRemove,
-          dataIndex = _this$props10.dataIndex,
-          streamIndex = _this$props10.streamIndex,
-          dynamicValue = _this$props10.dynamicValue,
-          staticValue = _this$props10.staticValue,
-          _this$props10$dataInd = _this$props10.dataIndexes,
-          dataIndexes = _this$props10$dataInd === void 0 ? [] : _this$props10$dataInd;
+      var _this$props9 = this.props,
+          points = _this$props9.points,
+          type = _this$props9.type,
+          title = _this$props9.title,
+          _onChange = _this$props9.onChange,
+          onClose = _this$props9.onClose,
+          onAdd = _this$props9.onAdd,
+          onEdit = _this$props9.onEdit,
+          onRemove = _this$props9.onRemove,
+          dataIndex = _this$props9.dataIndex,
+          streamIndex = _this$props9.streamIndex,
+          dynamicValue = _this$props9.dynamicValue,
+          staticValue = _this$props9.staticValue,
+          _this$props9$dataInde = _this$props9.dataIndexes,
+          dataIndexes = _this$props9$dataInde === void 0 ? [] : _this$props9$dataInde;
       var _this$context = this.context,
           data = _this$context.data,
           X = _this$context.X,
@@ -1625,7 +1642,7 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
           var streamIndex;
           var stream = data[dataIndex].stream;
 
-          var index = _this7.binerySearch(stream, X.labels.indexOf(staticValue), function (m) {
+          var index = _this6.binerySearch(stream, X.labels.indexOf(staticValue), function (m) {
             return X.labels.indexOf(m.x);
           });
 

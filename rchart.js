@@ -137,6 +137,7 @@ var RChartContext = createContext();
       var points = [],line = {points:[],lineWidth,stroke:color,dash},Area;
       for(var j = 0; j < stream.length; j++){
         let {x,y,pointRadius:PointRadius,lineWidth:LineWidth,fill:Fill} = stream[j];  
+        if(x === null || y === null){continue;}
         //if(x === 'msf'){debugger;}
         var xp = this.getPercentByValue(x,'x'),yp = this.getPercentByValue(y,'y');
         if(xp === 'string error'){
@@ -228,7 +229,7 @@ var RChartContext = createContext();
     }
     getElements(){ 
       var points = [],lines = [],rects = [],areas = [],Shapes = []; 
-      var {data,shapes} = this.props;
+      var {data} = this.props;
       var {X,Y,preventData} = this.state;
       var {barAxis} = this.details;
       var xGridLines = X.gridColor?this.getGridLines('x'):[];
@@ -238,12 +239,12 @@ var RChartContext = createContext();
       var barCounter = 0; 
       this.data = [];
       for(var i = 0; i < data.length; i++){  
-        let {title,stream,type:chartType = 'line',color = '#000'} = data[i];
+        let {title,stream,type:chartType = 'line',color = '#000',shapes} = data[i];
         if(preventData[title]){continue;}
         if(chartType === 'line'){
           var result = this.getLineChart(data[i],i);
           this.data.push(result);
-          points = points.concat(result.points) 
+          points = points.concat(result.points); 
           lines = lines.concat(result.line) ; 
           areas = areas.concat(result.area);
         } 
@@ -252,20 +253,32 @@ var RChartContext = createContext();
           this.data.push(result);
           rects = rects.concat(result.rects);
           barCounter++;
-        } 
-      }
-      if(shapes){
-        var res = shapes();
-        for(var i = 0; i < res.length; i++){
-          let {element,x,y} = res[i];
-          let obj = {...element};
-          obj.x = this.getPercentByValue(x,'x') + '%';
-          obj.y = -this.getPercentByValue(y,'y') + '%'; 
-          Shapes.push(obj)  
         }
+        Shapes = shapes?Shapes.concat(this.getShapes(shapes(data,X,Y))):Shapes; 
       }
       this.elements = {arcs:points,rects};
       return xGridLines.concat(yGridLines,rects,areas,lines,points,xIndicator,yIndicator,Shapes);
+    }
+    getShapes(shapes){
+      var Shapes = [];
+      for(var i = 0; i < shapes.length; i++){
+        let shape = shapes[i]
+        let obj = {...shape};
+        if(shape.points){
+          obj.points = [];
+          for(var j = 0; j < shape.points.length; j++){
+            let [x,y] = shape.points[j];
+            obj.points.push([this.getPercentByValue(x,'x') + '%',-this.getPercentByValue(y,'y') + '%'])
+          }
+        }
+        else if(shape.r){
+          let {x,y} = shape;
+          obj.x = this.getPercentByValue(x,'x') + '%';
+          obj.y = -this.getPercentByValue(y,'y') + '%';   
+        }
+        Shapes.push(obj)  
+      }
+      return Shapes;
     }
     componentDidMount(){this.setState({})}
     getDetails(){
@@ -302,7 +315,7 @@ var RChartContext = createContext();
         d.barWidth = barWidth / d.range[d.barAxis].count/d.barCount;
       }
     }
-    getPixedlByValue(value,axis){
+    getPixelByValue(value,axis){
       return this.getPercentByValue(value,axis) * this.details[axis === 'x'?'width':'height'] / 100;
     }
     changeFilter(p1,p2,axis){
@@ -577,10 +590,9 @@ var RChartContext = createContext();
                   mouseMove={(e,[x,y,px,py])=>{
                     this.mousePosition = [x,y,px,py];
                     this.mouseValue = [this.getValueByPercent(px,'x'),this.getValueByPercent(-py,'y')];
-                    console.log(this.mouseValue)
                     var xValue = this.mouseDownDetail.target === 'point'?this.mouseDownDetail.x:this.mouseValue[0];
                     this.popupPosition = [
-                      this.getPixedlByValue(xValue,'x') + yWidth,
+                      this.getPixelByValue(xValue,'x') + yWidth,
                       d.height + y
                     ]; 
                     var addIndicator = '';
@@ -612,10 +624,6 @@ var RChartContext = createContext();
 
  class RChartEdit extends Component{
    static contextType = RChartContext;
-   constructor(props){
-     super(props);
-     this.dom = createRef();
-   }
    binerySearch(array,value,field){
     var sI = 0,eI = array.length - 1;
     while(eI - sI > 1){
