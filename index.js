@@ -51,7 +51,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function () { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
@@ -111,7 +111,7 @@ var RChart = /*#__PURE__*/function (_Component) {
       popup: false,
       preventData: preventData
     };
-    _this.dom = (0, _react.createRef)();
+    _this.dom = /*#__PURE__*/(0, _react.createRef)();
     _this.details = {};
     (0, _jquery.default)('body').on('mouseout', '.r-chart-canvas', function () {
       (0, _jquery.default)('.r-chart-popup-container').html('');
@@ -655,10 +655,9 @@ var RChart = /*#__PURE__*/function (_Component) {
           obj.points = [];
 
           for (var j = 0; j < shape.points.length; j++) {
-            var _shape$points$j = _slicedToArray(shape.points[j], 2),
-                x = _shape$points$j[0],
-                y = _shape$points$j[1];
-
+            var _shape$points$j = shape.points[j],
+                x = _shape$points$j.x,
+                y = _shape$points$j.y;
             obj.points.push([this.getPercentByValue(x, 'x') + '%', -this.getPercentByValue(y, 'y') + '%']);
           }
         } else if (shape.r) {
@@ -1433,10 +1432,14 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
 
   var _super2 = _createSuper(RChartEdit);
 
-  function RChartEdit() {
+  function RChartEdit(props) {
+    var _this6;
+
     _classCallCheck(this, RChartEdit);
 
-    return _super2.apply(this, arguments);
+    _this6 = _super2.call(this, props);
+    _this6.dom = /*#__PURE__*/(0, _react.createRef)();
+    return _this6;
   }
 
   _createClass(RChartEdit, [{
@@ -1491,7 +1494,7 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
   }, {
     key: "render",
     value: function render() {
-      var _this6 = this;
+      var _this7 = this;
 
       var _this$props9 = this.props,
           points = _this$props9.points,
@@ -1642,7 +1645,7 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
           var streamIndex;
           var stream = data[dataIndex].stream;
 
-          var index = _this6.binerySearch(stream, X.labels.indexOf(staticValue), function (m) {
+          var index = _this7.binerySearch(stream, X.labels.indexOf(staticValue), function (m) {
             return X.labels.indexOf(m.x);
           });
 

@@ -267,7 +267,7 @@ var RChartContext = createContext();
         if(shape.points){
           obj.points = [];
           for(var j = 0; j < shape.points.length; j++){
-            let [x,y] = shape.points[j];
+            let {x,y} = shape.points[j];
             obj.points.push([this.getPercentByValue(x,'x') + '%',-this.getPercentByValue(y,'y') + '%'])
           }
         }
@@ -624,6 +624,10 @@ var RChartContext = createContext();
 
  class RChartEdit extends Component{
    static contextType = RChartContext;
+   constructor(props){
+     super(props);
+     this.dom = createRef();
+   }
    binerySearch(array,value,field){
     var sI = 0,eI = array.length - 1;
     while(eI - sI > 1){
