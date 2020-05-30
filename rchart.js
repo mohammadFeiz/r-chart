@@ -9,9 +9,7 @@ var RChartContext = createContext();
     constructor(props){
       super(props);
       this.mouseDownDetail = {};
-      var {X,Y,x,y,data} = this.props;
-      if(x){console.error('RChart error => you set x props for RChart. did you mean X')}
-      if(y){console.error('RChart error => you set y props for RChart. did you mean Y')}
+      var {data,filter} = this.props;
       this.touch = 'ontouchstart' in document.documentElement;
       var preventData = {};
       for(var i = 0; i < data.length; i++){
@@ -19,28 +17,12 @@ var RChartContext = createContext();
         if(d.title === undefined){continue;}
         preventData[d.title] = false;
       }
-      this.state = {X,Y,prevx:JSON.stringify(X),prevy:JSON.stringify(Y),popup:false,preventData};
+      this.state = {popup:false,preventData,filter};
       this.dom = createRef();
       this.details = {};
       $('body').on('mouseout','.r-chart-canvas',()=>{$('.r-chart-popup-container').html('')})
     }
-    static getDerivedStateFromProps(props,state){
-      var {prevx,prevy} = state;
-      var {X = {},Y = {}} = props;
-      var change = {},changed = false;
-      if(prevx !== JSON.stringify(X)){//اگر پروپس جدید از بیرون آمد
-        change.prevx = JSON.stringify(X);
-        change.X = X; 
-        changed = true;
-      }
-      if(prevy !== JSON.stringify(Y)){//اگر پروپس جدید از بیرون آمد
-        change.prevy = JSON.stringify(Y);
-        change.Y = Y;
-        changed = true;
-      }
-      if(changed){return change}
-      return null;
-    }
+    
     getStyle(x,y){
       return {
         gridTemplateColumns:`${x}px auto`,
@@ -66,7 +48,7 @@ var RChartContext = createContext();
       var yLimit = Y.labels?[0,Y.labels.length - 1]:this.getLimitTypeNumber(data,'y');
       return {x:xLimit,y:yLimit};
     }
-    getRangeTypeNumber(axis,{filter = []}){
+    getRangeTypeNumber(axis,filter = []){
       var {limit,width,height} = this.details;
       var [min,max] = limit[axis];
       if(min === undefined || max === undefined){return false;}
@@ -92,7 +74,7 @@ var RChartContext = createContext();
       var filteredRange = {start,end,step,p1:fs,p2:fe}  
       return {start:fs,step,end:fe,filter:filteredRange}; 
     } 
-    getRangeTypeString(axis,{filter = [],labels,width = 60,height = 30}){
+    getRangeTypeString(axis,{labels,width = 60,height = 30},filter = []){
       var {limit} = this.details;
       var size = this.details[axis === 'x'?'width':'height']
       var [start,end] = limit[axis];
@@ -110,12 +92,13 @@ var RChartContext = createContext();
     }
     getRange(X,Y){
       var {limit,type,width,height} = this.details;
+      var {filter} = this.state;
       var xRange = type.x === 'number'?
-      this.getRangeTypeNumber('x',X):
-      this.getRangeTypeString('x',X);
+      this.getRangeTypeNumber('x',filter.x):
+      this.getRangeTypeString('x',X,filter.x);
       var yRange = type.y === 'number'?
-      this.getRangeTypeNumber('y',Y):
-      this.getRangeTypeString('y',Y);
+      this.getRangeTypeNumber('y',filter.y):
+      this.getRangeTypeString('y',Y,filter.y);
       return {x:xRange,y:yRange};
     }
     eventHandler(selector, event, action,type = 'bind'){
@@ -219,7 +202,7 @@ var RChartContext = createContext();
     getGridLines(axis){
       var range = this.details.range[axis];
       if(!range){return []}
-      var {start,step,end} = range,{gridColor} = this.state[axis.toUpperCase()];
+      var {start,step,end} = range,{gridColor} = this.props[axis.toUpperCase()];
       var value = Math.round((start - step) / step) * step,gridLines = [];
       while (value <= end) { 
         if(value >= start){gridLines.push(this.getGridLine(value,axis,{color:gridColor}))} 
@@ -230,7 +213,8 @@ var RChartContext = createContext();
     getElements(){ 
       var points = [],lines = [],rects = [],areas = [],Shapes = []; 
       var {data} = this.props;
-      var {X,Y,preventData} = this.state;
+      var {preventData} = this.state;
+      var {X,Y} = this.props;
       var {barAxis} = this.details;
       var xGridLines = X.gridColor?this.getGridLines('x'):[];
       var yGridLines = Y.gridColor?this.getGridLines('y'):[]; 
@@ -280,9 +264,9 @@ var RChartContext = createContext();
       }
       return Shapes;
     }
-    componentDidMount(){this.setState({})}
+    componentDidMount(){this.SetState({})}
     getDetails(){
-      var {data,barWidth = 80} = this.props,{X,Y} = this.state,d = this.details; 
+      var {X,Y,data,barWidth = 80} = this.props,d = this.details; 
       if(!d.type){ 
         d.type = this.getType(X,Y); 
         //تایین محوری که پایه ی بار چارت روی آن بنا می شود
@@ -319,9 +303,10 @@ var RChartContext = createContext();
       return this.getPercentByValue(value,axis) * this.details[axis === 'x'?'width':'height'] / 100;
     }
     changeFilter(p1,p2,axis){
-      var obj = JSON.parse(JSON.stringify(this.state[axis])) 
-      obj.filter = obj.labels?[obj.labels[p1],obj.labels[p2]]:[p1,p2];
-      this.SetState({[axis]:obj});
+      var labels = this.props[axis.toUpperCase()].labels; 
+      var {filter} = this.state;
+      filter[axis] = labels?[labels[p1],labels[p2]]:[p1,p2];
+      this.SetState({filter});
     } 
     pointMouseDown({dataIndex,streamIndex}){
       let {data,edit,remove} = this.props;
@@ -410,7 +395,7 @@ var RChartContext = createContext();
         this.hideSelectRect();
         return;
       } 
-      this.setState({ 
+      this.SetState({ 
         popup:{
           type:'multiselect',
           title:'Multi Select',
@@ -440,7 +425,7 @@ var RChartContext = createContext();
     }
     zoomHover(e,axis){
       e.stopPropagation();
-      var {X = {},Y = {}} = this.state;
+      var {X = {},Y = {}} = this.props;
       if(axis === 'x' && !X.zoom){return;}
       if(axis === 'y' && !Y.zoom){return;}
       this.hoverAxis = axis;
@@ -472,7 +457,7 @@ var RChartContext = createContext();
       }
     }
     getPopup(popup){
-      var {X,Y} = this.state,{data,add,edit,remove} = this.props,d = this.details;
+      var {data,add,edit,remove} = this.props,d = this.details;
       var xType = d.type.x,yType = d.type.y;
       return <RChartEdit {...popup} 
         onChange={(obj)=>{
@@ -506,7 +491,7 @@ var RChartContext = createContext();
     getLabelSlider(axis){
       var type = this.details.type[axis],{start,end,step} = this.details.range[axis]; 
       var labelStyle = {x:{top:'24px'},y:{left:'unset',right:'16px',justifyContent:'flex-end'}};
-      var {rotate = 0,labels} = this.state[axis.toUpperCase()];
+      var {rotate = 0,labels} = this.props[axis.toUpperCase()];
       return (
         <RSlider 
           className='labelSlider' editable={false} showValue={false}
@@ -522,18 +507,18 @@ var RChartContext = createContext();
       ) 
     }
     getFilterSlider(axis){  
-      var {labels} = this.state[axis.toUpperCase()]; 
+      var {labels} = this.props[axis.toUpperCase()]; 
       var type = this.details.type[axis],{p1,p2,start,end} = this.details.range[axis].filter;
       var points = [{value:p1},{value:p2,fillStyle:{[axis === 'y'?'width':'height']:'3px',background:'#eee'}}]
       var style = {
         x:{width:'100%',height:'36px',padding:'0 12px',top:0},
         y:{width:'36px',height:'100%',padding:'12px 0',right:0}
-      }
+      } 
       return (
         <RSlider direction={axis === 'x'?'right':'top'} start={start} end={end} className='filterSlider'
           points={points}
           editValue={(point)=>type === 'string'?labels[point.value]:point.value} 
-          ondrag={({points})=>this.changeFilter(points[0].value,points[1].value,axis.toUpperCase())}
+          ondrag={({points})=>this.changeFilter(points[0].value,points[1].value,axis)}
           onmousedown={this.zoomMouseDown.bind(this)} 
           onmouseup={this.zoomMouseUp.bind(this)}
           style={{position:'absolute',display:'none',...style[axis]}}
@@ -560,8 +545,8 @@ var RChartContext = createContext();
       return indexes;
     }
     render(){
-      var {data,html,add,multiselect,style} = this.props;  
-      var {X,Y,popup,preventData} = this.state; 
+      var {X,Y,data,html,add,multiselect,style} = this.props;  
+      var {popup,preventData} = this.state; 
       var {width:xWidth = 60,height:xHeight = 50} = X;
       var {width:yWidth = 50} = Y;
       this.getDetails(); 
@@ -620,7 +605,7 @@ var RChartContext = createContext();
       )
     }
   }
- RChart.defaultProps = {data:[],X:{},Y:{}}
+ RChart.defaultProps = {data:[],X:{},Y:{},filter:{x:[],y:[]}}
 
  class RChartEdit extends Component{
    static contextType = RChartContext;

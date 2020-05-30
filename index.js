@@ -25,9 +25,9 @@ function _instanceof(left, right) { if (right != null && typeof Symbol !== "unde
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
-
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
@@ -76,20 +76,8 @@ var RChart = /*#__PURE__*/function (_Component) {
     _this = _super.call(this, props);
     _this.mouseDownDetail = {};
     var _this$props = _this.props,
-        X = _this$props.X,
-        Y = _this$props.Y,
-        x = _this$props.x,
-        y = _this$props.y,
-        data = _this$props.data;
-
-    if (x) {
-      console.error('RChart error => you set x props for RChart. did you mean X');
-    }
-
-    if (y) {
-      console.error('RChart error => you set y props for RChart. did you mean Y');
-    }
-
+        data = _this$props.data,
+        filter = _this$props.filter;
     _this.touch = 'ontouchstart' in document.documentElement;
     var preventData = {};
 
@@ -104,12 +92,9 @@ var RChart = /*#__PURE__*/function (_Component) {
     }
 
     _this.state = {
-      X: X,
-      Y: Y,
-      prevx: JSON.stringify(X),
-      prevy: JSON.stringify(Y),
       popup: false,
-      preventData: preventData
+      preventData: preventData,
+      filter: filter
     };
     _this.dom = /*#__PURE__*/(0, _react.createRef)();
     _this.details = {};
@@ -173,9 +158,8 @@ var RChart = /*#__PURE__*/function (_Component) {
     }
   }, {
     key: "getRangeTypeNumber",
-    value: function getRangeTypeNumber(axis, _ref) {
-      var _ref$filter = _ref.filter,
-          filter = _ref$filter === void 0 ? [] : _ref$filter;
+    value: function getRangeTypeNumber(axis) {
+      var filter = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
       var _this$details = this.details,
           limit = _this$details.limit,
           width = _this$details.width,
@@ -254,14 +238,13 @@ var RChart = /*#__PURE__*/function (_Component) {
     }
   }, {
     key: "getRangeTypeString",
-    value: function getRangeTypeString(axis, _ref2) {
-      var _ref2$filter = _ref2.filter,
-          filter = _ref2$filter === void 0 ? [] : _ref2$filter,
-          labels = _ref2.labels,
-          _ref2$width = _ref2.width,
-          width = _ref2$width === void 0 ? 60 : _ref2$width,
-          _ref2$height = _ref2.height,
-          height = _ref2$height === void 0 ? 30 : _ref2$height;
+    value: function getRangeTypeString(axis, _ref) {
+      var labels = _ref.labels,
+          _ref$width = _ref.width,
+          width = _ref$width === void 0 ? 60 : _ref$width,
+          _ref$height = _ref.height,
+          height = _ref$height === void 0 ? 30 : _ref$height;
+      var filter = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
       var limit = this.details.limit;
       var size = this.details[axis === 'x' ? 'width' : 'height'];
 
@@ -298,8 +281,9 @@ var RChart = /*#__PURE__*/function (_Component) {
           type = _this$details2.type,
           width = _this$details2.width,
           height = _this$details2.height;
-      var xRange = type.x === 'number' ? this.getRangeTypeNumber('x', X) : this.getRangeTypeString('x', X);
-      var yRange = type.y === 'number' ? this.getRangeTypeNumber('y', Y) : this.getRangeTypeString('y', Y);
+      var filter = this.state.filter;
+      var xRange = type.x === 'number' ? this.getRangeTypeNumber('x', filter.x) : this.getRangeTypeString('x', X, filter.x);
+      var yRange = type.y === 'number' ? this.getRangeTypeNumber('y', filter.y) : this.getRangeTypeString('y', Y, filter.y);
       return {
         x: xRange,
         y: yRange
@@ -348,20 +332,20 @@ var RChart = /*#__PURE__*/function (_Component) {
     }
   }, {
     key: "getLineChart",
-    value: function getLineChart(_ref3, index) {
-      var stream = _ref3.stream,
-          _ref3$fill = _ref3.fill,
-          fill = _ref3$fill === void 0 ? '#fff' : _ref3$fill,
-          _ref3$color = _ref3.color,
-          color = _ref3$color === void 0 ? '#000' : _ref3$color,
-          _ref3$pointRadius = _ref3.pointRadius,
-          pointRadius = _ref3$pointRadius === void 0 ? 4 : _ref3$pointRadius,
-          _ref3$lineWidth = _ref3.lineWidth,
-          lineWidth = _ref3$lineWidth === void 0 ? 2 : _ref3$lineWidth,
-          area = _ref3.area,
-          dash = _ref3.dash,
-          title = _ref3.title,
-          editable = _ref3.editable;
+    value: function getLineChart(_ref2, index) {
+      var stream = _ref2.stream,
+          _ref2$fill = _ref2.fill,
+          fill = _ref2$fill === void 0 ? '#fff' : _ref2$fill,
+          _ref2$color = _ref2.color,
+          color = _ref2$color === void 0 ? '#000' : _ref2$color,
+          _ref2$pointRadius = _ref2.pointRadius,
+          pointRadius = _ref2$pointRadius === void 0 ? 4 : _ref2$pointRadius,
+          _ref2$lineWidth = _ref2.lineWidth,
+          lineWidth = _ref2$lineWidth === void 0 ? 2 : _ref2$lineWidth,
+          area = _ref2.area,
+          dash = _ref2.dash,
+          title = _ref2.title,
+          editable = _ref2.editable;
       var points = [],
           line = {
         points: [],
@@ -457,10 +441,10 @@ var RChart = /*#__PURE__*/function (_Component) {
     }
   }, {
     key: "getBarChart",
-    value: function getBarChart(_ref4, barCounter, index) {
-      var color = _ref4.color,
-          title = _ref4.title,
-          editable = _ref4.editable;
+    value: function getBarChart(_ref3, barCounter, index) {
+      var color = _ref3.color,
+          title = _ref3.title,
+          editable = _ref3.editable;
       var rects = [];
       var _this$details3 = this.details,
           barAxis = _this$details3.barAxis,
@@ -532,12 +516,12 @@ var RChart = /*#__PURE__*/function (_Component) {
     }
   }, {
     key: "getGridLine",
-    value: function getGridLine(value, axis, _ref5) {
-      var _ref5$color = _ref5.color,
-          color = _ref5$color === void 0 ? 'red' : _ref5$color,
-          _ref5$lineWidth = _ref5.lineWidth,
-          lineWidth = _ref5$lineWidth === void 0 ? 0.7 : _ref5$lineWidth,
-          dash = _ref5.dash;
+    value: function getGridLine(value, axis, _ref4) {
+      var _ref4$color = _ref4.color,
+          color = _ref4$color === void 0 ? 'red' : _ref4$color,
+          _ref4$lineWidth = _ref4.lineWidth,
+          lineWidth = _ref4$lineWidth === void 0 ? 0.7 : _ref4$lineWidth,
+          dash = _ref4.dash;
       var range = this.details.range[axis];
 
       if (!range) {
@@ -568,7 +552,7 @@ var RChart = /*#__PURE__*/function (_Component) {
       var start = range.start,
           step = range.step,
           end = range.end,
-          gridColor = this.state[axis.toUpperCase()].gridColor;
+          gridColor = this.props[axis.toUpperCase()].gridColor;
       var value = Math.round((start - step) / step) * step,
           gridLines = [];
 
@@ -593,10 +577,10 @@ var RChart = /*#__PURE__*/function (_Component) {
           areas = [],
           Shapes = [];
       var data = this.props.data;
-      var _this$state = this.state,
-          X = _this$state.X,
-          Y = _this$state.Y,
-          preventData = _this$state.preventData;
+      var preventData = this.state.preventData;
+      var _this$props2 = this.props,
+          X = _this$props2.X,
+          Y = _this$props2.Y;
       var barAxis = this.details.barAxis;
       var xGridLines = X.gridColor ? this.getGridLines('x') : [];
       var yGridLines = Y.gridColor ? this.getGridLines('y') : [];
@@ -675,18 +659,17 @@ var RChart = /*#__PURE__*/function (_Component) {
   }, {
     key: "componentDidMount",
     value: function componentDidMount() {
-      this.setState({});
+      this.SetState({});
     }
   }, {
     key: "getDetails",
     value: function getDetails() {
-      var _this$props2 = this.props,
-          data = _this$props2.data,
-          _this$props2$barWidth = _this$props2.barWidth,
-          barWidth = _this$props2$barWidth === void 0 ? 80 : _this$props2$barWidth,
-          _this$state2 = this.state,
-          X = _this$state2.X,
-          Y = _this$state2.Y,
+      var _this$props3 = this.props,
+          X = _this$props3.X,
+          Y = _this$props3.Y,
+          data = _this$props3.data,
+          _this$props3$barWidth = _this$props3.barWidth,
+          barWidth = _this$props3$barWidth === void 0 ? 80 : _this$props3$barWidth,
           d = this.details;
 
       if (!d.type) {
@@ -759,19 +742,22 @@ var RChart = /*#__PURE__*/function (_Component) {
   }, {
     key: "changeFilter",
     value: function changeFilter(p1, p2, axis) {
-      var obj = JSON.parse(JSON.stringify(this.state[axis]));
-      obj.filter = obj.labels ? [obj.labels[p1], obj.labels[p2]] : [p1, p2];
-      this.SetState(_defineProperty({}, axis, obj));
+      var labels = this.props[axis.toUpperCase()].labels;
+      var filter = this.state.filter;
+      filter[axis] = labels ? [labels[p1], labels[p2]] : [p1, p2];
+      this.SetState({
+        filter: filter
+      });
     }
   }, {
     key: "pointMouseDown",
-    value: function pointMouseDown(_ref6) {
-      var dataIndex = _ref6.dataIndex,
-          streamIndex = _ref6.streamIndex;
-      var _this$props3 = this.props,
-          data = _this$props3.data,
-          edit = _this$props3.edit,
-          remove = _this$props3.remove;
+    value: function pointMouseDown(_ref5) {
+      var dataIndex = _ref5.dataIndex,
+          streamIndex = _ref5.streamIndex;
+      var _this$props4 = this.props,
+          data = _this$props4.data,
+          edit = _this$props4.edit,
+          remove = _this$props4.remove;
 
       if (data[dataIndex].editable === false) {
         return;
@@ -799,9 +785,9 @@ var RChart = /*#__PURE__*/function (_Component) {
   }, {
     key: "pointMouseMove",
     value: function pointMouseMove() {
-      var _this$props4 = this.props,
-          data = _this$props4.data,
-          edit = _this$props4.edit,
+      var _this$props5 = this.props,
+          data = _this$props5.data,
+          edit = _this$props5.edit,
           stream = data[this.so.dataIndex].stream[this.so.streamIndex];
 
       if (!this.moved) {
@@ -832,10 +818,10 @@ var RChart = /*#__PURE__*/function (_Component) {
       this.eventHandler('window', 'mousemove', this.pointMouseMove, 'unbind');
       this.eventHandler('window', 'mouseup', this.pointMouseUp, 'unbind');
       this.mouseDownDetail = {};
-      var _this$props5 = this.props,
-          data = _this$props5.data,
-          edit = _this$props5.edit,
-          remove = _this$props5.remove;
+      var _this$props6 = this.props,
+          data = _this$props6.data,
+          edit = _this$props6.edit,
+          remove = _this$props6.remove;
 
       if (!this.moved) {
         var stream = data[this.so.dataIndex].stream[this.so.streamIndex];
@@ -865,10 +851,10 @@ var RChart = /*#__PURE__*/function (_Component) {
   }, {
     key: "mouseDown",
     value: function mouseDown() {
-      var _this$props6 = this.props,
-          add = _this$props6.add,
-          multiselect = _this$props6.multiselect,
-          data = _this$props6.data; // اگر مد افزودن فعال بود و در موقعیت فعلی موس دیتا یا دیتا هایی آمادگی دریافت نقطه جدید در این موقعیت را داشتند
+      var _this$props7 = this.props,
+          add = _this$props7.add,
+          multiselect = _this$props7.multiselect,
+          data = _this$props7.data; // اگر مد افزودن فعال بود و در موقعیت فعلی موس دیتا یا دیتا هایی آمادگی دریافت نقطه جدید در این موقعیت را داشتند
 
       if (add && this.addDataIndexes.length) {
         this.SetState({
@@ -944,7 +930,7 @@ var RChart = /*#__PURE__*/function (_Component) {
         return;
       }
 
-      this.setState({
+      this.SetState({
         popup: {
           type: 'multiselect',
           title: 'Multi Select',
@@ -1001,11 +987,11 @@ var RChart = /*#__PURE__*/function (_Component) {
     key: "zoomHover",
     value: function zoomHover(e, axis) {
       e.stopPropagation();
-      var _this$state3 = this.state,
-          _this$state3$X = _this$state3.X,
-          X = _this$state3$X === void 0 ? {} : _this$state3$X,
-          _this$state3$Y = _this$state3.Y,
-          Y = _this$state3$Y === void 0 ? {} : _this$state3$Y;
+      var _this$props8 = this.props,
+          _this$props8$X = _this$props8.X,
+          X = _this$props8$X === void 0 ? {} : _this$props8$X,
+          _this$props8$Y = _this$props8.Y,
+          Y = _this$props8$Y === void 0 ? {} : _this$props8$Y;
 
       if (axis === 'x' && !X.zoom) {
         return;
@@ -1061,14 +1047,11 @@ var RChart = /*#__PURE__*/function (_Component) {
     value: function getPopup(popup) {
       var _this2 = this;
 
-      var _this$state4 = this.state,
-          X = _this$state4.X,
-          Y = _this$state4.Y,
-          _this$props7 = this.props,
-          data = _this$props7.data,
-          add = _this$props7.add,
-          edit = _this$props7.edit,
-          remove = _this$props7.remove,
+      var _this$props9 = this.props,
+          data = _this$props9.data,
+          add = _this$props9.add,
+          edit = _this$props9.edit,
+          remove = _this$props9.remove,
           d = this.details;
       var xType = d.type.x,
           yType = d.type.y;
@@ -1144,10 +1127,10 @@ var RChart = /*#__PURE__*/function (_Component) {
           justifyContent: 'flex-end'
         }
       };
-      var _this$state$axis$toUp = this.state[axis.toUpperCase()],
-          _this$state$axis$toUp2 = _this$state$axis$toUp.rotate,
-          rotate = _this$state$axis$toUp2 === void 0 ? 0 : _this$state$axis$toUp2,
-          labels = _this$state$axis$toUp.labels;
+      var _this$props$axis$toUp = this.props[axis.toUpperCase()],
+          _this$props$axis$toUp2 = _this$props$axis$toUp.rotate,
+          rotate = _this$props$axis$toUp2 === void 0 ? 0 : _this$props$axis$toUp2,
+          labels = _this$props$axis$toUp.labels;
       return /*#__PURE__*/_react.default.createElement(_rRangeSlider.default, {
         className: "labelSlider",
         editable: false,
@@ -1188,7 +1171,7 @@ var RChart = /*#__PURE__*/function (_Component) {
       var _fillStyle,
           _this4 = this;
 
-      var labels = this.state[axis.toUpperCase()].labels;
+      var labels = this.props[axis.toUpperCase()].labels;
       var type = this.details.type[axis],
           _this$details$range$a2 = this.details.range[axis].filter,
           p1 = _this$details$range$a2.p1,
@@ -1224,9 +1207,9 @@ var RChart = /*#__PURE__*/function (_Component) {
         editValue: function editValue(point) {
           return type === 'string' ? labels[point.value] : point.value;
         },
-        ondrag: function ondrag(_ref7) {
-          var points = _ref7.points;
-          return _this4.changeFilter(points[0].value, points[1].value, axis.toUpperCase());
+        ondrag: function ondrag(_ref6) {
+          var points = _ref6.points;
+          return _this4.changeFilter(points[0].value, points[1].value, axis);
         },
         onmousedown: this.zoomMouseDown.bind(this),
         onmouseup: this.zoomMouseUp.bind(this),
@@ -1250,8 +1233,8 @@ var RChart = /*#__PURE__*/function (_Component) {
     }
   }, {
     key: "getStreamIndexByLabel",
-    value: function getStreamIndexByLabel(_ref8, label) {
-      var stream = _ref8.stream;
+    value: function getStreamIndexByLabel(_ref7, label) {
+      var stream = _ref7.stream;
 
       for (var j = 0; j < stream.length; j++) {
         if (stream[j].x === label) {
@@ -1286,17 +1269,17 @@ var RChart = /*#__PURE__*/function (_Component) {
     value: function render() {
       var _this5 = this;
 
-      var _this$props8 = this.props,
-          data = _this$props8.data,
-          html = _this$props8.html,
-          add = _this$props8.add,
-          multiselect = _this$props8.multiselect,
-          style = _this$props8.style;
-      var _this$state5 = this.state,
-          X = _this$state5.X,
-          Y = _this$state5.Y,
-          popup = _this$state5.popup,
-          preventData = _this$state5.preventData;
+      var _this$props10 = this.props,
+          X = _this$props10.X,
+          Y = _this$props10.Y,
+          data = _this$props10.data,
+          html = _this$props10.html,
+          add = _this$props10.add,
+          multiselect = _this$props10.multiselect,
+          style = _this$props10.style;
+      var _this$state = this.state,
+          popup = _this$state.popup,
+          preventData = _this$state.preventData;
       var _X$width = X.width,
           xWidth = _X$width === void 0 ? 60 : _X$width,
           _X$height = X.height,
@@ -1343,12 +1326,12 @@ var RChart = /*#__PURE__*/function (_Component) {
         },
         axisPosition: ['0%', '100%'],
         items: items,
-        mouseMove: function mouseMove(e, _ref9) {
-          var _ref10 = _slicedToArray(_ref9, 4),
-              x = _ref10[0],
-              y = _ref10[1],
-              px = _ref10[2],
-              py = _ref10[3];
+        mouseMove: function mouseMove(e, _ref8) {
+          var _ref9 = _slicedToArray(_ref8, 4),
+              x = _ref9[0],
+              y = _ref9[1],
+              px = _ref9[2],
+              py = _ref9[3];
 
           _this5.mousePosition = [x, y, px, py];
           _this5.mouseValue = [_this5.getValueByPercent(px, 'x'), _this5.getValueByPercent(-py, 'y')];
@@ -1383,38 +1366,6 @@ var RChart = /*#__PURE__*/function (_Component) {
         }
       }, X.show !== false && xRange && this.getLabelSlider('x'), X.zoom && xRange && this.getFilterSlider('x')))));
     }
-  }], [{
-    key: "getDerivedStateFromProps",
-    value: function getDerivedStateFromProps(props, state) {
-      var prevx = state.prevx,
-          prevy = state.prevy;
-      var _props$X = props.X,
-          X = _props$X === void 0 ? {} : _props$X,
-          _props$Y = props.Y,
-          Y = _props$Y === void 0 ? {} : _props$Y;
-      var change = {},
-          changed = false;
-
-      if (prevx !== JSON.stringify(X)) {
-        //اگر پروپس جدید از بیرون آمد
-        change.prevx = JSON.stringify(X);
-        change.X = X;
-        changed = true;
-      }
-
-      if (prevy !== JSON.stringify(Y)) {
-        //اگر پروپس جدید از بیرون آمد
-        change.prevy = JSON.stringify(Y);
-        change.Y = Y;
-        changed = true;
-      }
-
-      if (changed) {
-        return change;
-      }
-
-      return null;
-    }
   }]);
 
   return RChart;
@@ -1424,7 +1375,11 @@ exports.default = RChart;
 RChart.defaultProps = {
   data: [],
   X: {},
-  Y: {}
+  Y: {},
+  filter: {
+    x: [],
+    y: []
+  }
 };
 
 var RChartEdit = /*#__PURE__*/function (_Component2) {
@@ -1496,21 +1451,21 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
     value: function render() {
       var _this7 = this;
 
-      var _this$props9 = this.props,
-          points = _this$props9.points,
-          type = _this$props9.type,
-          title = _this$props9.title,
-          _onChange = _this$props9.onChange,
-          onClose = _this$props9.onClose,
-          onAdd = _this$props9.onAdd,
-          onEdit = _this$props9.onEdit,
-          onRemove = _this$props9.onRemove,
-          dataIndex = _this$props9.dataIndex,
-          streamIndex = _this$props9.streamIndex,
-          dynamicValue = _this$props9.dynamicValue,
-          staticValue = _this$props9.staticValue,
-          _this$props9$dataInde = _this$props9.dataIndexes,
-          dataIndexes = _this$props9$dataInde === void 0 ? [] : _this$props9$dataInde;
+      var _this$props11 = this.props,
+          points = _this$props11.points,
+          type = _this$props11.type,
+          title = _this$props11.title,
+          _onChange = _this$props11.onChange,
+          onClose = _this$props11.onClose,
+          onAdd = _this$props11.onAdd,
+          onEdit = _this$props11.onEdit,
+          onRemove = _this$props11.onRemove,
+          dataIndex = _this$props11.dataIndex,
+          streamIndex = _this$props11.streamIndex,
+          dynamicValue = _this$props11.dynamicValue,
+          staticValue = _this$props11.staticValue,
+          _this$props11$dataInd = _this$props11.dataIndexes,
+          dataIndexes = _this$props11$dataInd === void 0 ? [] : _this$props11$dataInd;
       var _this$context = this.context,
           data = _this$context.data,
           X = _this$context.X,
@@ -1593,8 +1548,8 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
         }), item.type === 'select' && /*#__PURE__*/_react.default.createElement("select", {
           className: "r-chart-edit-value",
           title: item.value,
-          onChange: function onChange(_ref11) {
-            var nativeEvent = _ref11.nativeEvent;
+          onChange: function onChange(_ref10) {
+            var nativeEvent = _ref10.nativeEvent;
             var _nativeEvent$target = nativeEvent.target,
                 selectedIndex = _nativeEvent$target.selectedIndex,
                 options = _nativeEvent$target.options;
