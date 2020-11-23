@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "jquery": "^3.5.0",
-    "r-canvas": "^2.0.30",
+    "r-canvas": "^3.0.0",
     "r-range-slider": "^3.0.13",
     "react": "^16.13.1",
     "react-dom": "^16.13.1"
