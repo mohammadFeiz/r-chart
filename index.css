@@ -10,6 +10,15 @@ body,html{
   color:#777;
   box-sizing: border-box;
   flex-direction:column;
+  overflow: hidden;
+  position: relative;
+}
+.r-chart .labelSlider{
+  position:absolute;
+  left:0;top:0;
+  width:100%;
+  height:100%;
+  padding:0;
 }
 .r-chart-container{
   position:relative;
@@ -50,14 +59,13 @@ body,html{
   position:relative;
 }
 .r-chart-canvas canvas{
-  position:absolute;
-  left:0;
-  top:0;
-  width:100%;
-  height:100%;
+  position: absolute;
   border:1px solid #ddd;
   border-radius:12px;
-
+  width:calc(100% - 2px);
+  height:100%;
+  left:0;
+  top:0;
 }
 .r-chart-popup-container{
   position: absolute;
@@ -67,9 +75,15 @@ body,html{
   align-items:center;
   width:0;
   height:0;
+  pointer-events: none;
+  transition:0s;
 }
-.r-chart-popup-container .r-chart-popup{
-  background:rgba(0,0,0,.6);
+.r-chart-popup-container.r-chart-add-popup{
+  transition:0s;
+}
+
+.r-chart-popup{
+  background:rgba(20,20,20,.7);
   padding:6px 12px;
   border-radius:6px;
   position:absolute;
@@ -80,6 +94,16 @@ body,html{
   flex-direction:column;
 }
 
+.r-chart-popup:before{
+  content:'';
+  position: absolute;
+  top:100%;
+  left:calc(50% - 5px);
+  border-top:5px solid rgba(0,0,0,.7);
+  border-left:5px solid transparent;
+  border-right:5px solid transparent;
+  
+}
 
 .r-chart-edit{
   position:absolute;
@@ -158,14 +182,14 @@ option{
   position:relative;
   padding:0 12px;
 }
-.r-chart-edit-form{
+.r-chart-edit-item{
   position:relative;
   display:flex;
   justify-content: space-between;
   align-items: center;
   height:36px;
 }
-.r-chart-edit-value{
+.r-chart-edit-tag{
   height:20px;
   margin:0 4px;
   border:none;
@@ -175,7 +199,7 @@ option{
   width:100px;
   text-align: center;
 }
-.r-chart-edit-value option{
+.r-chart-edit-tag option{
   color:#000;
 }
 .r-chart-detail-value{
@@ -203,6 +227,7 @@ option{
   border:1px solid;
   border-radius:3px;
   margin:0 3px;
+  font-size:10px;
 }
 .r-chart-edit-footer{
   height:24px;
