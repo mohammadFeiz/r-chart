@@ -1,6 +1,6 @@
 import React,{Component,createRef,createContext} from 'react';
 import RSlider from 'r-range-slider';
-import RCanvas from './r-canvas';
+import RCanvas from 'r-canvas';
 import $ from 'jquery';
 import './index.css';
 import {string_getRange,number_getRange,getPercentByValue,getValueByPercent,getLimitTypeNumber,eventHandler} from './functions';
@@ -454,7 +454,6 @@ var RChartContext = createContext();
       var type = this.details.type[axis],{start,end,step} = this.details.range[axis]; 
       var labelStyle = {x:{top:'24px'},y:{left:'unset',right:'16px',justifyContent:'flex-end'}};
       var {rotate = 0,labels,editLabel} = this.props[axis.toUpperCase()];
-      debugger;
       return (
         <RSlider 
           className='labelSlider' editable={false} showValue={false}
@@ -660,7 +659,7 @@ var RChartContext = createContext();
      var {items = [],actions = []} = multiselect;
      return (
        <div className='r-chart-edit' ref={this.dom} style={{direction:rtl?'rtl':'ltr'}}>
-          <div className='r-chart-edit-backdrop'></div>
+          <div className='r-chart-edit-backdrop' onClick={onClose}></div>
           <div className='r-chart-edit-header'>
             <div className='r-chart-edit-title'>{title}</div>
             <div className='r-chart-edit-close' onClick={onClose}></div>
@@ -731,7 +730,6 @@ var RChartContext = createContext();
             }
           </div> 
           <div className='r-chart-edit-footer'>
-          <button className='r-chart-edit-button' onClick={onClose} style={{flex:1}}>{translate('Close')}</button>
                 { type === 'multiselect' &&
                   actions.filter((a)=>a.show !== false).map((a,i)=>{
                     return (

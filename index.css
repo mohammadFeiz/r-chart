@@ -110,18 +110,20 @@ body,html{
   left:calc(50% - 120px);
   top:30px;
   width:240px;
-  background:rgba(0,0,0,.7);
+  background:rgba(255,255,255,.95);
   border-radius:5px;
   padding:12px;
-  color:#fff;
+  color:#777;
   display:flex;
   flex-direction:column;
-  z-index:1000
+  border:1px solid #eee;
+  z-index:1000;
+  box-shadow: 5px 5px 10px 0 rgba(0,0,0,0.1);
 }
 
 .r-chart-edit-header{
   height:24px;
-  border-bottom:1px solid #eee;
+  border-bottom:1px solid #ddd;
   padding:0 6px;
   display:flex;
   align-items:center;
@@ -135,7 +137,6 @@ body,html{
 .r-chart-edit-close{
   width:24px;
   height:24px;
-  color:#fff;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -187,16 +188,21 @@ option{
   display:flex;
   justify-content: space-between;
   align-items: center;
-  height:36px;
+  height:48px;
+  border-bottom: 1px solid #ddd;
+}
+.r-chart-edit-item:last-child{
+  border-bottom:none;
 }
 .r-chart-edit-tag{
-  height:20px;
+  height:24px;
   margin:0 4px;
-  border:none;
-  border-bottom:1px solid;
+  border:1px solid #ddd;
+  border-radius:4px;
   background:none;
-  color:#fff;
+  color:inherit;
   width:100px;
+  outline:none;
   text-align: center;
 }
 .r-chart-edit-tag option{
@@ -223,9 +229,10 @@ option{
 }
 .r-chart-edit-button{
   background:none;
-  color:#fff;
+  color:inherit;
   border:1px solid;
   border-radius:3px;
+  flex:1;
   margin:0 3px;
   font-size:10px;
 }
@@ -267,5 +274,5 @@ option{
   position:absolute;
   height:100%;
   top:0;
-  background:#aaa;
+  background:#eee;
 }

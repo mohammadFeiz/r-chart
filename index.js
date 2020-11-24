@@ -13,7 +13,7 @@ var _react = _interopRequireWildcard(require("react"));
 
 var _rRangeSlider = _interopRequireDefault(require("r-range-slider"));
 
-var _rCanvas = _interopRequireDefault(require("./r-canvas"));
+var _rCanvas = _interopRequireDefault(require("r-canvas"));
 
 var _jquery = _interopRequireDefault(require("jquery"));
 
@@ -1001,7 +1001,6 @@ var RChart = /*#__PURE__*/function (_Component) {
           rotate = _this$props$axis$toUp2 === void 0 ? 0 : _this$props$axis$toUp2,
           labels = _this$props$axis$toUp.labels,
           editLabel = _this$props$axis$toUp.editLabel;
-      debugger;
       return /*#__PURE__*/_react.default.createElement(_rRangeSlider.default, {
         className: "labelSlider",
         editable: false,
@@ -1453,7 +1452,8 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
           direction: rtl ? 'rtl' : 'ltr'
         }
       }, /*#__PURE__*/_react.default.createElement("div", {
-        className: "r-chart-edit-backdrop"
+        className: "r-chart-edit-backdrop",
+        onClick: onClose
       }), /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-edit-header"
       }, /*#__PURE__*/_react.default.createElement("div", {
@@ -1538,13 +1538,7 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
         }));
       })), /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-edit-footer"
-      }, /*#__PURE__*/_react.default.createElement("button", {
-        className: "r-chart-edit-button",
-        onClick: onClose,
-        style: {
-          flex: 1
-        }
-      }, translate('Close')), type === 'multiselect' && actions.filter(function (a) {
+      }, type === 'multiselect' && actions.filter(function (a) {
         return a.show !== false;
       }).map(function (a, i) {
         return /*#__PURE__*/_react.default.createElement("button", {
