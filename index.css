@@ -272,7 +272,22 @@ option{
 
 .r-chart-multiselect{
   position:absolute;
-  height:100%;
-  top:0;
   background:#eee;
+}
+
+.r-chart-filterSlider-button{
+  width:10px;
+  height:10px;
+  background:#fff;
+  border:1px solid #eee;
+  border-radius:0;
+  transition:.2s;
+}
+.r-chart-filterSlider-button.active,.r-chart-filterSlider-button:hover{
+  width:26px;
+  height:26px;
+  background:#fff;
+  border:2px solid #999;
+  border-radius:100%;
+  transition:.2s;
 }

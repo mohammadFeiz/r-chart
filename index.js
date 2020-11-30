@@ -99,7 +99,15 @@ var RChart = /*#__PURE__*/function (_Component) {
     };
     _this.dom = /*#__PURE__*/(0, _react.createRef)();
     _this.details = {
-      getRange: {}
+      min: Infinity,
+      max: -Infinity,
+      editLabel: {},
+      getFilter: {},
+      changeFilter: {},
+      getPercentByValue: {},
+      getFilterSlider: {},
+      getGridLines: {},
+      getLines: {}
     };
     (0, _jquery.default)('body').on('mouseout', '.r-chart-canvas', function () {
       (0, _jquery.default)('.r-chart-popup-container').html('');
@@ -111,45 +119,12 @@ var RChart = /*#__PURE__*/function (_Component) {
       });
     }
 
+    _this.translate = _functions.translate;
+    _this.getLimitTypeNumber = _functions.getLimitTypeNumber;
     return _this;
   }
 
   _createClass(RChart, [{
-    key: "translate",
-    value: function translate(value) {
-      var dictionary = {
-        'Add.Point': {
-          en: 'Add Point',
-          fa: 'افزودن نقطه'
-        },
-        'Edit.Point': {
-          en: 'Edit Point',
-          fa: 'ویرایش نقطه'
-        },
-        'Remove.Point': {
-          en: 'Remove Point',
-          fa: 'حذف نقطه'
-        },
-        'Add': {
-          en: 'Add',
-          fa: 'افزودن'
-        },
-        'Edit': {
-          en: 'Edit',
-          fa: 'ویرایش'
-        },
-        'Remove': {
-          en: 'Remove',
-          fa: 'حذف'
-        },
-        'Close': {
-          en: 'Close',
-          fa: 'بستن'
-        }
-      };
-      return dictionary[value][this.props.globalization];
-    }
-  }, {
     key: "getStyle",
     value: function getStyle(x, y) {
       return {
@@ -159,14 +134,18 @@ var RChart = /*#__PURE__*/function (_Component) {
       };
     }
   }, {
-    key: "getLimit",
-    value: function getLimit(data, X, Y) {
-      var xLimit = X.labels ? [0, X.labels.length - 1] : (0, _functions.getLimitTypeNumber)(data, 'x');
-      var yLimit = Y.labels ? [0, Y.labels.length - 1] : (0, _functions.getLimitTypeNumber)(data, 'y');
-      return {
-        x: xLimit,
-        y: yLimit
-      };
+    key: "getKey",
+    value: function getKey(point) {
+      var keyAxis = this.props.keyAxis;
+      var field = keyAxis.field;
+      return point[field];
+    }
+  }, {
+    key: "getValue",
+    value: function getValue(point) {
+      var valueAxis = this.props.valueAxis;
+      var field = valueAxis.field;
+      return point[field];
     }
   }, {
     key: "getClient",
@@ -194,201 +173,249 @@ var RChart = /*#__PURE__*/function (_Component) {
     }
   }, {
     key: "getLineChart",
-    value: function getLineChart(_ref, index) {
-      var stream = _ref.stream,
-          _ref$fill = _ref.fill,
-          fill = _ref$fill === void 0 ? '#fff' : _ref$fill,
-          _ref$color = _ref.color,
-          color = _ref$color === void 0 ? '#000' : _ref$color,
-          _ref$pointRadius = _ref.pointRadius,
-          pointRadius = _ref$pointRadius === void 0 ? 4 : _ref$pointRadius,
-          _ref$lineWidth = _ref.lineWidth,
-          lineWidth = _ref$lineWidth === void 0 ? 2 : _ref$lineWidth,
-          area = _ref.area,
-          dash = _ref.dash,
-          title = _ref.title,
-          editable = _ref.editable;
-      var points = [],
-          line = {
+    value: function getLineChart(data, dataIndex) {
+      var points = data.points,
+          _data$color = data.color,
+          color = _data$color === void 0 ? '#000' : _data$color,
+          _data$lineWidth = data.lineWidth,
+          lineWidth = _data$lineWidth === void 0 ? 2 : _data$lineWidth,
+          areaOpacity = data.areaOpacity,
+          dash = data.dash,
+          pointStyle = data.pointStyle,
+          text = data.text;
+      var dataDetail = { ...data,
+        dataIndex: dataIndex,
         points: [],
-        lineWidth: lineWidth,
-        stroke: color,
-        dash: dash
-      },
-          Area;
+        line: {
+          points: [],
+          lineWidth: lineWidth,
+          stroke: color,
+          dash: dash
+        },
+        area: false,
+        texts: []
+      };
 
-      for (var j = 0; j < stream.length; j++) {
-        var _stream$j = stream[j],
-            x = _stream$j.x,
-            y = _stream$j.y,
-            PointRadius = _stream$j.pointRadius,
-            LineWidth = _stream$j.lineWidth,
-            Fill = _stream$j.fill;
+      for (var pointIndex = 0; pointIndex < points.length; pointIndex++) {
+        var point = points[pointIndex];
+        var key = this.getKey(point),
+            value = this.getValue(point);
 
-        if (x === null || y === null) {
+        if (key === null || value === null) {
           continue;
         }
 
-        var xp = (0, _functions.getPercentByValue)(x, 'x', this.details),
-            yp = (0, _functions.getPercentByValue)(y, 'y', this.details);
+        var px = this.details.getPercentByValue.x(key, value, point);
+        var py = this.details.getPercentByValue.y(key, value, point);
 
-        if (xp === 'string error') {
-          console.error("RChart => Receive \"".concat(x, "\" in data[").concat(index, "].stream[").concat(j, "].x . but there is not \"").concat(x, "\" in X.labels array"));
+        if (px === false || py === false) {
           continue;
-        } else if (xp === 'number error') {
-          console.error("RChart => data[".concat(index, "].stream[").concat(j, "].x is not a number. if type of x value of stream is an string you must set labels property as array of strings in X props"));
-          continue;
-        } else {
-          xp += '%';
         }
 
-        if (yp === false) {
-          console.error("RChart => Receive \"".concat(y, "\" in data[").concat(index, "].stream[").concat(j, "].y . but there is not \"").concat(y, "\" in Y.labels array"));
-          continue;
-        } else if (yp === 'number error') {
-          console.error("RChart => data[".concat(index, "].stream[").concat(j, "].y is not a number. if type of y value of stream is an string you must set labels property as array of strings in Y props"));
-          continue;
-        } else {
-          yp *= -1;
-          yp += '%';
-        }
+        this.keyDictionary[dataIndex][key] = pointIndex;
 
-        var radius = PointRadius || pointRadius;
-
-        if (radius) {
-          points.push({
-            x: xp,
-            y: yp,
+        if (pointStyle) {
+          var PointStyle = typeof pointStyle === 'function' ? pointStyle(point, {
+            dataIndex: dataIndex,
+            pointIndex: pointIndex
+          }) : pointStyle;
+          var radius = PointStyle.radius,
+              _PointStyle$fill = PointStyle.fill,
+              fill = _PointStyle$fill === void 0 ? '#fff' : _PointStyle$fill,
+              _PointStyle$stroke = PointStyle.stroke,
+              stroke = _PointStyle$stroke === void 0 ? color : _PointStyle$stroke,
+              _PointStyle$lineWidth = PointStyle.lineWidth,
+              pointLineWidth = _PointStyle$lineWidth === void 0 ? lineWidth : _PointStyle$lineWidth,
+              pointDash = PointStyle.dash,
+              slice = PointStyle.slice;
+          var Point = {
+            x: px + '%',
+            y: py + '%',
             items: [{
               r: this.props.clickRadius,
-              fill: 'transparent',
+              fill: 'rgba(0,0,0,0)',
               onMouseDown: this.pointMouseDown.bind(this),
-              dataIndex: index,
-              streamIndex: j,
-              value: {
-                x: x,
-                y: y
-              }
+              dataIndex: dataIndex,
+              pointIndex: pointIndex
             }, {
               r: radius,
-              lineWidth: LineWidth || lineWidth * 2,
-              fill: Fill || fill,
-              stroke: color
+              lineWidth: pointLineWidth * 2,
+              fill: fill,
+              stroke: stroke,
+              dash: pointDash,
+              slice: slice
             }]
-          });
+          };
+          this.elements.points.push(Point);
+          dataDetail.points.push(Point);
         }
 
-        if (lineWidth) {
-          line.points.push([xp, yp]);
+        if (text) {
+          var _text = text(point, {
+            dataIndex: dataIndex,
+            pointIndex: pointIndex
+          }),
+              _text$value = _text.value,
+              _value = _text$value === void 0 ? '' : _text$value,
+              _text$fontSize = _text.fontSize,
+              fontSize = _text$fontSize === void 0 ? 16 : _text$fontSize,
+              _text$color = _text.color,
+              _color = _text$color === void 0 ? '#444' : _text$color,
+              _text$x = _text.x,
+              x = _text$x === void 0 ? 0 : _text$x,
+              _text$y = _text.y,
+              y = _text$y === void 0 ? 0 : _text$y,
+              rotate = _text.rotate,
+              align = _text.align;
+
+          var Text = {
+            x: px + '%',
+            y: py + '%',
+            rotate: rotate,
+            items: [{
+              text: _value,
+              fontSize: fontSize,
+              fill: _color,
+              x: x,
+              y: y,
+              align: align
+            }]
+          };
+          this.elements.texts.push(Text);
+          dataDetail.texts.push(Text);
         }
+
+        dataDetail.line.points.push([px + '%', py + '%']);
       }
 
-      if (area) {
-        Area = {
-          points: line.points.slice(),
-          fill: color,
-          opacity: area
-        };
-        Area.points.splice(0, 0, [line.points[0][0], 0]);
-        Area.points.push([line.points[line.points.length - 1][0], 0]);
+      if (lineWidth) {
+        this.elements.lines.push(dataDetail.line);
       }
 
-      return {
-        points: points,
-        line: line,
-        area: area ? Area : [],
-        type: 'line',
-        title: title,
-        index: index,
-        editable: editable
-      };
+      if (areaOpacity) {
+        dataDetail.area = this.details.getArea(dataDetail.line.points, color, areaOpacity);
+        this.elements.areas.push(dataDetail.area);
+      }
+
+      this.dataDetails.push(dataDetail);
     }
   }, {
     key: "getBarChart",
-    value: function getBarChart(_ref2, barCounter, index) {
-      var color = _ref2.color,
-          title = _ref2.title,
-          editable = _ref2.editable,
-          stream = _ref2.stream;
-      var rects = [];
+    value: function getBarChart(data, barCounter, dataIndex) {
+      var color = data.color,
+          points = data.points,
+          text = data.text;
+      var dataDetail = { ...data,
+        dataIndex: dataIndex,
+        rects: [],
+        texts: []
+      };
       var _this$details = this.details,
-          barAxis = _this$details.barAxis,
+          keyAxis = _this$details.keyAxis,
           barCount = _this$details.barCount,
-          barWidth = _this$details.barWidth;
+          barWidth = _this$details.barWidth,
+          getPercentByValue = _this$details.getPercentByValue;
 
-      for (var j = 0; j < stream.length; j++) {
-        var _stream$j2 = stream[j],
-            x = _stream$j2.x,
-            y = _stream$j2.y;
-        var xp = (0, _functions.getPercentByValue)(x, 'x', this.details),
-            yp = (0, _functions.getPercentByValue)(y, 'y', this.details);
+      for (var pointIndex = 0; pointIndex < points.length; pointIndex++) {
+        var point = points[pointIndex];
+        var key = this.getKey(point),
+            value = this.getValue(point);
 
-        if (xp === false) {
-          console.error("RChart => Receive \"".concat(x, "\" in data[").concat(index, "].stream[").concat(j, "].x . but there is not \"").concat(x, "\" in X.labels array"));
+        if (key === null || value === null) {
           continue;
-        } else {
-          xp += '%';
         }
 
-        if (yp === false) {
-          console.error("RChart => Receive \"".concat(y, "\" in data[").concat(index, "].stream[").concat(j, "].y . but there is not \"").concat(y, "\" in Y.labels array"));
+        var px = getPercentByValue.x(key, value, point) + '%';
+        var py = getPercentByValue.y(key, value, point) + '%';
+
+        if (px === false || py === false) {
           continue;
-        } else {
-          yp *= -1;
-          yp += '%';
         }
 
-        if (barAxis === 'x') {
-          rects.push({
+        this.keyDictionary[dataIndex][key] = pointIndex;
+
+        if (keyAxis === 'x') {
+          var rect = {
             width: barWidth + '%',
-            height: yp + '%',
-            x: xp,
+            height: py,
+            x: px,
             fill: color,
             pivot: [barWidth * (barCount / 2 - barCounter) + '%', 0],
             onMouseDown: this.pointMouseDown.bind(this),
-            dataIndex: index,
-            streamIndex: j
-          });
+            dataIndex: dataIndex,
+            pointIndex: pointIndex
+          };
+          this.elements.rects.push(rect);
+          dataDetail.rects.push(rect);
         } else {
-          rects.push({
-            width: xp + '%',
+          var _rect = {
+            width: px,
             height: barWidth + '%',
-            y: yp,
+            y: py,
             fill: color,
-            value: {
-              x: x,
-              y: y
-            },
             pivot: [0, barWidth * (barCount / 2 - barCounter) + '%'],
             onMouseDown: this.pointMouseDown.bind(this),
-            dataIndex: index,
-            streamIndex: j
-          });
+            dataIndex: dataIndex,
+            pointIndex: pointIndex
+          };
+          this.elements.rects.push(_rect);
+          dataDetail.rects.push(_rect);
+        }
+
+        if (text) {
+          var _text2 = text(point, {
+            dataIndex: dataIndex,
+            pointIndex: pointIndex
+          }),
+              _text2$value = _text2.value,
+              _value2 = _text2$value === void 0 ? '' : _text2$value,
+              _text2$fontSize = _text2.fontSize,
+              fontSize = _text2$fontSize === void 0 ? 16 : _text2$fontSize,
+              _text2$color = _text2.color,
+              _color2 = _text2$color === void 0 ? '#444' : _text2$color,
+              _text2$x = _text2.x,
+              x = _text2$x === void 0 ? 0 : _text2$x,
+              _text2$y = _text2.y,
+              y = _text2$y === void 0 ? 0 : _text2$y,
+              rotate = _text2.rotate,
+              align = _text2.align;
+
+          var Text = {
+            x: px + '%',
+            y: py + '%',
+            rotate: rotate,
+            items: [{
+              text: _value2,
+              fontSize: fontSize,
+              fill: _color2,
+              x: x,
+              y: y,
+              align: align
+            }]
+          };
+          this.elements.texts.push(Text);
+          dataDetail.texts.push(Text);
         }
       }
 
-      return {
-        rects: rects,
-        type: 'bar',
-        title: title,
-        index: index,
-        editable: editable
-      };
+      this.dataDetails.push(dataDetail);
     }
   }, {
     key: "getGridLine",
-    value: function getGridLine(value, axis, _ref3) {
-      var _ref3$color = _ref3.color,
-          color = _ref3$color === void 0 ? 'red' : _ref3$color,
-          _ref3$lineWidth = _ref3.lineWidth,
-          lineWidth = _ref3$lineWidth === void 0 ? 0.7 : _ref3$lineWidth,
-          dash = _ref3.dash;
+    value: function getGridLine(value, axis, _ref) {
+      var _ref$color = _ref.color,
+          color = _ref$color === void 0 ? 'red' : _ref$color,
+          _ref$lineWidth = _ref.lineWidth,
+          lineWidth = _ref$lineWidth === void 0 ? 0.7 : _ref$lineWidth,
+          dash = _ref.dash;
       var range = this.details.range[axis];
 
       if (!range) {
         return {};
       }
 
+      var keyAxis = this.props.keyAxis;
+      value = typeof value === 'string' ? keyAxis.list.indexOf(value) : value;
       var start = range.start,
           end = range.end,
           v = (value - start) * 100 / (end - start);
@@ -403,7 +430,7 @@ var RChart = /*#__PURE__*/function (_Component) {
     }
   }, {
     key: "getGridLines",
-    value: function getGridLines(axis) {
+    value: function getGridLines(axis, color) {
       var range = this.details.range[axis];
 
       if (!range) {
@@ -412,15 +439,14 @@ var RChart = /*#__PURE__*/function (_Component) {
 
       var start = range.start,
           step = range.step,
-          end = range.end,
-          gridColor = this.props[axis.toUpperCase()].gridColor;
+          end = range.end;
       var value = Math.round((start - step) / step) * step,
           gridLines = [];
 
       while (value <= end) {
         if (value >= start) {
           gridLines.push(this.getGridLine(value, axis, {
-            color: gridColor
+            color: color
           }));
         }
 
@@ -430,92 +456,83 @@ var RChart = /*#__PURE__*/function (_Component) {
       return gridLines;
     }
   }, {
+    key: "getLines",
+    value: function getLines(axis, lines) {
+      var Lines = (typeof lines === 'function' ? lines() : lines) || [];
+      var indicators = [];
+
+      for (var i = 0; i < Lines.length; i++) {
+        var _Lines$i = Lines[i],
+            value = _Lines$i.value,
+            dash = _Lines$i.dash,
+            lineWidth = _Lines$i.lineWidth,
+            color = _Lines$i.color;
+        indicators.push(this.getGridLine(value, axis, {
+          dash: dash,
+          lineWidth: lineWidth,
+          color: color
+        }));
+      }
+
+      return indicators;
+    }
+  }, {
     key: "getElements",
     value: function getElements() {
-      var points = [],
-          lines = [],
-          rects = [],
-          areas = [],
-          Shapes = [];
-      var _this$props2 = this.props,
-          data = _this$props2.data,
-          X = _this$props2.X,
-          Y = _this$props2.Y;
+      var data = this.props.data;
+      this.keyDictionary = data.map(function () {
+        return {};
+      });
       var preventData = this.state.preventData;
-      var barAxis = this.details.barAxis;
-      var xGridLines = X.gridColor ? this.getGridLines('x') : [];
-      var yGridLines = Y.gridColor ? this.getGridLines('y') : [];
-      var xIndicator = X.indicator ? [this.getGridLine(X.indicator.value, 'x', X.indicator)] : [];
-      var yIndicator = Y.indicator ? [this.getGridLine(Y.indicator.value, 'y', X.indicator)] : [];
+      var _this$details2 = this.details,
+          getGridLines = _this$details2.getGridLines,
+          getLines = _this$details2.getLines;
+      this.elements = {
+        xGridLines: getGridLines.x(),
+        yGridLines: getGridLines.y(),
+        areas: [],
+        rects: [],
+        lines: [],
+        points: [],
+        xIndicators: getLines.x(),
+        yIndicators: getLines.y(),
+        texts: [],
+        shapes: []
+      };
       var barCounter = 0;
-      this.data = [];
+      this.dataDetails = [];
 
-      for (var i = 0; i < data.length; i++) {
-        var _data$i = data[i],
-            title = _data$i.title,
-            stream = _data$i.stream,
-            _data$i$type = _data$i.type,
-            chartType = _data$i$type === void 0 ? 'line' : _data$i$type,
-            _data$i$color = _data$i.color,
-            color = _data$i$color === void 0 ? '#000' : _data$i$color,
-            shapes = _data$i.shapes;
+      for (var dataIndex = 0; dataIndex < data.length; dataIndex++) {
+        var _data$dataIndex = data[dataIndex],
+            title = _data$dataIndex.title,
+            _data$dataIndex$type = _data$dataIndex.type,
+            type = _data$dataIndex$type === void 0 ? 'line' : _data$dataIndex$type,
+            _data$dataIndex$shape = _data$dataIndex.shapes,
+            shapes = _data$dataIndex$shape === void 0 ? function () {
+          return [];
+        } : _data$dataIndex$shape;
 
         if (preventData[title]) {
           continue;
         }
 
-        if (chartType === 'line') {
-          var result = this.getLineChart(data[i], i);
-          points = points.concat(result.points);
-          lines = lines.concat(result.line);
-          areas = areas.concat(result.area);
-          this.data.push(JSON.parse(JSON.stringify(result)));
-        } else if (chartType === 'bar' && barAxis) {
-          var result = this.getBarChart(data[i], barCounter, i);
-          this.data.push(result);
-          rects = rects.concat(result.rects);
+        if (type === 'line') {
+          this.getLineChart(data[dataIndex], dataIndex);
+        } else if (type === 'bar') {
+          this.getBarChart(data[dataIndex], barCounter, dataIndex);
           barCounter++;
         }
 
-        Shapes = shapes ? Shapes.concat(this.getShapes(shapes(data, X, Y))) : Shapes;
+        this.elements.shapes = (0, _functions.getShapes)(shapes(), this.details);
       }
 
-      this.elements = {
-        arcs: points,
-        rects: rects
-      };
-      return xGridLines.concat(yGridLines, rects, areas, lines, points, xIndicator, yIndicator, Shapes);
-    }
-  }, {
-    key: "getShapes",
-    value: function getShapes(shapes) {
-      var Shapes = [];
+      var elements = [];
 
-      for (var i = 0; i < shapes.length; i++) {
-        var shape = shapes[i];
-        var obj = { ...shape
-        };
-
-        if (shape.points) {
-          obj.points = [];
-
-          for (var j = 0; j < shape.points.length; j++) {
-            var _shape$points$j = shape.points[j],
-                x = _shape$points$j.x,
-                y = _shape$points$j.y;
-            obj.points.push([(0, _functions.getPercentByValue)(x, 'x', this.details) + '%', -(0, _functions.getPercentByValue)(y, 'y', this.details) + '%']);
-          }
-        } else if (shape.r) {
-          var _x = shape.x,
-              _y = shape.y;
-          obj.x = (0, _functions.getPercentByValue)(_x, 'x', this.details) + '%';
-          obj.y = -(0, _functions.getPercentByValue)(_y, 'y', this.details) + '%';
-        }
-
-        Shapes.push(obj);
+      for (var prop in this.elements) {
+        elements = elements.concat(this.elements[prop]);
       }
 
-      return Shapes;
+      return elements;
     }
   }, {
     key: "componentDidMount",
@@ -523,79 +540,276 @@ var RChart = /*#__PURE__*/function (_Component) {
       this.SetState({});
     }
   }, {
-    key: "getRange",
-    value: function getRange(X, Y) {
-      var type = this.details.type;
-      var xRange = type.x === 'number' ? (0, _functions.number_getRange)('x', this.details) : (0, _functions.string_getRange)('x', this.details);
-      var yRange = type.y === 'number' ? (0, _functions.number_getRange)('y', this.details) : (0, _functions.string_getRange)('y', this.details);
-      return {
-        x: xRange,
-        y: yRange
-      };
-    }
-  }, {
     key: "getDetails",
     value: function getDetails() {
-      var _this$props3 = this.props,
-          X = _this$props3.X,
-          Y = _this$props3.Y,
-          data = _this$props3.data,
-          _this$props3$barWidth = _this$props3.barWidth,
-          barWidth = _this$props3$barWidth === void 0 ? 80 : _this$props3$barWidth,
-          precision = _this$props3.precision,
+      var _this2 = this;
+
+      var _this$props2 = this.props,
+          keyAxis = _this$props2.keyAxis,
+          valueAxis = _this$props2.valueAxis,
+          X = _this$props2.X,
+          Y = _this$props2.Y,
+          data = _this$props2.data,
+          _this$props2$barWidth = _this$props2.barWidth,
+          barWidth = _this$props2$barWidth === void 0 ? 80 : _this$props2$barWidth,
+          precision = _this$props2.precision,
+          reverse = _this$props2.reverse,
+          labels = _this$props2.labels,
+          editValue = _this$props2.editValue,
           d = this.details;
 
-      if (!d.type) {
-        d.filter = this.state.filter;
+      if (!d.keyAxis) {
+        d.getKey = this.getKey.bind(this);
+        d.getValue = this.getValue.bind(this);
         d.Axis = {
           x: X,
           y: Y
         };
-        d.type = {
-          x: X.labels ? 'string' : 'number',
-          y: Y.labels ? 'string' : 'number'
-        }; //تایین محوری که پایه ی بار چارت روی آن بنا می شود
+        d.KeyAxis = keyAxis;
+        var editLabelKey = keyAxis.editLabel ? function (value) {
+          if (value < 0 || value >= keyAxis.list.length) {
+            return '';
+          }
 
-        d.barAxis = d.type.x === 'string' ? 'x' : d.type.y === 'string' ? 'y' : false; //تایین محوری که ادیت چارت در راستای آن انجام می شود
+          return keyAxis.editLabel(keyAxis.list[value]);
+        } : function (value) {
+          return value;
+        };
+        var editLabelValue = valueAxis.editLabel ? function (value) {
+          return valueAxis.editLabel(value);
+        } : function (value) {
+          return value;
+        };
 
-        d.editAxis = d.type.x === 'string' ? 'y' : d.type.y === 'string' ? 'x' : 'y';
+        if (!reverse) {
+          d.getFilter.x = function () {
+            return _this2.state.filter.key;
+          };
+
+          d.getFilter.y = function () {
+            return _this2.state.filter.value;
+          };
+
+          d.keyAxis = 'x';
+          d.valueAxis = 'y';
+          d.editLabel.x = editLabelKey;
+          d.editLabel.y = editLabelValue;
+
+          d.getRange = function () {
+            return {
+              x: (0, _functions.string_getRange)('x', _this2.details),
+              y: (0, _functions.number_getRange)('y', _this2.details)
+            };
+          };
+
+          d.getPercentByValue.x = function (key, value) {
+            var point = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+            point._keyIndex = keyAxis.list.indexOf(key);
+
+            if (point._keyIndex === -1) {
+              return false;
+            }
+
+            return (0, _functions.string_getPercentByValue)(point._keyIndex, 'x', _this2.details);
+          };
+
+          d.getPercentByValue.y = function (key, value, point) {
+            return -(0, _functions.number_getPercentByValue)(value, 'y', _this2.details);
+          };
+
+          d.getValueByPercent = function (px, py) {
+            return {
+              key: (0, _functions.string_getValueByPercent)(px, 'x', _this2.details),
+              value: (0, _functions.number_getValueByPercent)(py, 'y', _this2.details)
+            };
+          };
+
+          d.getArea = function (points, fill, opacity) {
+            var area = {
+              points: points.slice(),
+              fill: fill,
+              opacity: opacity
+            };
+            area.points.splice(0, 0, [points[0][0], 0]);
+            area.points.push([points[points.length - 1][0], 0]);
+            return area;
+          };
+
+          d.getFilterSlider.x = keyAxis.zoom ? function () {
+            return _this2.getFilterSlider('x');
+          } : function () {
+            return null;
+          };
+          d.getFilterSlider.y = valueAxis.zoom ? function () {
+            return _this2.getFilterSlider('y');
+          } : function () {
+            return null;
+          };
+          d.getGridLines.x = keyAxis.gridColor ? function () {
+            return _this2.getGridLines('x', keyAxis.gridColor);
+          } : function () {
+            return [];
+          };
+          d.getGridLines.y = valueAxis.gridColor ? function () {
+            return _this2.getGridLines('y', valueAxis.gridColor);
+          } : function () {
+            return [];
+          };
+
+          d.getLines.x = function () {
+            return _this2.getLines('x', keyAxis.lines);
+          };
+
+          d.getLines.y = function () {
+            return _this2.getLines('y', valueAxis.lines);
+          };
+
+          d.changeFilter.x = function (p1, p2) {
+            var filter = _this2.state.filter;
+            var list = keyAxis.list;
+            filter.key = [list[p1], list[p2]];
+
+            _this2.SetState({
+              filter: filter
+            });
+          };
+
+          d.changeFilter.y = function (p1, p2) {
+            var filter = _this2.state.filter;
+            filter.value = [p1, p2];
+
+            _this2.SetState({
+              filter: filter
+            });
+          };
+        } else {
+          d.getFilter.x = function () {
+            return _this2.state.filter.value;
+          };
+
+          d.getFilter.y = function () {
+            return _this2.state.filter.key;
+          };
+
+          d.keyAxis = 'y';
+          d.valueAxis = 'x';
+          d.editLabel.x = editLabelValue;
+          d.editLabel.y = editLabelKey;
+
+          d.getRange = function () {
+            return {
+              x: (0, _functions.number_getRange)('x', _this2.details),
+              y: (0, _functions.string_getRange)('y', _this2.details)
+            };
+          };
+
+          d.getPercentByValue.x = function (key, value, point) {
+            return (0, _functions.number_getPercentByValue)(value, 'x', _this2.details);
+          };
+
+          d.getPercentByValue.y = function (key, value) {
+            var point = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+            point._keyIndex = keyAxis.list.indexOf(key);
+
+            if (point._keyIndex === -1) {
+              return false;
+            }
+
+            return -(0, _functions.string_getPercentByValue)(point._keyIndex, 'y', _this2.details);
+          };
+
+          d.getValueByPercent = function (px, py) {
+            return {
+              key: (0, _functions.string_getValueByPercent)(py, 'y', _this2.details),
+              value: (0, _functions.number_getValueByPercent)(px, 'x', _this2.details)
+            };
+          };
+
+          d.getArea = function (points, fill, opacity) {
+            var area = {
+              points: points.slice(),
+              fill: fill,
+              opacity: opacity
+            };
+            area.points.splice(0, 0, [0, points[0][1]]);
+            area.points.push([0, points[points.length - 1][1]]);
+            return area;
+          };
+
+          d.getFilterSlider.x = valueAxis.zoom ? function () {
+            return _this2.getFilterSlider('x');
+          } : function () {
+            return null;
+          };
+          d.getFilterSlider.y = keyAxis.zoom ? function () {
+            return _this2.getFilterSlider('y');
+          } : function () {
+            return null;
+          };
+          d.getGridLines.x = valueAxis.gridColor ? function () {
+            return _this2.getGridLines('x', valueAxis.gridColor);
+          } : function () {
+            return [];
+          };
+          d.getGridLines.y = keyAxis.gridColor ? function () {
+            return _this2.getGridLines('y', keyAxis.gridColor);
+          } : function () {
+            return [];
+          };
+
+          d.getLines.x = function () {
+            return _this2.getLines('x', valueAxis.lines);
+          };
+
+          d.getLines.y = function () {
+            return _this2.getLines('y', keyAxis.lines);
+          };
+
+          d.changeFilter.x = function (p1, p2) {
+            var filter = _this2.state.filter;
+            filter.value = [p1, p2];
+
+            _this2.SetState({
+              filter: filter
+            });
+          };
+
+          d.changeFilter.y = function (p1, p2) {
+            var filter = _this2.state.filter;
+            var list = keyAxis.list;
+            filter.key = [list[p1], list[p2]];
+
+            _this2.SetState({
+              filter: filter
+            });
+          };
+        }
       } //نوع چارت و تابع گرفتن درصد با مقدار یکبار تایین می شود
 
 
       d.precision = precision;
 
       if (this.mouseDownDetail.target !== 'point') {
-        this.details.limit = this.getLimit(data, X, Y);
+        var limit = this.getLimitTypeNumber(data);
+        this.details.min = limit.min;
+        this.details.max = limit.max;
+        this.details.range = d.getRange();
       }
 
-      this.details.range = this.getRange(X, Y);
       d.barCount = data.filter(function (d) {
         return d.type === 'bar';
       }).length;
-
-      if (d.barAxis) {
-        d.barWidth = barWidth / d.range[d.barAxis].count / d.barCount;
-      }
-    }
-  }, {
-    key: "changeFilter",
-    value: function changeFilter(p1, p2, axis) {
-      var labels = this.props[axis.toUpperCase()].labels;
-      var filter = this.state.filter;
-      filter[axis] = labels ? [labels[p1], labels[p2]] : [p1, p2];
-      this.SetState({
-        filter: filter
-      });
+      d.barWidth = barWidth / d.range[d.keyAxis].count / d.barCount;
     }
   }, {
     key: "pointMouseDown",
     value: function pointMouseDown(e, pos, obj) {
       var dataIndex = obj.dataIndex,
-          streamIndex = obj.streamIndex;
-      var _this$props4 = this.props,
-          data = _this$props4.data,
-          edit = _this$props4.edit,
-          remove = _this$props4.remove;
+          pointIndex = obj.pointIndex;
+      var _this$props3 = this.props,
+          data = _this$props3.data,
+          edit = _this$props3.edit,
+          remove = _this$props3.remove;
 
       if (data[dataIndex].editable === false) {
         return;
@@ -606,17 +820,18 @@ var RChart = /*#__PURE__*/function (_Component) {
       }
 
       this.getMouseDetail(pos);
-      var stream = data[dataIndex].stream[streamIndex];
+      var point = data[dataIndex].points[pointIndex];
       this.mouseDownDetail = {
         target: 'point',
-        x: stream.x,
-        y: stream.y
+        key: this.getKey(point),
+        value: this.getValue(point)
       };
       (0, _functions.eventHandler)('window', 'mousemove', _jquery.default.proxy(this.pointMouseMove, this));
       (0, _functions.eventHandler)('window', 'mouseup', _jquery.default.proxy(this.pointMouseUp, this));
       this.so = {
         dataIndex: dataIndex,
-        streamIndex: streamIndex,
+        pointIndex: pointIndex,
+        x: this.mouseDetail.x,
         y: this.mouseDetail.y
       };
       this.moved = false;
@@ -624,17 +839,15 @@ var RChart = /*#__PURE__*/function (_Component) {
   }, {
     key: "pointMouseMove",
     value: function pointMouseMove() {
-      var _this$props5 = this.props,
-          data = _this$props5.data,
-          edit = _this$props5.edit,
-          stream = data[this.so.dataIndex].stream[this.so.streamIndex];
+      var _this$props4 = this.props,
+          data = _this$props4.data,
+          edit = _this$props4.edit,
+          valueAxis = _this$props4.valueAxis,
+          point = data[this.so.dataIndex].points[this.so.pointIndex];
 
       if (!this.moved) {
-        if (Math.abs(this.mouseDetail.y - this.so.y) < 8) {
-          return;
-        }
-
-        if (stream.y === this.mouseDetail.vy) {
+        //if(Math.abs(this.mouseDetail.y - this.so.y) < 8){return;}
+        if (this.getValue(point) === this.mouseDetail.value) {
           return;
         }
       }
@@ -645,10 +858,13 @@ var RChart = /*#__PURE__*/function (_Component) {
         return;
       }
 
-      edit({
+      var newPoint = { ...point
+      };
+      console.log(this.mouseDetail.key, this.mouseDetail.value);
+      newPoint[valueAxis.field] = this.mouseDetail.value;
+      edit(newPoint, {
         dataIndex: this.so.dataIndex,
-        streamIndex: this.so.streamIndex,
-        value: this.mouseDetail.vy
+        pointIndex: this.so.pointIndex
       });
     }
   }, {
@@ -657,96 +873,128 @@ var RChart = /*#__PURE__*/function (_Component) {
       (0, _functions.eventHandler)('window', 'mousemove', this.pointMouseMove, 'unbind');
       (0, _functions.eventHandler)('window', 'mouseup', this.pointMouseUp, 'unbind');
       this.mouseDownDetail = {};
-      var _this$props6 = this.props,
-          data = _this$props6.data,
-          edit = _this$props6.edit,
-          remove = _this$props6.remove,
-          onDragEnd = _this$props6.onDragEnd;
+      var _this$props5 = this.props,
+          data = _this$props5.data,
+          edit = _this$props5.edit,
+          remove = _this$props5.remove,
+          onDragEnd = _this$props5.onDragEnd,
+          valueAxis = _this$props5.valueAxis;
+      var point = data[this.so.dataIndex].points[this.so.pointIndex];
 
       if (!this.moved) {
-        var stream = data[this.so.dataIndex].stream[this.so.streamIndex];
         var title = !edit ? this.translate('Remove.Point') : this.translate('Edit.Point');
         this.SetState({
           popup: {
             dataIndex: this.so.dataIndex,
-            streamIndex: this.so.streamIndex,
+            pointIndex: this.so.pointIndex,
             dataIndexes: [this.so.dataIndex],
-            dynamicValue: stream.y,
-            staticValue: this.mouseDetail.vx,
+            dynamicValue: this.getValue(point),
+            staticValue: this.mouseDetail.key,
             onEdit: edit,
             onRemove: remove,
             title: title
           }
         });
-      } else if (onDragEnd) {
+        return;
+      }
+
+      var newPoint = { ...point
+      };
+      newPoint[valueAxis.field] = this.mouseDetail.value;
+
+      if (onDragEnd) {
         var changes = {
           dataIndex: this.so.dataIndex,
-          streamIndex: this.so.streamIndex,
-          value: this.mouseDetail.vy
+          pointIndex: this.so.pointIndex
         };
-        onDragEnd(changes);
+        onDragEnd(newPoint, changes);
       } else if (edit) {
         var changes = {
           dataIndex: this.so.dataIndex,
-          streamIndex: this.so.streamIndex,
-          value: this.mouseDetail.vy
+          pointIndex: this.so.pointIndex
         };
-        edit(changes);
+        edit(newPoint, changes);
       }
     } //کلیک روی بک گراند چارت
 
   }, {
     key: "mouseDown",
-    value: function mouseDown() {
-      var _this$props7 = this.props,
-          add = _this$props7.add,
-          multiselect = _this$props7.multiselect,
-          addPopup = _this$props7.addPopup; // اگر مد افزودن فعال بود و در موقعیت فعلی موس دیتا یا دیتا هایی آمادگی دریافت نقطه جدید در این موقعیت را داشتند
+    value: function mouseDown(a, b) {
+      if ('ontouchstart' in document.documentElement) {
+        (0, _functions.eventHandler)('window', 'mouseup', _jquery.default.proxy(this.addMouseUp, this));
+        this.getMouseDetail(b);
+        return;
+      }
 
-      this.mouseDownXValue = this.mouseDetail.vx;
+      var _this$props6 = this.props,
+          add = _this$props6.add,
+          multiselect = _this$props6.multiselect,
+          addPopup = _this$props6.addPopup; // اگر مد افزودن فعال بود و در موقعیت فعلی موس دیتا یا دیتا هایی آمادگی دریافت نقطه جدید در این موقعیت را داشتند
+
+      this.mouseDownKey = this.mouseDetail.key;
 
       if (add && this.mouseDetail.addDataIndexes.length) {
         (0, _functions.eventHandler)('window', 'mouseup', _jquery.default.proxy(this.addMouseUp, this));
       }
 
+      var reverse = this.props.reverse;
+
       if (multiselect && this.mouseDetail.target !== 'point') {
         this.multiselect = {};
         this.multiselect.selectRect = (0, _jquery.default)(this.dom.current).find('.r-chart-multiselect');
-        this.multiselect.selectRect.css({
-          display: 'block',
-          left: this.mouseDetail.px + '%',
-          width: '0%'
-        });
+
+        if (reverse) {
+          this.multiselect.selectRect.css({
+            display: 'block',
+            top: this.mouseDetail.py + '%',
+            height: '0%',
+            width: '100%',
+            left: 0
+          });
+          this.multiselect.position = this.mouseDetail.py;
+        } else {
+          this.multiselect.selectRect.css({
+            display: 'block',
+            left: this.mouseDetail.px + '%',
+            width: '0%',
+            height: '100%',
+            top: 0
+          });
+          this.multiselect.position = this.mouseDetail.px;
+        }
+
         (0, _functions.eventHandler)('window', 'mousemove', _jquery.default.proxy(this.multiselectMove, this));
         (0, _functions.eventHandler)('window', 'mouseup', _jquery.default.proxy(this.multiselectUp, this));
-        this.multiselect.position = this.mouseDetail.px;
       }
     }
   }, {
     key: "addMouseUp",
     value: function addMouseUp() {
-      var _this$props8 = this.props,
-          add = _this$props8.add,
-          addPopup = _this$props8.addPopup;
+      var _this$props7 = this.props,
+          add = _this$props7.add,
+          addPopup = _this$props7.addPopup;
       (0, _functions.eventHandler)('window', 'mouseup', this.addMouseUp, 'unbind');
 
-      if (this.mouseDetail.vx !== this.mouseDownXValue) {
-        return;
+      if ('ontouchstart' in document.documentElement) {
+        if (this.mouseDetail.addDataIndexes.length === 0) {
+          return;
+        }
+      } else {
+        if (this.mouseDetail.key !== this.mouseDownKey) {
+          return;
+        }
       }
 
       if (addPopup === false) {
-        add({
-          y: this.mouseDetail.vy,
-          x: this.mouseDetail.vx
-        });
+        add(this.mouseDetail);
       } else {
         this.SetState({
           popup: {
             type: 'add',
             dataIndexes: this.mouseDetail.addDataIndexes,
             dataIndex: this.mouseDetail.addDataIndexes[0],
-            dynamicValue: this.mouseDetail.vy,
-            staticValue: this.mouseDetail.vx,
+            dynamicValue: this.mouseDetail.value,
+            staticValue: this.mouseDetail.key,
             onAdd: add,
             title: this.translate('Add.Point')
           }
@@ -756,25 +1004,45 @@ var RChart = /*#__PURE__*/function (_Component) {
   }, {
     key: "multiselectMove",
     value: function multiselectMove() {
-      var m = this.multiselect,
-          mp = this.mouseDetail.px;
+      var reverse = this.props.reverse;
+      var m = this.multiselect;
 
-      if (this.mouseDetail.vx === this.mouseDownXValue) {
+      if (this.mouseDetail.key === this.mouseDownKey) {
         return;
       }
 
-      if (mp < m.position) {
-        m.end = m.position;
-        m.start = mp;
-      } else {
-        m.start = m.position;
-        m.end = mp;
-      }
+      if (!reverse) {
+        var mp = this.mouseDetail.px;
 
-      m.selectRect.css({
-        width: m.end - m.start + '%',
-        left: m.start + '%'
-      });
+        if (mp < m.position) {
+          m.end = m.position;
+          m.start = mp;
+        } else {
+          m.start = m.position;
+          m.end = mp;
+        }
+
+        m.selectRect.css({
+          width: m.end - m.start + '%',
+          left: m.start + '%'
+        });
+      } else {
+        var mp = this.mouseDetail.py;
+
+        if (mp < m.position) {
+          m.end = m.position;
+          m.start = mp;
+        } else {
+          m.start = m.position;
+          m.end = mp;
+        }
+
+        var obj = {
+          height: m.end - m.start + '%',
+          top: m.start + 100 + '%'
+        };
+        m.selectRect.css(obj);
+      }
     }
   }, {
     key: "hideSelectRect",
@@ -790,7 +1058,6 @@ var RChart = /*#__PURE__*/function (_Component) {
   }, {
     key: "multiselectUp",
     value: function multiselectUp() {
-      var multiselect = this.props.multiselect;
       (0, _functions.eventHandler)('window', 'mousemove', this.multiselectMove, 'unbind');
       (0, _functions.eventHandler)('window', 'mouseup', this.multiselectUp, 'unbind');
 
@@ -823,12 +1090,12 @@ var RChart = /*#__PURE__*/function (_Component) {
           end = _this$multiselect.end;
       var result = [];
 
-      for (var i = 0; i < this.data.length; i++) {
-        var _this$data$i = this.data[i],
-            index = _this$data$i.index,
-            title = _this$data$i.title,
-            points = _this$data$i.points,
-            editable = _this$data$i.editable;
+      for (var i = 0; i < this.dataDetails.length; i++) {
+        var _this$dataDetails$i = this.dataDetails[i],
+            dataIndex = _this$dataDetails$i.dataIndex,
+            title = _this$dataDetails$i.title,
+            points = _this$dataDetails$i.points,
+            editable = _this$dataDetails$i.editable;
 
         if (editable === false) {
           continue;
@@ -838,14 +1105,15 @@ var RChart = /*#__PURE__*/function (_Component) {
           continue;
         }
 
-        for (var j = 0; j < points.length; j++) {
-          var x = parseFloat(points[j].x);
+        for (var pointIndex = 0; pointIndex < points.length; pointIndex++) {
+          var point = points[pointIndex];
+          var percent = parseFloat(point[this.details.keyAxis]);
 
-          if (x < start || x > end) {
+          if (percent < start || percent > end) {
             continue;
           }
 
-          result.push([index, j]);
+          result.push([dataIndex, pointIndex]);
         }
       }
 
@@ -860,77 +1128,17 @@ var RChart = /*#__PURE__*/function (_Component) {
       this.hideSelectRect();
     }
   }, {
-    key: "zoomHover",
-    value: function zoomHover(e, axis) {
-      e.stopPropagation();
-      var _this$props9 = this.props,
-          _this$props9$X = _this$props9.X,
-          X = _this$props9$X === void 0 ? {} : _this$props9$X,
-          _this$props9$Y = _this$props9.Y,
-          Y = _this$props9$Y === void 0 ? {} : _this$props9$Y;
-
-      if (axis === 'x' && !X.zoom) {
-        return;
-      }
-
-      if (axis === 'y' && !Y.zoom) {
-        return;
-      }
-
-      this.hoverAxis = axis;
-
-      if (this.zoomDown) {
-        return;
-      }
-
-      this.hadleShowSliders(axis);
-    }
-  }, {
-    key: "zoomMouseDown",
-    value: function zoomMouseDown() {
-      this.zoomDown = true;
-    }
-  }, {
-    key: "zoomMouseUp",
-    value: function zoomMouseUp() {
-      this.zoomDown = false;
-
-      if (this.hoverAxis) {
-        return;
-      }
-
-      this.hadleShowSliders(false);
-    }
-  }, {
-    key: "hadleShowSliders",
-    value: function hadleShowSliders(axis) {
-      if (axis) {
-        var container = (0, _jquery.default)(this.dom.current).find('.r-chart-axis-' + axis);
-        var filterSlider = container.find('.filterSlider');
-        var labelSlider = container.find('.labelSlider');
-        filterSlider.show();
-        labelSlider.hide();
-      } else {
-        var container = (0, _jquery.default)(this.dom.current);
-        var filterSlider = container.find('.filterSlider');
-        var labelSlider = container.find('.labelSlider');
-        filterSlider.hide();
-        labelSlider.show();
-      }
-    }
-  }, {
     key: "getPopup",
     value: function getPopup(popup) {
-      var _this2 = this;
+      var _this3 = this;
 
-      var d = this.details;
       return /*#__PURE__*/_react.default.createElement(RChartEdit, _extends({}, popup, {
         onChange: function onChange(obj) {
           for (var prop in obj) {
             popup[prop] = obj[prop];
           }
 
-          _this2.SetState({
+          _this3.SetState({
             popup: popup
           });
         },
@@ -940,7 +1148,7 @@ var RChart = /*#__PURE__*/function (_Component) {
   }, {
     key: "getHeader",
     value: function getHeader(yWidth) {
-      var _this3 = this;
+      var _this4 = this;
 
       var data = this.props.data,
           preventData = this.state.preventData;
@@ -966,7 +1174,7 @@ var RChart = /*#__PURE__*/function (_Component) {
             preventData[title] = preventData[title] === undefined ? false : preventData[title];
             preventData[title] = !preventData[title];
 
-            _this3.SetState({
+            _this4.SetState({
               preventData: preventData
             });
           }
@@ -981,8 +1189,13 @@ var RChart = /*#__PURE__*/function (_Component) {
   }, {
     key: "getLabelSlider",
     value: function getLabelSlider(axis) {
-      var type = this.details.type[axis],
-          _this$details$range$a = this.details.range[axis],
+      var _this5 = this;
+
+      if (!this.details.range || !this.details.range[axis]) {
+        return null;
+      }
+
+      var _this$details$range$a = this.details.range[axis],
           start = _this$details$range$a.start,
           end = _this$details$range$a.end,
           step = _this$details$range$a.step;
@@ -996,11 +1209,8 @@ var RChart = /*#__PURE__*/function (_Component) {
           justifyContent: 'flex-end'
         }
       };
-      var _this$props$axis$toUp = this.props[axis.toUpperCase()],
-          _this$props$axis$toUp2 = _this$props$axis$toUp.rotate,
-          rotate = _this$props$axis$toUp2 === void 0 ? 0 : _this$props$axis$toUp2,
-          labels = _this$props$axis$toUp.labels,
-          editLabel = _this$props$axis$toUp.editLabel;
+      var _this$props$axis$toUp = this.props[axis.toUpperCase()].rotate,
+          rotate = _this$props$axis$toUp === void 0 ? 0 : _this$props$axis$toUp;
       return /*#__PURE__*/_react.default.createElement(_rRangeSlider.default, {
         className: "labelSlider",
         editable: false,
@@ -1026,9 +1236,9 @@ var RChart = /*#__PURE__*/function (_Component) {
         label: {
           step: step,
           rotate: axis === 'y' ? 0 : rotate,
-          edit: type === 'string' ? function (value) {
-            return editLabel ? editLabel(labels[value]) : labels[value];
-          } : undefined,
+          edit: function edit(value) {
+            return _this5.details.editLabel[axis](value);
+          },
           style: {
             fontSize: 'inherit',
             ...labelStyle[axis]
@@ -1037,23 +1247,55 @@ var RChart = /*#__PURE__*/function (_Component) {
       });
     }
   }, {
+    key: "filterMouseDown",
+    value: function filterMouseDown(e) {
+      e.preventDefault();
+      var container = (0, _jquery.default)(this.dom.current);
+      var filterButtons = container.find('.r-chart-filterSlider-button');
+      filterButtons.addClass('active');
+      (0, _functions.eventHandler)('window', 'mouseup', _jquery.default.proxy(this.filterMouseUp, this));
+    }
+  }, {
+    key: "filterMouseUp",
+    value: function filterMouseUp() {
+      var container = (0, _jquery.default)(this.dom.current);
+      var filterButtons = container.find('.r-chart-filterSlider-button');
+      filterButtons.removeClass('active');
+      (0, _functions.eventHandler)('window', 'mouseup', this.filterMouseUp, 'unbind');
+    }
+  }, {
     key: "getFilterSlider",
     value: function getFilterSlider(axis) {
       var _fillStyle,
-          _this4 = this;
+          _this6 = this;
+
+      var _this$details3 = this.details,
+          range = _this$details3.range,
+          changeFilter = _this$details3.changeFilter;
+
+      if (!range || !range[axis]) {
+        return null;
+      }
 
       var color = '#eee';
-      var labels = this.props[axis.toUpperCase()].labels;
-      var type = this.details.type[axis],
-          _this$details$range$a2 = this.details.range[axis].filter,
-          p1 = _this$details$range$a2.p1,
-          p2 = _this$details$range$a2.p2,
-          start = _this$details$range$a2.start,
-          end = _this$details$range$a2.end;
+      var _range$axis$filter = range[axis].filter,
+          p1 = _range$axis$filter.p1,
+          p2 = _range$axis$filter.p2,
+          start = _range$axis$filter.start,
+          end = _range$axis$filter.end;
+
+      var html = /*#__PURE__*/_react.default.createElement("div", {
+        className: 'r-chart-filterSlider-button r-chart-filterSlider-button-' + axis,
+        onTouchStart: this.filterMouseDown.bind(this),
+        onMouseDown: this.filterMouseDown.bind(this)
+      });
+
       var points = [{
-        value: p1
+        value: p1,
+        html: html
       }, {
         value: p2,
+        html: html,
         fillStyle: (_fillStyle = {}, _defineProperty(_fillStyle, axis === 'y' ? 'width' : 'height', '1px'), _defineProperty(_fillStyle, "background", color), _fillStyle)
       }];
       var style = {
@@ -1079,11 +1321,11 @@ var RChart = /*#__PURE__*/function (_Component) {
         className: "filterSlider",
         points: points,
         editValue: function editValue(point) {
-          return type === 'string' ? labels[point.value] : point.value;
+          return _this6.details.editLabel[axis](point.value);
         },
-        ondrag: function ondrag(_ref4) {
-          var points = _ref4.points;
-          return _this4.changeFilter(points[0].value, points[1].value, axis);
+        ondrag: function ondrag(_ref2) {
+          var points = _ref2.points;
+          return changeFilter[axis](points[0].value, points[1].value);
         },
         style: {
           position: 'absolute',
@@ -1093,56 +1335,21 @@ var RChart = /*#__PURE__*/function (_Component) {
           display: 'none'
         },
         pointStyle: {
-          width: '10px',
-          height: '10px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '30px',
+          height: '30px',
           borderRadius: '0px',
-          background: '#fff',
-          border: '2px solid ' + color
+          background: 'none'
         },
         showValue: true
       });
-    } // getFilterSlider(axis,xHeight,yWidth){  
-    //   var {labels} = this.props[axis.toUpperCase()]; 
-    //   var type = this.details.type[axis],{p1,p2,start,end} = this.details.range[axis].filter;
-    //   var points = [{value:p1},{value:p2,fillStyle:{[axis === 'y'?'width':'height']:'100%',background:'#f5f5f5'}}]
-    //   var style = {
-    //     x:{width:'100%',height:'100%',padding:'0 12px',top:'2px',opacity:.7,background:''},
-    //     y:{width:'100%',height:'100%',padding:'12px 0',right:'0px',opacity:.7,background:''}
-    //   } 
-    //   var pointStyle = {
-    //     x:{width:'16px',height:xHeight + 'px',borderRadius:0,background:'none'},
-    //     y:{width:yWidth + 'px',height:'16px',borderRadius:0,background:'none'}
-    //   }
-    //   return (
-    //     <RSlider direction={axis === 'x'?'right':'top'} start={start} end={end} className='filterSlider'
-    //       points={points}
-    //       editValue={(point)=>type === 'string'?labels[point.value]:point.value} 
-    //       ondrag={({points})=>this.changeFilter(points[0].value,points[1].value,axis)}
-    //       style={{position:'absolute',...style[axis]}}
-    //       lineStyle={{display:'none'}}
-    //       pointStyle={pointStyle[axis]}
-    //       showValue={true}
-    //     />
-    //   )
-    // }
-
-  }, {
-    key: "getStreamIndexByLabel",
-    value: function getStreamIndexByLabel(_ref5, label) {
-      var stream = _ref5.stream;
-
-      for (var j = 0; j < stream.length; j++) {
-        if (stream[j].x === label) {
-          return j;
-        }
-      }
-
-      return false;
     }
   }, {
     key: "getAddableDataIndexes",
-    value: function getAddableDataIndexes(label) {
-      if (label === undefined) {
+    value: function getAddableDataIndexes(key) {
+      if (key === undefined) {
         return [];
       }
 
@@ -1156,7 +1363,7 @@ var RChart = /*#__PURE__*/function (_Component) {
           continue;
         }
 
-        if (this.getStreamIndexByLabel(data[i], label) === false) {
+        if (this.keyDictionary[i][key] === undefined) {
           indexes.push(i);
         }
       }
@@ -1165,27 +1372,29 @@ var RChart = /*#__PURE__*/function (_Component) {
     }
   }, {
     key: "getNearestPointToMouse",
-    value: function getNearestPointToMouse(vx, vy) {
+    value: function getNearestPointToMouse(obj) {
       var data = this.props.data;
       var res = false;
       var dif = Infinity;
 
       for (var dataIndex = 0; dataIndex < data.length; dataIndex++) {
-        var streamIndex = this.getStreamIndexByLabel(data[dataIndex], vx);
+        var pointIndex = this.keyDictionary[dataIndex][obj.key];
 
-        if (streamIndex === false) {
+        if (pointIndex === undefined) {
           continue;
         }
 
-        var stream = data[dataIndex].stream[streamIndex];
-        var Dif = Math.abs(stream.y - vy);
+        var point = data[dataIndex].points[pointIndex];
+        var key = this.getKey(point),
+            value = this.getValue(point);
+        var Dif = Math.abs(value - obj.value);
 
         if (Dif <= dif) {
           res = {
-            vx: stream.x,
-            vy: stream.y,
+            key: key,
+            value: value,
             dataIndex: dataIndex,
-            streamIndex: streamIndex
+            pointIndex: pointIndex
           };
           dif = Dif;
         }
@@ -1195,34 +1404,43 @@ var RChart = /*#__PURE__*/function (_Component) {
     }
   }, {
     key: "getMouseDetail",
-    value: function getMouseDetail(_ref6) {
-      var _ref7 = _slicedToArray(_ref6, 4),
-          x = _ref7[0],
-          y = _ref7[1],
-          px = _ref7[2],
-          py = _ref7[3];
+    value: function getMouseDetail(a) {
+      if (!a) {
+        return;
+      }
 
-      var _this$props10 = this.props,
-          add = _this$props10.add,
-          Y = _this$props10.Y;
+      var d = this.details;
+
+      var _a = _slicedToArray(a, 4),
+          x = _a[0],
+          y = _a[1],
+          px = _a[2],
+          py = _a[3];
+
+      var _this$props8 = this.props,
+          add = _this$props8.add,
+          Y = _this$props8.Y;
       var _Y$width = Y.width,
           yWidth = _Y$width === void 0 ? 50 : _Y$width;
-      var vx = this.mouseDownDetail.target === 'point' ? this.mouseDownDetail.x : (0, _functions.getValueByPercent)(px, 'x', this.details);
-      console.log(vx);
-      var vy = (0, _functions.getValueByPercent)(-py, 'y', this.details);
+      var obj = d.getValueByPercent(px, -py);
+
+      if (this.mouseDownDetail.target === 'point') {
+        obj.key = this.mouseDownDetail.key;
+      }
+
       var popupPosition = {
         x: x + yWidth,
-        y: y + this.details.height
+        y: y + this.details.canvasSize.y
       };
-      var nearestPoint = this.getNearestPointToMouse(vx, vy);
-      var addDataIndexes = add && this.mouseDownDetail.target !== 'point' ? this.getAddableDataIndexes(vx) : [];
+      var nearestPoint = this.getNearestPointToMouse(obj);
+      var addDataIndexes = add && this.mouseDownDetail.target !== 'point' ? this.getAddableDataIndexes(obj.key) : [];
       this.mouseDetail = {
         x: x,
         y: y,
         px: px,
         py: py,
-        vx: vx,
-        vy: vy,
+        key: obj.key,
+        value: obj.value,
         nearestPoint: nearestPoint,
         addDataIndexes: addDataIndexes,
         popupPosition: popupPosition
@@ -1231,36 +1449,45 @@ var RChart = /*#__PURE__*/function (_Component) {
   }, {
     key: "render",
     value: function render() {
-      var _this5 = this;
+      var _this7 = this;
 
-      var _this$props11 = this.props,
-          X = _this$props11.X,
-          Y = _this$props11.Y,
-          data = _this$props11.data,
-          html = _this$props11.html,
-          add = _this$props11.add,
-          edit = _this$props11.edit,
-          multiselect = _this$props11.multiselect,
-          style = _this$props11.style,
-          rtl = _this$props11.rtl;
+      var xls = '',
+          yls = '',
+          xfs = '',
+          yfs = '',
+          items = '',
+          HTML = '';
+      var _this$props9 = this.props,
+          X = _this$props9.X,
+          Y = _this$props9.Y,
+          data = _this$props9.data,
+          _this$props9$html = _this$props9.html,
+          html = _this$props9$html === void 0 ? function () {
+        return '';
+      } : _this$props9$html,
+          add = _this$props9.add,
+          style = _this$props9.style;
       var popup = this.state.popup;
       var _X$height = X.height,
           xHeight = _X$height === void 0 ? 50 : _X$height;
       var _Y$width2 = Y.width,
           yWidth = _Y$width2 === void 0 ? 50 : _Y$width2;
-      this.getDetails();
-      var d = this.details;
-      var xRange = d.range.x,
-          yRange = d.range.y;
-      var items = d.width ? this.getElements() : [];
+
+      if (this.details.canvasSize && data.length) {
+        this.getDetails();
+        var d = this.details;
+        items = this.getElements();
+        yls = this.getLabelSlider('y');
+        yfs = d.getFilterSlider.y('y');
+        xls = this.getLabelSlider('x');
+        xfs = d.getFilterSlider.x('x');
+        HTML = html(this.elements, d);
+      }
+
       return /*#__PURE__*/_react.default.createElement(RChartContext.Provider, {
-        value: {
-          data: data,
-          X: X,
-          Y: Y,
-          multiselect: multiselect,
+        value: { ...this.props,
           translate: this.translate.bind(this),
-          rtl: rtl
+          keyDictionary: this.keyDictionary
         }
       }, /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart",
@@ -1270,56 +1497,56 @@ var RChart = /*#__PURE__*/function (_Component) {
         className: "r-chart-container",
         style: this.getStyle(yWidth, xHeight)
       }, /*#__PURE__*/_react.default.createElement("div", {
-        className: 'r-chart-popup-container' + (add ? ' r-chart-add-popup' : '')
+        className: 'r-chart-popup-container r-chart-detail-popup'
+      }), add && /*#__PURE__*/_react.default.createElement("div", {
+        className: 'r-chart-popup-container r-chart-add-popup'
       }), popup !== false && this.getPopup(popup), /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-axis r-chart-axis-y"
-      }, yRange && this.getLabelSlider('y'), yRange && this.getFilterSlider('y', xHeight, yWidth)), /*#__PURE__*/_react.default.createElement("div", {
+      }, yls, " ", yfs), /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-canvas"
-      }, html && html(this.elements, d), /*#__PURE__*/_react.default.createElement("div", {
+      }, HTML, /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-multiselect"
       }), /*#__PURE__*/_react.default.createElement(_rCanvas.default, {
         getSize: function getSize(width, height) {
-          _this5.details.width = width;
-          _this5.details.height = height;
+          _this7.details.canvasSize = {
+            x: width,
+            y: height
+          };
         },
         axisPosition: ['0%', '100%'],
         items: items,
         events: {
           onMouseMove: function onMouseMove(e, pos) {
-            _this5.getMouseDetail(pos);
+            _this7.getMouseDetail(pos);
 
-            var _this5$mouseDetail = _this5.mouseDetail,
-                x = _this5$mouseDetail.x,
-                y = _this5$mouseDetail.y,
-                px = _this5$mouseDetail.px,
-                py = _this5$mouseDetail.py,
-                vx = _this5$mouseDetail.vx,
-                vy = _this5$mouseDetail.vy,
-                nearestPoint = _this5$mouseDetail.nearestPoint,
-                addDataIndexes = _this5$mouseDetail.addDataIndexes,
-                popupPosition = _this5$mouseDetail.popupPosition;
-            var addIndicator = '';
-            var container = (0, _jquery.default)(_this5.dom.current).find('.r-chart-popup-container');
+            var _this7$mouseDetail = _this7.mouseDetail,
+                key = _this7$mouseDetail.key,
+                value = _this7$mouseDetail.value,
+                nearestPoint = _this7$mouseDetail.nearestPoint,
+                addDataIndexes = _this7$mouseDetail.addDataIndexes,
+                popupPosition = _this7$mouseDetail.popupPosition;
+            (0, _jquery.default)(_this7.dom.current).find('.r-chart-popup-container').html('');
 
             if (addDataIndexes.length) {
-              addIndicator = addDataIndexes.length ? "<div class=\"add-indicator\" style=\"background:".concat(data[addDataIndexes[0]].color, "\">+</div>") : '';
+              var container = (0, _jquery.default)(_this7.dom.current).find('.r-chart-add-popup');
+              var addIndicator = addDataIndexes.length ? "<div class=\"add-indicator\" style=\"background:".concat(data[addDataIndexes[0]].color, "\">+</div>") : '';
               container.css({
                 left: popupPosition.x,
-                top: popupPosition.y
+                top: popupPosition.y - ('ontouchstart' in document.documentElement ? 40 : 0)
               });
-              container.html('<div class="r-chart-popup">' + addIndicator + vx + '  ' + vy + '</div>');
-            } else {
-              if (nearestPoint) {
-                var left = (0, _functions.getPercentByValue)(nearestPoint.vx, 'x', _this5.details) * d.width / 100 + yWidth;
-                var bottom = (0, _functions.getPercentByValue)(nearestPoint.vy, 'y', _this5.details) * d.height / 100 + xHeight;
-                container.css({
-                  left: left,
-                  top: 'unset',
-                  bottom: bottom
-                });
-                container.html('<div class="r-chart-popup">' + nearestPoint.vx + '  ' + nearestPoint.vy + '</div>');
-              } else {//$('.r-chart-popup-container').html('');
-              }
+              container.html('<div class="r-chart-popup">' + addIndicator + key + '  ' + value + '</div>');
+            }
+
+            if (nearestPoint) {
+              var container = (0, _jquery.default)(_this7.dom.current).find('.r-chart-detail-popup');
+              var left = d.getPercentByValue.x(nearestPoint.key, nearestPoint.value) * d.canvasSize.x / 100 + yWidth;
+              var bottom = -d.getPercentByValue.y(nearestPoint.key, nearestPoint.value) * d.canvasSize.y / 100 + xHeight;
+              container.css({
+                left: left,
+                top: 'unset',
+                bottom: bottom
+              });
+              container.html('<div class="r-chart-popup">' + nearestPoint.key + '  ' + nearestPoint.value + '</div>');
             }
           },
           onMouseDown: this.mouseDown.bind(this)
@@ -1328,7 +1555,7 @@ var RChart = /*#__PURE__*/function (_Component) {
         className: "r-chart-corner"
       }), /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-axis r-chart-axis-x"
-      }, xRange && this.getLabelSlider('x'), xRange && this.getFilterSlider('x', xHeight, yWidth)))));
+      }, xls, " ", xfs))));
     }
   }]);
 
@@ -1341,12 +1568,13 @@ RChart.defaultProps = {
   X: {},
   Y: {},
   filter: {
-    x: [],
-    y: []
+    key: [],
+    value: []
   },
   globalization: 'en',
   precision: 0,
-  clickRadius: 12
+  clickRadius: 12,
+  lines: []
 };
 
 var RChartEdit = /*#__PURE__*/function (_Component2) {
@@ -1355,60 +1583,16 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
   var _super2 = _createSuper(RChartEdit);
 
   function RChartEdit(props) {
-    var _this6;
+    var _this8;
 
     _classCallCheck(this, RChartEdit);
 
-    _this6 = _super2.call(this, props);
-    _this6.dom = /*#__PURE__*/(0, _react.createRef)();
-    return _this6;
+    _this8 = _super2.call(this, props);
+    _this8.dom = /*#__PURE__*/(0, _react.createRef)();
+    return _this8;
   }
 
   _createClass(RChartEdit, [{
-    key: "binerySearch",
-    value: function binerySearch(array, value, field) {
-      var sI = 0,
-          eI = array.length - 1;
-
-      while (eI - sI > 1) {
-        var midIndex = Math.floor((eI + sI) / 2);
-        var midValue = field(array[midIndex], array);
-
-        if (value === midValue) {
-          return midIndex;
-        }
-
-        if (value < midValue) {
-          eI = midIndex;
-        }
-
-        if (value > midValue) {
-          sI = midIndex;
-        }
-      }
-
-      var endValue = field(array[eI], array);
-      var startValue = field(array[sI], array);
-
-      if (value === endValue) {
-        return eI;
-      }
-
-      if (value === startValue) {
-        return sI;
-      }
-
-      if (value > endValue) {
-        return Infinity;
-      }
-
-      if (value < startValue) {
-        return -Infinity;
-      }
-
-      return [sI, eI];
-    }
-  }, {
     key: "componentDidMount",
     value: function componentDidMount() {
       (0, _jquery.default)(this.dom.current).find('input').eq(0).focus().select();
@@ -1416,31 +1600,30 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
   }, {
     key: "render",
     value: function render() {
-      var _this7 = this;
-
-      var _this$props12 = this.props,
-          points = _this$props12.points,
-          type = _this$props12.type,
-          title = _this$props12.title,
-          _onChange = _this$props12.onChange,
-          onClose = _this$props12.onClose,
-          onAdd = _this$props12.onAdd,
-          onEdit = _this$props12.onEdit,
-          onRemove = _this$props12.onRemove,
-          dataIndex = _this$props12.dataIndex,
-          streamIndex = _this$props12.streamIndex,
-          dynamicValue = _this$props12.dynamicValue,
-          staticValue = _this$props12.staticValue,
-          _this$props12$dataInd = _this$props12.dataIndexes,
-          dataIndexes = _this$props12$dataInd === void 0 ? [] : _this$props12$dataInd;
+      var _this$props10 = this.props,
+          points = _this$props10.points,
+          type = _this$props10.type,
+          title = _this$props10.title,
+          _onChange = _this$props10.onChange,
+          onClose = _this$props10.onClose,
+          onAdd = _this$props10.onAdd,
+          onEdit = _this$props10.onEdit,
+          onRemove = _this$props10.onRemove,
+          dataIndex = _this$props10.dataIndex,
+          pointIndex = _this$props10.pointIndex,
+          dynamicValue = _this$props10.dynamicValue,
+          staticValue = _this$props10.staticValue,
+          _this$props10$dataInd = _this$props10.dataIndexes,
+          dataIndexes = _this$props10$dataInd === void 0 ? [] : _this$props10$dataInd;
       var _this$context = this.context,
+          keyAxis = _this$context.keyAxis,
+          valueAxis = _this$context.valueAxis,
           data = _this$context.data,
-          X = _this$context.X,
-          Y = _this$context.Y,
           _this$context$multise = _this$context.multiselect,
           multiselect = _this$context$multise === void 0 ? {} : _this$context$multise,
           translate = _this$context.translate,
-          rtl = _this$context.rtl;
+          rtl = _this$context.rtl,
+          keyDictionary = _this$context.keyDictionary;
       var _multiselect$items = multiselect.items,
           items = _multiselect$items === void 0 ? [] : _multiselect$items,
           _multiselect$actions = multiselect.actions,
@@ -1489,13 +1672,13 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
         className: "r-chart-edit-item"
       }, /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-edit-label"
-      }, (X.title || 'X untitle') + ' : '), /*#__PURE__*/_react.default.createElement("div", {
+      }, (keyAxis.title || 'untitle') + ' : '), /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-detail-value"
       }, staticValue)), dynamicValue !== undefined && /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-edit-item"
       }, /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-edit-label"
-      }, (Y.title || 'Y untitle') + ' : '), /*#__PURE__*/_react.default.createElement("input", {
+      }, (valueAxis.title || 'untitle') + ' : '), /*#__PURE__*/_react.default.createElement("input", {
         className: "r-chart-edit-tag",
         type: "number",
         value: dynamicValue,
@@ -1552,28 +1735,25 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
       }), onAdd && /*#__PURE__*/_react.default.createElement("button", {
         className: "r-chart-edit-button",
         onClick: function onClick() {
-          var streamIndex;
-          var stream = data[dataIndex].stream;
+          var _onAdd;
 
-          var index = _this7.binerySearch(stream, X.labels.indexOf(staticValue), function (m) {
-            return X.labels.indexOf(m.x);
-          });
+          var list = keyAxis.list;
+          var points = data[dataIndex].points;
+          var index = list.indexOf(staticValue);
+          var pointIndex = points.length;
 
-          if (index === Infinity) {
-            streamIndex = stream.length;
-          } else if (index === -Infinity) {
-            streamIndex = 0;
-          } else if (Array.isArray(index)) {
-            streamIndex = index[1];
+          for (var i = 0; i < points.length; i++) {
+            var point = points[i];
+
+            if (point._keyIndex > index) {
+              pointIndex = i;
+              break;
+            }
           }
 
-          onAdd({
+          onAdd((_onAdd = {}, _defineProperty(_onAdd, keyAxis.field, staticValue), _defineProperty(_onAdd, valueAxis.field, dynamicValue), _onAdd), {
             dataIndex: dataIndex,
-            streamIndex: streamIndex,
-            object: {
-              x: staticValue,
-              y: dynamicValue
-            }
+            pointIndex: pointIndex
           });
           onClose();
         }
@@ -1582,17 +1762,19 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
         onClick: function onClick() {
           onRemove({
             dataIndex: dataIndex,
-            streamIndex: streamIndex
+            pointIndex: pointIndex
           });
           onClose();
         }
       }, translate('Remove')), onEdit && /*#__PURE__*/_react.default.createElement("button", {
         className: "r-chart-edit-button",
         onClick: function onClick() {
-          onEdit({
+          var newPoint = { ...data[dataIndex].points[pointIndex]
+          };
+          newPoint[valueAxis.field] = dynamicValue;
+          onEdit(newPoint, {
             dataIndex: dataIndex,
-            streamIndex: streamIndex,
-            value: dynamicValue
+            pointIndex: pointIndex
           });
           onClose();
         }
