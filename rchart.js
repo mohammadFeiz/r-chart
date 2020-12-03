@@ -258,17 +258,15 @@ var RChartContext = createContext();
       this.moved = false;
     }
     pointMouseMove(){
-      var {data,edit,valueAxis} = this.props,point = data[this.so.dataIndex].points[this.so.pointIndex];
+      var {data,edit} = this.props,point = data[this.so.dataIndex].points[this.so.pointIndex];
+      var {dToAxis} = this.details;
       if(!this.moved){
-        //if(Math.abs(this.mouseDetail.y - this.so.y) < 8){return;}
+        if(Math.abs(this.mouseDetail[dToAxis.value] - this.so[dToAxis.value]) < 8){return;}
         if(point._value === this.mouseDetail.value){return;}
       }
       this.moved = true;
       if(!edit){return;}
-      var newPoint = {...point};      
-      newPoint[valueAxis.field] = this.mouseDetail.value;
-      edit(newPoint,{dataIndex:this.so.dataIndex,pointIndex:this.so.pointIndex});
-
+      edit({point,key:point._key,value:this.mouseDetail.value,dataIndex:this.so.dataIndex,pointIndex:this.so.pointIndex});
     }
     pointMouseUp(){
       eventHandler('window','mousemove',this.pointMouseMove,'unbind')
@@ -288,16 +286,9 @@ var RChartContext = createContext();
         })
         return;
       }
-      var newPoint = {...point};
-      newPoint[valueAxis.field] = this.mouseDetail.value;
-      if(onDragEnd){
-        var changes = {dataIndex:this.so.dataIndex,pointIndex:this.so.pointIndex};
-        onDragEnd(newPoint,changes)
-      }
-      else if(edit){
-        var changes = {dataIndex:this.so.dataIndex,pointIndex:this.so.pointIndex};
-        edit(newPoint,changes)
-      }
+      var obj = {point,key:point._key,value:this.mouseDetail.value,dataIndex:this.so.dataIndex,pointIndex:this.so.pointIndex};
+      if(onDragEnd){onDragEnd(obj)}
+      else if(edit){edit(obj)}
     }
     //کلیک روی بک گراند چارت
     mouseDown(a,b){
@@ -757,7 +748,7 @@ var RChartContext = createContext();
                         }
 
                       }
-                      onAdd({[keyAxis.field]:staticValue,[valueAxis.field]:dynamicValue},{dataIndex,pointIndex}); 
+                      onAdd({key:staticValue,value:dynamicValue},{dataIndex,pointIndex}); 
                       onClose();
                     }}
                   >{translate('Add')}</button>
@@ -766,7 +757,10 @@ var RChartContext = createContext();
                   onRemove &&
                   <button 
                     className='r-chart-edit-button' 
-                    onClick={()=>{onRemove({dataIndex,pointIndex}); onClose();}}
+                    onClick={()=>{
+                      let point = data[dataIndex].points[pointIndex];
+                      onRemove({point,key:point._key,value:point._value,dataIndex,pointIndex}); onClose();
+                    }}
                   >{translate('Remove')}</button>
                 }
                 {
@@ -774,9 +768,8 @@ var RChartContext = createContext();
                   <button 
                     className='r-chart-edit-button' 
                     onClick={()=>{
-                      let newPoint = {...data[dataIndex].points[pointIndex]}
-                      newPoint[valueAxis.field] = dynamicValue;
-                      onEdit(newPoint,{dataIndex,pointIndex}); onClose();
+                      let point = data[dataIndex].points[pointIndex];
+                      onEdit({point,key:point._key,value:dynamicValue,dataIndex,pointIndex}); onClose();
                     }}
                   >{translate('Edit')}</button>
                 } 

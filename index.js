@@ -686,11 +686,14 @@ var RChart = /*#__PURE__*/function (_Component) {
       var _this$props4 = this.props,
           data = _this$props4.data,
           edit = _this$props4.edit,
-          valueAxis = _this$props4.valueAxis,
           point = data[this.so.dataIndex].points[this.so.pointIndex];
+      var dToAxis = this.details.dToAxis;
 
       if (!this.moved) {
-        //if(Math.abs(this.mouseDetail.y - this.so.y) < 8){return;}
+        if (Math.abs(this.mouseDetail[dToAxis.value] - this.so[dToAxis.value]) < 8) {
+          return;
+        }
+
         if (point._value === this.mouseDetail.value) {
           return;
         }
@@ -702,10 +705,10 @@ var RChart = /*#__PURE__*/function (_Component) {
         return;
       }
 
-      var newPoint = { ...point
-      };
-      newPoint[valueAxis.field] = this.mouseDetail.value;
-      edit(newPoint, {
+      edit({
+        point: point,
+        key: point._key,
+        value: this.mouseDetail.value,
         dataIndex: this.so.dataIndex,
         pointIndex: this.so.pointIndex
       });
@@ -741,22 +744,18 @@ var RChart = /*#__PURE__*/function (_Component) {
         return;
       }
 
-      var newPoint = { ...point
+      var obj = {
+        point: point,
+        key: point._key,
+        value: this.mouseDetail.value,
+        dataIndex: this.so.dataIndex,
+        pointIndex: this.so.pointIndex
       };
-      newPoint[valueAxis.field] = this.mouseDetail.value;
 
       if (onDragEnd) {
-        var changes = {
-          dataIndex: this.so.dataIndex,
-          pointIndex: this.so.pointIndex
-        };
-        onDragEnd(newPoint, changes);
+        onDragEnd(obj);
       } else if (edit) {
-        var changes = {
-          dataIndex: this.so.dataIndex,
-          pointIndex: this.so.pointIndex
-        };
-        edit(newPoint, changes);
+        edit(obj);
       }
     } //کلیک روی بک گراند چارت
 
@@ -1611,8 +1610,6 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
       }), onAdd && /*#__PURE__*/_react.default.createElement("button", {
         className: "r-chart-edit-button",
         onClick: function onClick() {
-          var _onAdd;
-
           var keys = keyAxis.keys;
           var points = data[dataIndex].points;
           var index = keys.indexOf(staticValue);
@@ -1627,7 +1624,10 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
             }
           }
 
-          onAdd((_onAdd = {}, _defineProperty(_onAdd, keyAxis.field, staticValue), _defineProperty(_onAdd, valueAxis.field, dynamicValue), _onAdd), {
+          onAdd({
+            key: staticValue,
+            value: dynamicValue
+          }, {
             dataIndex: dataIndex,
             pointIndex: pointIndex
           });
@@ -1636,7 +1636,11 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
       }, translate('Add')), onRemove && /*#__PURE__*/_react.default.createElement("button", {
         className: "r-chart-edit-button",
         onClick: function onClick() {
+          var point = data[dataIndex].points[pointIndex];
           onRemove({
+            point: point,
+            key: point._key,
+            value: point._value,
             dataIndex: dataIndex,
             pointIndex: pointIndex
           });
@@ -1645,10 +1649,11 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
       }, translate('Remove')), onEdit && /*#__PURE__*/_react.default.createElement("button", {
         className: "r-chart-edit-button",
         onClick: function onClick() {
-          var newPoint = { ...data[dataIndex].points[pointIndex]
-          };
-          newPoint[valueAxis.field] = dynamicValue;
-          onEdit(newPoint, {
+          var point = data[dataIndex].points[pointIndex];
+          onEdit({
+            point: point,
+            key: point._key,
+            value: dynamicValue,
             dataIndex: dataIndex,
             pointIndex: pointIndex
           });
