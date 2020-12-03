@@ -1,11 +1,10 @@
 import $ from 'jquery';
-export function getGap(labels){
-  return Math.max(0.5,Math.round(labels.length / 10))
+export function getGap(length){
+  return Math.max(0.5,Math.round(length / 10))
 }
-export function number_getRange(axis,details){
-      var {min,max,canvasSize} = details;
-      var filter = details.getFilter[axis]();
-      console.log(filter);
+export function value_getRange(axis){
+      var {min,max,canvasSize,axisToD} = this.details;
+      var filter = this.state.filter[axisToD[axis]];
       var size = canvasSize[axis];
       if(min === undefined || max === undefined){return false;}
       var range = max - min,i = 1;
@@ -29,24 +28,27 @@ export function number_getRange(axis,details){
       var filteredRange = {start,end,step,p1:fs,p2:fe}  
       return {start:fs,step,end:fe,filter:filteredRange}; 
     } 
-    export function string_getRange(axis,details){
-      var filter = details.getFilter[axis]();
+    export function key_getRange(axis){
+      var {canvasSize,axisToD} = this.details;
+      var {keyAxis} = this.props;
+      var filter = this.state.filter[axisToD[axis]];
       var labelSize;
-      if(axis === 'x'){labelSize = details.Axis.x.width || 60;}
-      else{labelSize = details.Axis.y.height || 30;}
-      var canvasSize = details.canvasSize[axis]
-      var list = details.KeyAxis.list;
-      var gap = getGap(list);
-      var fs = filter[0]?list.indexOf(filter[0]):0;
-      var fe = filter[1]?list.indexOf(filter[1]):list.length - 1;
-      var filteredRange = {start:0,end:list.length - 1,p1:fs,p2:fe};
+      if(axis === 'x'){labelSize = this.props.labelSize;}
+      else{labelSize = 30;}
+      var canvasSize = canvasSize[axis]
+      var keys = keyAxis.keys;
+      var fs = filter[0]?keys.indexOf(filter[0]):0;
+      var fe = filter[1]?keys.indexOf(filter[1]):keys.length - 1;
+      var filteredRange = {start:0,end:keys.length - 1,p1:fs,p2:fe};
       var count = fe - fs + 1;
+      var gap = getGap(count);
+      var labelSpace = canvasSize / count;
       var approveCount = Math.floor(canvasSize / labelSize);
       approveCount = approveCount < 1 ? 1:approveCount;
       var labelStep = Math.floor(count / approveCount);
       labelStep = labelStep < 1 ? 1:labelStep;
       return {
-        start:fs - gap,step:labelStep,end:fe + gap,count,filter:filteredRange
+        start:fs - gap,step:labelStep,end:fe + gap,count,filter:filteredRange,labelSpace
       };
     }
 
@@ -54,30 +56,29 @@ export function number_getRange(axis,details){
     //   return this.getPercentByValue(value,axis) * this.details[axis === 'x'?'width':'height'] / 100;
     // }
 
-    export function number_getPercentByValue(value,axis,details){
-      var {range} = details;
-      let {start,end} = range[axis],Value; 
-      if(isNaN(value)){return false}  
-      Value = value; 
-      return 100 * (Value - start) / (end - start) 
+    export function value_getPercentByValue(axis,point = {}){
+      if(isNaN(point._value)){return false}  
+      var {start,end} = this.details.range[axis];
+      return 100 * (point._value - start) / (end - start) 
     }
-    export function string_getPercentByValue(index,axis,details){
-      var {range} = details;
-      let {start,end} = range[axis]; 
-      return 100 * (index - start) / (end - start) 
+    export function key_getPercentByValue(axis,point = {}){
+      if(point._keyIndex === undefined){return false;}
+      let {start,end} = this.details.range[axis]; 
+      return 100 * (point._keyIndex - start) / (end - start) 
     }
-    export function number_getValueByPercent(p,axis,details){
-      var {range,precision} = details;
+    export function value_getValueByPercent(p,axis){
+      var {range} = this.details;
+      var {precision} = this.props;
       if(!range[axis]){return '';}
       let {start,end} = range[axis],Value = (end - start) * p / 100;
       return parseFloat((Value + start).toFixed(precision))
     }
-    export function string_getValueByPercent(p,axis,details){
-      var {range,KeyAxis} = details;
+    export function key_getValueByPercent(p,axis){
+      var {range} = this.details;
       if(!range[axis]){return '';}
       let {start,end} = range[axis],Value = (end - start) * p / 100;
       var a = Math.round(Value + start);
-      return KeyAxis.list[a]
+      return a;
     }
     export function getLimitTypeNumber(data){
       var min = Infinity,max = -Infinity;
@@ -85,7 +86,7 @@ export function number_getRange(axis,details){
         var {points = []} = data[i];
         for (var j = 0; j < points.length; j++) { 
           let point = points[j];
-          var value = this.getValue(point); 
+          var value = this.getValue(point,{dataIndex:i,pointIndex:j}); 
           if(value < min){min = value;}
           if(value > max){max = value;}
         }
@@ -133,3 +134,49 @@ export function number_getRange(axis,details){
       }
       return dictionary[value][this.props.globalization];
     }
+    export function key_getLabel(value){
+      var {keyAxis} = this.props;
+      if(value < 0 || value >= keyAxis.keys.length){return ''}
+      if(!keyAxis.editLabel){return keyAxis.keys[value]}
+      return keyAxis.editLabel(keyAxis.keys[value]);    
+    }
+    export function value_getLabel(value){
+      var {valueAxis} = this.props;
+      return valueAxis.editLabel?valueAxis.editLabel(value):value
+    }
+    export function key_changeFilter(p1,p2){
+      let {filter} = this.state;
+      let {keyAxis} = this.props;
+      let {keys} = keyAxis;
+      filter.key = [keys[p1],keys[p2]];
+      this.SetState({filter});
+    };
+    export function value_changeFilter(p1,p2){
+      let {filter} = this.state;
+      filter.value = [p1,p2];
+      this.SetState({filter});
+    }
+
+    export function getValueByPercent(percent){
+      var keyIndex = this.key_getValueByPercent(percent[this.details.dToAxis['key']],this.details.dToAxis['key']);
+      var {keyAxis} = this.props;
+      return {
+        keyIndex,
+        key:keyAxis.keys[keyIndex],
+        value:this.value_getValueByPercent(percent[this.details.dToAxis['value']],this.details.dToAxis['value'])
+      }
+    }
+
+    export function normal_getArea(points,fill,opacity){
+      let area = {points:points.slice(),fill,opacity};
+      area.points.splice(0,0,[points[0][0],0]);
+      area.points.push([points[points.length - 1][0],0]);
+      return area;
+    };
+
+    export function reverse_getArea(points,fill,opacity){
+      let area = {points:points.slice(),fill,opacity};
+      area.points.splice(0,0,[0,points[0][1]]);
+      area.points.push([0,points[points.length - 1][1]]);
+      return area;
+    };

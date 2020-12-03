@@ -279,7 +279,7 @@ option{
   width:10px;
   height:10px;
   background:#fff;
-  border:1px solid #eee;
+  border:1px solid #999;
   border-radius:0;
   transition:.2s;
 }
@@ -290,4 +290,44 @@ option{
   border:2px solid #999;
   border-radius:100%;
   transition:.2s;
+}
+.r-chart-line{
+  position:absolute;
+  display:none;
+  z-index:100;
+  pointer-events: none;
+}
+.r-chart-line div{
+  position:absolute;
+  height:20px;
+  line-height:20px;
+  color:#fff;
+  background:#ccc;
+  border-radius:4px;
+}
+.r-chart-horizontal-line{
+  height:0;
+  border-bottom:1px dashed #aaa;
+  right:0;
+  
+}
+.r-chart-horizontal-line div{
+  right:100%;
+  position:absolute;
+  padding-right:16px;
+  padding-left:3px;
+  top:-10px;
+}
+.r-chart-vertical-line{
+  width:0;
+  border-left:1px dashed #aaa;
+  top:0;
+  display:flex;
+  justify-content: center;
+  
+}
+.r-chart-vertical-line div{
+  width:fit-content;
+  padding:0 3px;
+  top:calc(100% + 14px);
 }

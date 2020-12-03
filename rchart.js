@@ -4,9 +4,12 @@ import RCanvas from 'r-canvas';
 import $ from 'jquery';
 import './index.css';
 import {
-  number_getRange,string_getRange,
-  number_getPercentByValue,string_getPercentByValue,
-  number_getValueByPercent,string_getValueByPercent,
+  value_getRange,key_getRange,
+  value_getLabel,key_getLabel,
+  normal_getArea,reverse_getArea,
+  value_getPercentByValue,key_getPercentByValue,
+  value_getValueByPercent,key_getValueByPercent,getValueByPercent,
+  value_changeFilter,key_changeFilter,
   getLimitTypeNumber,eventHandler,getShapes,translate} from './functions';
 
 var RChartContext = createContext();
@@ -14,76 +17,77 @@ var RChartContext = createContext();
     constructor(props){
       super(props);
       this.mouseDownDetail = {};
-      var {data,filter} = this.props;
-      var preventData = {};
-      for(var i = 0; i < data.length; i++){
-        let d = data[i];
-        if(d.title === undefined){continue;}
-        preventData[d.title] = false;
-      }
-      this.state = {popup:false,preventData,filter};
+      var {filter} = this.props;
+      this.state = {popup:false,dataHide:{},filter};
       this.dom = createRef();
       this.details = {
-        min:Infinity,max:-Infinity,editLabel:{},getFilter:{},changeFilter:{},
-        getPercentByValue:{},
-        getFilterSlider:{},getGridLines:{},getLines:{}
+        min:Infinity,max:-Infinity
       };
-      $('body').on('mouseout','.r-chart-canvas',()=>{$('.r-chart-popup-container').html('')})
+      $('body').on('mouseout','.r-chart-canvas',()=>{
+        $('.r-chart-popup-container').html('');
+        $('.r-chart-line').css({display:'none'})
+      })
       if('ontouchstart' in document.documentElement){
-        eventHandler('window','mouseup',()=>{$('.r-chart-popup-container').html('')})
+        eventHandler('window','mouseup',()=>{
+          $('.r-chart-popup-container').html('')
+          $('.r-chart-line').css({display:'none'})
+        })
       }
       this.translate = translate;
       this.getLimitTypeNumber = getLimitTypeNumber;
+      this.key_getRange = key_getRange;
+      this.value_getRange = value_getRange;
+      this.key_getPercentByValue = key_getPercentByValue;
+      this.value_getPercentByValue = value_getPercentByValue;
+      this.key_getLabel = key_getLabel;
+      this.value_getLabel = value_getLabel;
+      this.key_getValueByPercent = key_getValueByPercent;
+      this.value_getValueByPercent = value_getValueByPercent;
+      this.key_changeFilter = key_changeFilter;
+      this.value_changeFilter = value_changeFilter;
+      this.getValueByPercent = getValueByPercent;
+      this.normal_getArea = normal_getArea;
+      this.reverse_getArea = reverse_getArea;
     }
-    
-    getStyle(x,y){
-      return {
-        gridTemplateColumns:`${x}px auto`,
-        gridTemplateRows:`auto ${y}px`,
-        direction:'ltr'
-      }
-    }
-    getKey(point){
-      var {keyAxis} = this.props;
-      var {field} = keyAxis;
-      return point[field];
-    }
-    getValue(point){
-      var {valueAxis} = this.props;
-      var {field} = valueAxis;
-      return point[field];
-    }
+    getStyle(x,y){return {gridTemplateColumns:`${x}px auto`,gridTemplateRows:`auto ${y}px`,direction:'ltr'}}
+    getKey(point,{dataIndex,pointIndex}){return this.props.data[dataIndex].getKey(point,{dataIndex,pointIndex});}
+    getValue(point,{dataIndex,pointIndex}){return this.props.data[dataIndex].getValue(point,{dataIndex,pointIndex});}
     getClient(e){
       return 'ontouchstart' in document.documentElement?{x: e.changedTouches[0].clientX,y:e.changedTouches[0].clientY }:{x:e.clientX,y:e.clientY}
     }
     SetState(obj){this.setState(obj)}
-    onChange(data){
-      var {onChange} = this.props;
-      onChange({data});
-    }
     getLineChart(data,dataIndex){ 
+      var {keyAxis} = this.props;
       var {points,color = '#000',lineWidth = 2,areaOpacity,dash,pointStyle,text} = data;
-      var dataDetail = {...data,dataIndex,points:[],line:{points:[],lineWidth,stroke:color,dash},area:false,texts:[]}
+      var dataDetail = {...data,dataIndex,points:[],line:{points:[],lineWidth,stroke:color,dash},area:false,
+      texts:[]}
+      var labelSpace = this.details.labelSpace;
       for(let pointIndex = 0; pointIndex < points.length; pointIndex++){
         let point = points[pointIndex];
-        let key = this.getKey(point),value = this.getValue(point);
+        let key = this.getKey(point,{dataIndex,pointIndex}),value = this.getValue(point,{dataIndex,pointIndex});
+        point._key = key; point._value = value;
         if(key === null || value === null){continue;}
-        var px = this.details.getPercentByValue.x(key,value,point);
-        var py = this.details.getPercentByValue.y(key,value,point);
-        if(px === false || py === false){continue;}
+        if(!this.mouseDownDetail.target){
+          point._keyIndex = keyAxis.keys.indexOf(key);
+        }
+        if(point._keyIndex === -1 || point._keyIndex === undefined){continue;}
+        var px = this.getPercentByValue('x',point);
+        var py = this.getPercentByValue('y',point);
         this.keyDictionary[dataIndex][key] = pointIndex;
         if(pointStyle){
           let PointStyle = typeof pointStyle === 'function'?pointStyle(point,{dataIndex,pointIndex}):pointStyle;
           let {radius,fill = '#fff',stroke = color,lineWidth:pointLineWidth = lineWidth,dash:pointDash,slice} = PointStyle;
-          let Point = {
-            x:px + '%',y:py + '%',
-            items:[
-              {r:this.props.clickRadius,fill:'rgba(0,0,0,0)',onMouseDown:this.pointMouseDown.bind(this),dataIndex,pointIndex},
-              {r: radius,lineWidth:pointLineWidth * 2,fill,stroke,dash:pointDash,slice}
-            ]
+          if(radius && labelSpace > 2 * (radius + pointLineWidth) + 2){
+            let Point = {
+              x:px + '%',y:py + '%',
+              items:[
+                {r:this.props.clickRadius,fill:'rgba(0,0,0,0)',onMouseDown:this.pointMouseDown.bind(this),dataIndex,pointIndex},
+                {r: radius,lineWidth:pointLineWidth * 2,fill,stroke,dash:pointDash,slice}
+              ]
+            }
+            this.elements.points.push(Point);
+            dataDetail.points.push(Point);
           }
-          this.elements.points.push(Point);
-          dataDetail.points.push(Point);
         }
         if(text){
           let {value = '',fontSize = 16,color = '#444',x = 0,y = 0,rotate,align} = text(point,{dataIndex,pointIndex});
@@ -95,24 +99,30 @@ var RChartContext = createContext();
       }
       if(lineWidth){this.elements.lines.push(dataDetail.line)}
       if(areaOpacity){
-        dataDetail.area = this.details.getArea(dataDetail.line.points,color,areaOpacity)
+        dataDetail.area = this.getArea(dataDetail.line.points,color,areaOpacity)
         this.elements.areas.push(dataDetail.area)
       }
       this.dataDetails.push(dataDetail);
     }
     getBarChart(data,barCounter,dataIndex){
       var {color,points,text} = data;
+      var {reverse,keyAxis} = this.props;
       var dataDetail = {...data,dataIndex,rects:[],texts:[]}
-      var {keyAxis,barCount,barWidth,getPercentByValue} = this.details;
+      var {barCount,barWidth} = this.details;
       for(var pointIndex = 0; pointIndex < points.length; pointIndex++){
         let point = points[pointIndex];
-        let key = this.getKey(point),value = this.getValue(point);
+        let key = this.getKey(point,{dataIndex,pointIndex}),value = this.getValue(point,{dataIndex,pointIndex});
+        point._key = key; point._value = value;
         if(key === null || value === null){continue;}
-        var px = getPercentByValue.x(key,value,point) + '%';
-        var py = getPercentByValue.y(key,value,point) + '%';
+        if(!this.mouseDownDetail.target){
+          var keyIndex = keyAxis.keys.indexOf(key);
+          point._keyIndex = keyIndex === -1?undefined:keyIndex;
+        }
+        var px = this.getPercentByValue('x',point) + '%';
+        var py = this.getPercentByValue('y',point) + '%';
         if(px === false || py === false){continue;}
         this.keyDictionary[dataIndex][key] = pointIndex;
-        if(keyAxis === 'x'){
+        if(!reverse){
           let rect = {
             width:barWidth + '%',height:py,x:px,fill:color,
             pivot:[barWidth * (barCount / 2 - barCounter) + '%',0],
@@ -145,12 +155,13 @@ var RChartContext = createContext();
       var range = this.details.range[axis];
       if(!range){return {}}
       var {keyAxis} = this.props;
-      value = typeof value === 'string'?keyAxis.list.indexOf(value):value;
+      value = typeof value === 'string'?keyAxis.keys.indexOf(value):value;
       var {start,end} = range,v = (value - start) * 100 / (end - start);
       var points = axis === 'x'?[[v + '%','0%'],[v + '%','-100%']]:[['0%',-v + '%'],['100%',-v + '%']];
       return {stroke:color,lineWidth,points,type:'line',dash}
     }
     getGridLines(axis,color){
+      var color = this.props[this.details.axisToD[axis] + 'Axis'].gridColor; if(!color){return []}
       var range = this.details.range[axis];
       if(!range){return []}
       var {start,step,end} = range;
@@ -173,14 +184,14 @@ var RChartContext = createContext();
     getElements(){ 
       var {data} = this.props;
       this.keyDictionary = data.map(()=>{return {}});
-      var {preventData} = this.state;
-      var {getGridLines,getLines} = this.details;
+      var {dataHide} = this.state;
+      var {getLines} = this.details;
       this.elements = {
-        xGridLines:getGridLines.x(),
-        yGridLines:getGridLines.y(), 
+        xGridLines:this.getGridLines('x'),
+        yGridLines:this.getGridLines('y'), 
         areas:[],rects:[],lines:[],points:[],
-        xIndicators:getLines.x(),
-        yIndicators:getLines.y(),
+        xIndicators:getLines('x'),
+        yIndicators:getLines('y'),
         texts:[],
         shapes:[]
       }
@@ -188,7 +199,7 @@ var RChartContext = createContext();
       this.dataDetails = [];
       for(var dataIndex = 0; dataIndex < data.length; dataIndex++){  
         let {title,type = 'line',shapes = () => []} = data[dataIndex];
-        if(preventData[title]){continue;}
+        if(title && dataHide[title]){continue;}
         if(type === 'line'){
             this.getLineChart(data[dataIndex],dataIndex);
         } 
@@ -205,126 +216,42 @@ var RChartContext = createContext();
     componentDidMount(){this.SetState({})}
     
     getDetails(){
-      var {keyAxis,valueAxis,X,Y,data,barWidth = 80,precision,reverse,labels,editValue} = this.props,d = this.details; 
-      if(!d.keyAxis){ 
-        d.getKey = this.getKey.bind(this);
-        d.getValue = this.getValue.bind(this);
-        d.Axis = {x:X,y:Y};
-        d.KeyAxis = keyAxis;
-        var editLabelKey = keyAxis.editLabel?(value)=>{
-          if(value < 0 || value >= keyAxis.list.length){return ''}
-          return keyAxis.editLabel(keyAxis.list[value]);
-        }:(value)=>value;
-        var editLabelValue = valueAxis.editLabel?(value)=>valueAxis.editLabel(value):(value)=>value; 
+      var {data,barWidth = 80,reverse} = this.props,d = this.details; 
+      if(!d.axisToD){ 
         if(!reverse){
-          d.getFilter.x = ()=>this.state.filter.key;
-          d.getFilter.y = ()=>this.state.filter.value;
-          d.keyAxis = 'x';
-          d.valueAxis = 'y';
-          d.editLabel.x = editLabelKey;
-          d.editLabel.y = editLabelValue;
-          d.getRange = ()=>{return {x:string_getRange('x',this.details),y:number_getRange('y',this.details)}}
-          d.getPercentByValue.x = (key,value,point = {})=>{
-            point._keyIndex = keyAxis.list.indexOf(key);
-            if(point._keyIndex === -1){return false;}
-            return string_getPercentByValue(point._keyIndex,'x',this.details)
-          };
-          d.getPercentByValue.y = (key,value,point)=>-number_getPercentByValue(value,'y',this.details);
-          d.getValueByPercent = (px,py)=>{
-            return {
-              key:string_getValueByPercent(px,'x',this.details),
-              value:number_getValueByPercent(py,'y',this.details)
-            }
-          }
-          d.getArea = (points,fill,opacity)=>{
-            let area = {points:points.slice(),fill,opacity};
-            area.points.splice(0,0,[points[0][0],0]);
-            area.points.push([points[points.length - 1][0],0]);
-            return area;
-          };
-          d.getFilterSlider.x = keyAxis.zoom?()=>this.getFilterSlider('x'):()=>null;
-          d.getFilterSlider.y = valueAxis.zoom?()=>this.getFilterSlider('y'):()=>null;
-          d.getGridLines.x = keyAxis.gridColor?()=>this.getGridLines('x',keyAxis.gridColor):()=>[];
-          d.getGridLines.y = valueAxis.gridColor?()=>this.getGridLines('y',valueAxis.gridColor):()=>[];
-          d.getLines.x = ()=>this.getLines('x',keyAxis.lines);
-          d.getLines.y = ()=>this.getLines('y',valueAxis.lines);
-          d.changeFilter.x = (p1,p2)=>{
-            let {filter} = this.state;
-            let {list} = keyAxis;
-            filter.key = [list[p1],list[p2]];
-            this.SetState({filter});
-          };
-          d.changeFilter.y = (p1,p2)=>{
-            let {filter} = this.state;
-            filter.value = [p1,p2];
-            this.SetState({filter});
-          }
+          d.axisToD = {x:'key',y:'value'}; d.dToAxis = {key:'x',value:'y'};
+          this.getArea = this.normal_getArea;
         }
         else{
-          d.getFilter.x = ()=>this.state.filter.value;
-          d.getFilter.y = ()=>this.state.filter.key;
-          d.keyAxis = 'y';
-          d.valueAxis = 'x';
-          d.editLabel.x = editLabelValue;
-          d.editLabel.y = editLabelKey;
-          d.getRange = ()=>{return {x:number_getRange('x',this.details),y:string_getRange('y',this.details)}}
-          d.getPercentByValue.x = (key,value,point)=>number_getPercentByValue(value,'x',this.details);
-          d.getPercentByValue.y = (key,value,point = {})=>{
-            point._keyIndex = keyAxis.list.indexOf(key);
-            if(point._keyIndex === -1){return false;}
-            return -string_getPercentByValue(point._keyIndex,'y',this.details)
-          };
-          d.getValueByPercent = (px,py)=>{
-            return {
-              key:string_getValueByPercent(py,'y',this.details),
-              value:number_getValueByPercent(px,'x',this.details)
-            }
-          }
-          d.getArea = (points,fill,opacity)=>{
-            let area = {points:points.slice(),fill,opacity};
-            area.points.splice(0,0,[0,points[0][1]]);
-            area.points.push([0,points[points.length - 1][1]]);
-            return area;
-          };
-          d.getFilterSlider.x = valueAxis.zoom?()=>this.getFilterSlider('x'):()=>null;
-          d.getFilterSlider.y = keyAxis.zoom?()=>this.getFilterSlider('y'):()=>null;
-          d.getGridLines.x = valueAxis.gridColor?()=>this.getGridLines('x',valueAxis.gridColor):()=>[];
-          d.getGridLines.y = keyAxis.gridColor?()=>this.getGridLines('y',keyAxis.gridColor):()=>[];
-          d.getLines.x = ()=>this.getLines('x',valueAxis.lines);
-          d.getLines.y = ()=>this.getLines('y',keyAxis.lines);
-          d.changeFilter.x = (p1,p2)=>{
-            let {filter} = this.state;
-            filter.value = [p1,p2];
-            this.SetState({filter});
-          };
-          d.changeFilter.y = (p1,p2)=>{
-            let {filter} = this.state;
-            let {list} = keyAxis;
-            filter.key = [list[p1],list[p2]];
-            this.SetState({filter});
-          };
+          d.axisToD = {x:'value',y:'key'}; d.dToAxis = {key:'y',value:'x'};
+          this.getArea = this.reverse_getArea;
         }
-        
+        this.changeFilter = (axis,p1,p2)=>this[d.axisToD[axis] + '_changeFilter'](p1,p2);
+        this.getRange = (axis)=>this[d.axisToD[axis]+'_getRange'](axis);
+        this.getLabel = (axis,value)=>this[d.axisToD[axis] + '_getLabel'](value);
+        this.getPercentByValue = (axis,point)=>this[d.axisToD[axis] + '_getPercentByValue'](axis,point) * (axis === 'y'?-1:1);
+        d.getLines = (axis)=>this.getLines(axis,this.props[d.axisToD[axis] + 'Axis'].lines);
       } //نوع چارت و تابع گرفتن درصد با مقدار یکبار تایین می شود
-      d.precision = precision;
       if(this.mouseDownDetail.target !== 'point'){
-        var limit = this.getLimitTypeNumber(data);
-        this.details.min = limit.min;
-        this.details.max = limit.max;
-        this.details.range = d.getRange(); 
-      }  
-      
+        if(this.mouseDownDetail.target !== 'filter'){
+          var limit = this.getLimitTypeNumber(data);
+          this.details.min = limit.min;
+          this.details.max = limit.max;
+        }
+        this.details.range = {x:this.getRange('x'),y:this.getRange('y')}; 
+        this.details.labelSpace = this.details.range[d.dToAxis.key].labelSpace;
+      }
       d.barCount = data.filter((d)=>d.type === 'bar').length;
-      d.barWidth = barWidth / d.range[d.keyAxis].count/d.barCount; 
+      d.barWidth = barWidth / d.range[d.dToAxis['key']].count/d.barCount; 
     }
     pointMouseDown(e,pos,obj){
       var {dataIndex,pointIndex} = obj;
       let {data,edit,remove} = this.props;
-      if(data[dataIndex].editable === false){return;}
+      if(!data[dataIndex].editable){return;}
       if(!edit && !remove){return;}
       this.getMouseDetail(pos);
       var point = data[dataIndex].points[pointIndex];
-      this.mouseDownDetail = {target:'point',key:this.getKey(point),value:this.getValue(point)};
+      this.mouseDownDetail = {target:'point',key:point._key,value:point._value};
       eventHandler('window','mousemove',$.proxy(this.pointMouseMove,this))
       eventHandler('window','mouseup',$.proxy(this.pointMouseUp,this))
       this.so = {dataIndex,pointIndex,x:this.mouseDetail.x,y:this.mouseDetail.y}; 
@@ -334,13 +261,11 @@ var RChartContext = createContext();
       var {data,edit,valueAxis} = this.props,point = data[this.so.dataIndex].points[this.so.pointIndex];
       if(!this.moved){
         //if(Math.abs(this.mouseDetail.y - this.so.y) < 8){return;}
-        if(this.getValue(point) === this.mouseDetail.value){return;}
+        if(point._value === this.mouseDetail.value){return;}
       }
       this.moved = true;
       if(!edit){return;}
-      var newPoint = {...point};
-      console.log(this.mouseDetail.key,this.mouseDetail.value);
-      
+      var newPoint = {...point};      
       newPoint[valueAxis.field] = this.mouseDetail.value;
       edit(newPoint,{dataIndex:this.so.dataIndex,pointIndex:this.so.pointIndex});
 
@@ -357,7 +282,7 @@ var RChartContext = createContext();
           popup:{
             dataIndex:this.so.dataIndex,pointIndex:this.so.pointIndex,
             dataIndexes:[this.so.dataIndex],
-            dynamicValue:this.getValue(point),staticValue:this.mouseDetail.key,
+            dynamicValue:point._value,staticValue:this.mouseDetail.key,
             onEdit:edit,onRemove:remove,title
           }
         })
@@ -469,16 +394,14 @@ var RChartContext = createContext();
       })
     }
     getPointsBySelectRect(){
-      var {preventData} = this.state;
       var {start,end} = this.multiselect;
       var result = [];
       for(var i = 0; i < this.dataDetails.length; i++){
-        var {dataIndex,title,points,editable} = this.dataDetails[i];
+        var {dataIndex,points,editable} = this.dataDetails[i];
         if(editable === false){continue;}
-        if(preventData[title]){continue}
         for(var pointIndex = 0; pointIndex < points.length; pointIndex++){
           let point = points[pointIndex];
-          var percent = parseFloat(point[this.details.keyAxis]);
+          var percent = parseFloat(point[this.details.dToAxis['key']]);
           if(percent < start || percent > end){continue;}
           result.push([dataIndex,pointIndex])
         }
@@ -499,17 +422,17 @@ var RChartContext = createContext();
       />
     }
     getHeader(yWidth){
-      var {data} = this.props,{preventData} = this.state;
+      var {data} = this.props,{dataHide} = this.state;
       return (
         <div className='r-chart-title' style={{paddingLeft:yWidth + 'px'}}>
             {data.filter((d)=>d.title !== undefined).map((d,i)=>{
               let {color,title} = d;
-              let style = !preventData[d.title]?{background:color}:{boxShadow:`inset 0 0 0 2px ${color}`};
+              let style = !dataHide[d.title]?{background:color}:{boxShadow:`inset 0 0 0 2px ${color}`};
               return (
                 <div key={i} className='r-chart-title-item' onClick={()=>{
-                  preventData[title] = preventData[title] === undefined?false:preventData[title];
-                  preventData[title] = !preventData[title];
-                  this.SetState({preventData})
+                  dataHide[title] = dataHide[title] === undefined?false:dataHide[title];
+                  dataHide[title] = !dataHide[title];
+                  this.SetState({dataHide})
                 }}>
                   <div className='r-chart-title-color' style={style}></div>
                   <div className='r-chart-title-text'>{d.title || 'untitle'}</div>
@@ -523,7 +446,7 @@ var RChartContext = createContext();
       if(!this.details.range || !this.details.range[axis]){return null;}
       var {start,end,step} = this.details.range[axis]; 
       var labelStyle = {x:{top:'24px'},y:{left:'unset',right:'16px',justifyContent:'flex-end'}};
-      var {rotate = 0} = this.props[axis.toUpperCase()];
+      var {labelRotate} = this.props;
       return (
         <RSlider 
           className='labelSlider' editable={false} showValue={false}
@@ -531,8 +454,8 @@ var RChartContext = createContext();
           pointStyle={{display:'none'}} lineStyle={{display:'none'}}
           direction={axis === 'x'?'right':'top'} start={start} end={end}
           label={{
-            step,rotate:axis === 'y'?0:rotate,
-            edit:(value)=>this.details.editLabel[axis](value),
+            step,rotate:axis === 'y'?0:labelRotate,
+            edit:(value)=>this.getLabel(axis,value),
             style:{fontSize:'inherit',...labelStyle[axis]}
           }}
         />
@@ -540,19 +463,22 @@ var RChartContext = createContext();
     }
     filterMouseDown(e){
       e.preventDefault();
+      this.mouseDownDetail.target = 'filter';
       var container = $(this.dom.current);
       var filterButtons = container.find('.r-chart-filterSlider-button');
       filterButtons.addClass('active');
       eventHandler('window','mouseup',$.proxy(this.filterMouseUp,this));
     }
     filterMouseUp(){
+      this.mouseDownDetail = {}; 
       var container = $(this.dom.current);
       var filterButtons = container.find('.r-chart-filterSlider-button');
       filterButtons.removeClass('active');
       eventHandler('window','mouseup',this.filterMouseUp,'unbind');
     }
     getFilterSlider(axis){
-      var {range,changeFilter} = this.details;
+      var zoom  = this.props[this.details.axisToD[axis] + 'Axis'].zoom; if(!zoom){return null;}
+      var {range} = this.details;
       if(!range || !range[axis]){return null;}
       var color = '#eee';
       var {p1,p2,start,end} = range[axis].filter;
@@ -574,8 +500,8 @@ var RChartContext = createContext();
       return (
         <RSlider direction={axis === 'x'?'right':'top'} start={start} end={end} className='filterSlider'
           points={points}
-          editValue={(point)=>this.details.editLabel[axis](point.value)} 
-          ondrag={({points})=>changeFilter[axis](points[0].value,points[1].value)}
+          editValue={(point)=>this.getLabel(axis,point.value)} 
+          ondrag={({points})=>this.changeFilter(axis,points[0].value,points[1].value)}
           style={{position:'absolute',...style[axis]}}
           lineStyle={{display:'none'}}
           pointStyle={{display:'flex',alignItems:'center',justifyContent:'center',width:'30px',height:'30px',borderRadius:'0px',background:'none'}}
@@ -603,11 +529,10 @@ var RChartContext = createContext();
       for(var dataIndex = 0; dataIndex < data.length; dataIndex++){
         var pointIndex = this.keyDictionary[dataIndex][obj.key];
         if(pointIndex === undefined){continue;}
-        var point = data[dataIndex].points[pointIndex];
-        var key = this.getKey(point),value = this.getValue(point);
-        var Dif = Math.abs(value - obj.value);
+        let point = data[dataIndex].points[pointIndex];
+        var Dif = Math.abs(point._value - obj.value);
         if(Dif <= dif){
-          res = {key,value,dataIndex,pointIndex};
+          res = point;
           dif = Dif;
         }
       }
@@ -615,42 +540,50 @@ var RChartContext = createContext();
     }
     getMouseDetail(a){
       if(!a){return;}
-      var d = this.details;
       var [x,y,px,py] = a;
-      var {add,Y} = this.props;
-      var {width:yWidth = 50} = Y;
-      
-      var obj = d.getValueByPercent(px,-py);
+      var {add,axisSize} = this.props;
+      var {vertical = 50} = axisSize;
+      var obj = this.getValueByPercent({x:px,y:-py});
       if(this.mouseDownDetail.target === 'point'){
         obj.key = this.mouseDownDetail.key;
       }
-      var popupPosition = {x:x + yWidth,y:y + this.details.canvasSize.y}; 
+      var popupPosition = {x:x + vertical,y:y + this.details.canvasSize.y}; 
       var nearestPoint = this.getNearestPointToMouse(obj);
       var addDataIndexes = add && this.mouseDownDetail.target !== 'point'?this.getAddableDataIndexes(obj.key):[];
-      this.mouseDetail = {x,y,px,py,key:obj.key,value:obj.value,nearestPoint,addDataIndexes,popupPosition}  
+      this.mouseDetail = {xLabel:obj.xLabel,yLabel:obj.yLabel,x,y,px,py,key:obj.key,value:obj.value,nearestPoint,addDataIndexes,popupPosition}  
             
     }
     render(){
       var xls = '',yls = '',xfs = '',yfs = '',items = '',HTML = '';
-      var {X,Y,data,html = ()=>'',add,style} = this.props;  
+      var {keyAxis,valueAxis,axisSize,data,html = ()=>'',add} = this.props;  
+      var style = typeof this.props.style === 'function'?this.props.style():this.props.style;
       var {popup} = this.state; 
-      var {height:xHeight = 50} = X;
-      var {width:yWidth = 50} = Y;
-      if(this.details.canvasSize && data.length){
+      var {horizontal = 50,vertical = 50} = axisSize;
+      var ok = false;
+      if(this.details.canvasSize && data.length && keyAxis && keyAxis.keys && valueAxis){
+        ok = true;
         this.getDetails();
         var d = this.details;
         items = this.getElements();
         yls = this.getLabelSlider('y');
-        yfs = d.getFilterSlider.y('y');
+        yfs = this.getFilterSlider('y');
         xls = this.getLabelSlider('x');
-        xfs = d.getFilterSlider.x('x');
+        xfs = this.getFilterSlider('x');
         HTML = html(this.elements,d);
       }
       return (
         <RChartContext.Provider value={{...this.props,translate:this.translate.bind(this),keyDictionary:this.keyDictionary}}>
           <div className='r-chart' ref={this.dom} style={style}>
-            {this.getHeader(yWidth)}
-            <div className='r-chart-container' style={this.getStyle(yWidth,xHeight)}>
+            {this.getHeader(vertical)}
+            <div className='r-chart-container' style={this.getStyle(vertical,horizontal)}>
+              <div 
+                className='r-chart-horizontal-line r-chart-line'
+                style={{width:`calc(100% - ${vertical}px)`}}
+              ></div>
+              <div 
+                className='r-chart-vertical-line r-chart-line'
+                style={{height:`calc(100% - ${horizontal}px)`}}
+              ></div>
               <div className={'r-chart-popup-container r-chart-detail-popup'}></div>
               {add && <div className={'r-chart-popup-container r-chart-add-popup'}></div>}
               {popup !== false && this.getPopup(popup)}
@@ -664,22 +597,34 @@ var RChartContext = createContext();
                   items={items}
                   events={{
                     onMouseMove:(e,pos)=>{
+                      if(!ok){return;}            
                       this.getMouseDetail(pos);
-                      var {key,value,nearestPoint,addDataIndexes,popupPosition} = this.mouseDetail;
-                      $(this.dom.current).find('.r-chart-popup-container').html('');
-                      
+                      var {nearestPoint,addDataIndexes,popupPosition} = this.mouseDetail;
+                      var dom = $(this.dom.current);
+                      dom.find('.r-chart-popup-container').html('');
+                      var horLine = dom.find('.r-chart-horizontal-line');
+                      var verLine = dom.find('.r-chart-vertical-line');
+                      horLine.css({display:'block',top:`calc(100% + ${pos[1] - horizontal}px)`});
+                      verLine.css({display:'flex',right:`calc(100% - ${pos[0] + vertical}px)`});
+                      var xD = this.details.axisToD.x,yD = this.details.axisToD.y;
+                      var xEditLabel = this.props[xD + 'Axis'].editLabel || ((value)=>value);
+                      var yEditLabel = this.props[yD + 'Axis'].editLabel || ((value)=>value);
+                      var xLabel = xEditLabel(this.mouseDetail[xD]);
+                      var yLabel = yEditLabel(this.mouseDetail[yD]);
+                      horLine.html(`<div>${yLabel === undefined?'':yLabel}</div>`);
+                      verLine.html(`<div>${xLabel === undefined?'':xLabel}</div>`);
                       if(addDataIndexes.length){
                           var container = $(this.dom.current).find('.r-chart-add-popup');
-                          var addIndicator = addDataIndexes.length?`<div class="add-indicator" style="background:${data[addDataIndexes[0]].color}">+</div>`:''
+                          var addIndicator = `<div class="add-indicator" style="background:${data[addDataIndexes[0]].color}">+</div>`;
                           container.css({left:popupPosition.x,top:popupPosition.y - ('ontouchstart' in document.documentElement?40:0)});
-                          container.html('<div class="r-chart-popup">' + addIndicator + key  + '  ' + value + '</div>');
+                          container.html('<div class="r-chart-popup">' + addIndicator + xLabel  + '  ' + yLabel + '</div>');
                       }
                       if(nearestPoint){
                           var container = $(this.dom.current).find('.r-chart-detail-popup');
-                          let left = d.getPercentByValue.x(nearestPoint.key,nearestPoint.value) * d.canvasSize.x / 100 + yWidth;
-                          let bottom = -d.getPercentByValue.y(nearestPoint.key,nearestPoint.value) * d.canvasSize.y / 100 + xHeight;
+                          let left = this.getPercentByValue('x',nearestPoint) * d.canvasSize.x / 100 + vertical;
+                          let bottom = -this.getPercentByValue('y',nearestPoint) * d.canvasSize.y / 100 + horizontal;
                           container.css({left,top:'unset',bottom});
-                          container.html('<div class="r-chart-popup">' + nearestPoint.key  + '  ' + nearestPoint.value + '</div>');
+                          container.html('<div class="r-chart-popup">' + xEditLabel(nearestPoint['_' + xD])  + '  ' + yEditLabel(nearestPoint['_' + yD]) + '</div>');
                       }
                     },
                     onMouseDown:this.mouseDown.bind(this)
@@ -695,8 +640,8 @@ var RChartContext = createContext();
     }
   }
   RChart.defaultProps = {
-    data:[],X:{},Y:{},filter:{key:[],value:[]},globalization:'en',precision:0,clickRadius:12,
-    lines:[]
+    data:[],filter:{key:[],value:[]},globalization:'en',precision:0,clickRadius:12,
+    lines:[],axisSize:{},labelSize:60
   }
 
  class RChartEdit extends Component{
@@ -710,8 +655,8 @@ var RChartContext = createContext();
   }
    render(){
      var {points,type,title,onChange,onClose,onAdd,onEdit,onRemove,dataIndex,pointIndex,dynamicValue,staticValue,dataIndexes = []} = this.props;
-     var {keyAxis,valueAxis,data,multiselect = {},translate,rtl,keyDictionary} = this.context;
-     var {items = [],actions = []} = multiselect;
+     var {keyAxis,valueAxis,data,multiselect = {},translate,rtl} = this.context;
+     var {inputs = [],buttons = []} = multiselect;
      return (
        <div className='r-chart-edit' ref={this.dom} style={{direction:rtl?'rtl':'ltr'}}>
           <div className='r-chart-edit-backdrop' onClick={onClose}></div>
@@ -756,8 +701,8 @@ var RChartContext = createContext();
               </div>
             }
             {
-              type === 'multiselect' &&
-              items.filter((item)=>item.show !== false).map((item,i)=>{
+              type === 'multiselect' && (buttons.length || items.length) &&
+              inputs.map((item,i)=>{
                 return ( 
                   <div key={i} className='r-chart-edit-item'>
                     <div className="r-chart-edit-label">{item.title}</div> 
@@ -786,11 +731,11 @@ var RChartContext = createContext();
           </div> 
           <div className='r-chart-edit-footer'>
                 { type === 'multiselect' &&
-                  actions.filter((a)=>a.show !== false).map((a,i)=>{
+                  buttons.filter((a)=>a.show !== false).map((a,i)=>{
                     return (
                       <button key={i} 
                         className='r-chart-edit-button' 
-                        onClick={()=>{a.callback(points); onClose();}}
+                        onClick={()=>{a.onClick(points); onClose();}}
                       >{a.text}</button>    
                     )
                   }) 
@@ -800,9 +745,9 @@ var RChartContext = createContext();
                   <button 
                     className='r-chart-edit-button' 
                     onClick={()=>{
-                      let list = keyAxis.list;
+                      let keys = keyAxis.keys;
                       let points = data[dataIndex].points;
-                      let index = list.indexOf(staticValue);
+                      let index = keys.indexOf(staticValue);
                       let pointIndex = points.length;
                       for(let i = 0; i < points.length; i++){
                         let point = points[i];
