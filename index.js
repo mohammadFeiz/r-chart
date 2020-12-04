@@ -1288,14 +1288,13 @@ var RChart = /*#__PURE__*/function (_Component) {
       var nearestPoint = this.getNearestPointToMouse(obj);
       var addDataIndexes = add && this.mouseDownDetail.target !== 'point' ? this.getAddableDataIndexes(obj.key) : [];
       this.mouseDetail = {
-        xLabel: obj.xLabel,
-        yLabel: obj.yLabel,
         x: x,
         y: y,
         px: px,
         py: py,
         key: obj.key,
         value: obj.value,
+        keyIndex: obj.keyIndex,
         nearestPoint: nearestPoint,
         addDataIndexes: addDataIndexes,
         popupPosition: popupPosition
@@ -1408,17 +1407,16 @@ var RChart = /*#__PURE__*/function (_Component) {
             });
             var xD = _this7.details.axisToD.x,
                 yD = _this7.details.axisToD.y;
+            var xLabel, yLabel;
 
-            var xEditLabel = _this7.props[xD + 'Axis'].editLabel || function (value) {
-              return value;
-            };
+            if (xD === 'key') {
+              xLabel = _this7.getLabel('x', _this7.mouseDetail['keyIndex']);
+              yLabel = _this7.getLabel('y', _this7.mouseDetail[yD]);
+            } else {
+              xLabel = _this7.getLabel('x', _this7.mouseDetail[xD]);
+              yLabel = _this7.getLabel('y', _this7.mouseDetail['keyIndex']);
+            }
 
-            var yEditLabel = _this7.props[yD + 'Axis'].editLabel || function (value) {
-              return value;
-            };
-
-            var xLabel = xEditLabel(_this7.mouseDetail[xD]);
-            var yLabel = yEditLabel(_this7.mouseDetail[yD]);
             horLine.html("<div>".concat(yLabel === undefined ? '' : yLabel, "</div>"));
             verLine.html("<div>".concat(xLabel === undefined ? '' : xLabel, "</div>"));
 
@@ -1441,7 +1439,18 @@ var RChart = /*#__PURE__*/function (_Component) {
                 top: 'unset',
                 bottom: bottom
               });
-              container.html('<div class="r-chart-popup">' + xEditLabel(nearestPoint['_' + xD]) + '  ' + yEditLabel(nearestPoint['_' + yD]) + '</div>');
+
+              var _xLabel, _yLabel;
+
+              if (xD === 'key') {
+                _xLabel = _this7.getLabel('x', nearestPoint['_keyIndex']);
+                _yLabel = _this7.getLabel('y', nearestPoint['_value']);
+              } else {
+                _xLabel = _this7.getLabel('x', nearestPoint['_value']);
+                _yLabel = _this7.getLabel('y', nearestPoint['_keyIndex']);
+              }
+
+              container.html('<div class="r-chart-popup">' + _xLabel + '  ' + _yLabel + '</div>');
             }
           },
           onMouseDown: this.mouseDown.bind(this)

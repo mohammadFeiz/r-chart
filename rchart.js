@@ -549,7 +549,7 @@ var RChartContext = createContext();
       var popupPosition = {x:x + vertical,y:y + this.details.canvasSize.y}; 
       var nearestPoint = this.getNearestPointToMouse(obj);
       var addDataIndexes = add && this.mouseDownDetail.target !== 'point'?this.getAddableDataIndexes(obj.key):[];
-      this.mouseDetail = {xLabel:obj.xLabel,yLabel:obj.yLabel,x,y,px,py,key:obj.key,value:obj.value,nearestPoint,addDataIndexes,popupPosition}  
+      this.mouseDetail = {x,y,px,py,key:obj.key,value:obj.value,keyIndex:obj.keyIndex,nearestPoint,addDataIndexes,popupPosition}  
             
     }
     render(){
@@ -606,10 +606,15 @@ var RChartContext = createContext();
                       horLine.css({display:'block',top:`calc(100% + ${pos[1] - horizontal}px)`});
                       verLine.css({display:'flex',right:`calc(100% - ${pos[0] + vertical}px)`});
                       var xD = this.details.axisToD.x,yD = this.details.axisToD.y;
-                      var xEditLabel = this.props[xD + 'Axis'].editLabel || ((value)=>value);
-                      var yEditLabel = this.props[yD + 'Axis'].editLabel || ((value)=>value);
-                      var xLabel = xEditLabel(this.mouseDetail[xD]);
-                      var yLabel = yEditLabel(this.mouseDetail[yD]);
+                      var xLabel,yLabel;
+                      if(xD === 'key'){
+                        xLabel = this.getLabel('x',this.mouseDetail['keyIndex']);
+                        yLabel = this.getLabel('y',this.mouseDetail[yD]);
+                      }
+                      else{
+                        xLabel = this.getLabel('x',this.mouseDetail[xD]);
+                        yLabel = this.getLabel('y',this.mouseDetail['keyIndex']);
+                      }
                       horLine.html(`<div>${yLabel === undefined?'':yLabel}</div>`);
                       verLine.html(`<div>${xLabel === undefined?'':xLabel}</div>`);
                       if(addDataIndexes.length){
@@ -623,7 +628,16 @@ var RChartContext = createContext();
                           let left = this.getPercentByValue('x',nearestPoint) * d.canvasSize.x / 100 + vertical;
                           let bottom = -this.getPercentByValue('y',nearestPoint) * d.canvasSize.y / 100 + horizontal;
                           container.css({left,top:'unset',bottom});
-                          container.html('<div class="r-chart-popup">' + xEditLabel(nearestPoint['_' + xD])  + '  ' + yEditLabel(nearestPoint['_' + yD]) + '</div>');
+                          let xLabel,yLabel;
+                          if(xD === 'key'){
+                            xLabel = this.getLabel('x',nearestPoint['_keyIndex']);
+                            yLabel = this.getLabel('y',nearestPoint['_value']);
+                          }
+                          else{
+                            xLabel = this.getLabel('x',nearestPoint['_value']);
+                            yLabel = this.getLabel('y',nearestPoint['_keyIndex']);
+                          }
+                          container.html('<div class="r-chart-popup">' + xLabel  + '  ' + yLabel + '</div>');
                       }
                     },
                     onMouseDown:this.mouseDown.bind(this)
