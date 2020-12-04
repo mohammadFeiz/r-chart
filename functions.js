@@ -25,20 +25,23 @@ export function value_getRange(axis){
       var maxCount = size?Math.ceil(size / 60):10;
       while (count > maxCount){step *= 2; count = (end - start) / step;}
       var [fs = start,fe = end] = filter;
+      if(fs < start){fs = start;}
+      if(fe > end){fe = end;}
       var filteredRange = {start,end,step,p1:fs,p2:fe}  
       return {start:fs,step,end:fe,filter:filteredRange}; 
     } 
     export function key_getRange(axis){
       var {canvasSize,axisToD} = this.details;
-      var {keyAxis} = this.props;
+      var {keys} = this.props;
       var filter = this.state.filter[axisToD[axis]];
       var labelSize;
       if(axis === 'x'){labelSize = this.props.labelSize;}
       else{labelSize = 30;}
       var canvasSize = canvasSize[axis]
-      var keys = keyAxis.keys;
       var fs = filter[0]?keys.indexOf(filter[0]):0;
       var fe = filter[1]?keys.indexOf(filter[1]):keys.length - 1;
+      if(fs === -1){fs = 0;}
+      if(fe === -1){fe = keys.length - 1;}
       var filteredRange = {start:0,end:keys.length - 1,p1:fs,p2:fe};
       var count = fe - fs + 1;
       var gap = getGap(count);
@@ -86,7 +89,7 @@ export function value_getRange(axis){
         var {points = []} = data[i];
         for (var j = 0; j < points.length; j++) { 
           let point = points[j];
-          var value = this.getValue(point,{dataIndex:i,pointIndex:j}); 
+          var value = this.getValue({point,dataIndex:i,pointIndex:j}); 
           if(value < min){min = value;}
           if(value > max){max = value;}
         }
@@ -135,10 +138,10 @@ export function value_getRange(axis){
       return dictionary[value][this.props.globalization];
     }
     export function key_getLabel(value){
-      var {keyAxis} = this.props;
-      if(value < 0 || value >= keyAxis.keys.length){return ''}
-      if(!keyAxis.editLabel){return keyAxis.keys[value]}
-      return keyAxis.editLabel(keyAxis.keys[value]);    
+      var {keyAxis,keys} = this.props;
+      if(value < 0 || value >= keys.length){return ''}
+      if(!keyAxis.editLabel){return keys[value]}
+      return keyAxis.editLabel(keys[value]);    
     }
     export function value_getLabel(value){
       var {valueAxis} = this.props;
@@ -146,8 +149,7 @@ export function value_getRange(axis){
     }
     export function key_changeFilter(p1,p2){
       let {filter} = this.state;
-      let {keyAxis} = this.props;
-      let {keys} = keyAxis;
+      let {keys} = this.props;
       filter.key = [keys[p1],keys[p2]];
       this.SetState({filter});
     };
@@ -159,10 +161,10 @@ export function value_getRange(axis){
 
     export function getValueByPercent(percent){
       var keyIndex = this.key_getValueByPercent(percent[this.details.dToAxis['key']],this.details.dToAxis['key']);
-      var {keyAxis} = this.props;
+      var {keys} = this.props;
       return {
         keyIndex,
-        key:keyAxis.keys[keyIndex],
+        key:keys[keyIndex],
         value:this.value_getValueByPercent(percent[this.details.dToAxis['value']],this.details.dToAxis['value'])
       }
     }

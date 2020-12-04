@@ -133,20 +133,34 @@ var RChart = /*#__PURE__*/function (_Component) {
     }
   }, {
     key: "getKey",
-    value: function getKey(point, _ref) {
-      var dataIndex = _ref.dataIndex,
+    value: function getKey(_ref) {
+      var point = _ref.point,
+          dataIndex = _ref.dataIndex,
           pointIndex = _ref.pointIndex;
-      return this.props.data[dataIndex].getKey(point, {
+      var _this$props$data$data = this.props.data[dataIndex].getKey,
+          getKey = _this$props$data$data === void 0 ? function (_ref2) {
+        var point = _ref2.point;
+        return point.x;
+      } : _this$props$data$data;
+      return getKey({
+        point: point,
         dataIndex: dataIndex,
         pointIndex: pointIndex
       });
     }
   }, {
     key: "getValue",
-    value: function getValue(point, _ref2) {
-      var dataIndex = _ref2.dataIndex,
-          pointIndex = _ref2.pointIndex;
-      return this.props.data[dataIndex].getValue(point, {
+    value: function getValue(_ref3) {
+      var point = _ref3.point,
+          dataIndex = _ref3.dataIndex,
+          pointIndex = _ref3.pointIndex;
+      var _this$props$data$data2 = this.props.data[dataIndex].getValue,
+          getValue = _this$props$data$data2 === void 0 ? function (_ref4) {
+        var point = _ref4.point;
+        return point.y;
+      } : _this$props$data$data2;
+      return getValue({
+        point: point,
         dataIndex: dataIndex,
         pointIndex: pointIndex
       });
@@ -170,7 +184,7 @@ var RChart = /*#__PURE__*/function (_Component) {
   }, {
     key: "getLineChart",
     value: function getLineChart(data, dataIndex) {
-      var keyAxis = this.props.keyAxis;
+      var keys = this.props.keys;
       var points = data.points,
           _data$color = data.color,
           color = _data$color === void 0 ? '#000' : _data$color,
@@ -196,11 +210,13 @@ var RChart = /*#__PURE__*/function (_Component) {
 
       for (var pointIndex = 0; pointIndex < points.length; pointIndex++) {
         var point = points[pointIndex];
-        var key = this.getKey(point, {
+        var key = this.getKey({
+          point: point,
           dataIndex: dataIndex,
           pointIndex: pointIndex
         }),
-            value = this.getValue(point, {
+            value = this.getValue({
+          point: point,
           dataIndex: dataIndex,
           pointIndex: pointIndex
         });
@@ -212,7 +228,7 @@ var RChart = /*#__PURE__*/function (_Component) {
         }
 
         if (!this.mouseDownDetail.target) {
-          point._keyIndex = keyAxis.keys.indexOf(key);
+          point._keyIndex = keys.indexOf(key);
         }
 
         if (point._keyIndex === -1 || point._keyIndex === undefined) {
@@ -319,7 +335,7 @@ var RChart = /*#__PURE__*/function (_Component) {
           text = data.text;
       var _this$props = this.props,
           reverse = _this$props.reverse,
-          keyAxis = _this$props.keyAxis;
+          keys = _this$props.keys;
       var dataDetail = { ...data,
         dataIndex: dataIndex,
         rects: [],
@@ -331,11 +347,13 @@ var RChart = /*#__PURE__*/function (_Component) {
 
       for (var pointIndex = 0; pointIndex < points.length; pointIndex++) {
         var point = points[pointIndex];
-        var key = this.getKey(point, {
+        var key = this.getKey({
+          point: point,
           dataIndex: dataIndex,
           pointIndex: pointIndex
         }),
-            value = this.getValue(point, {
+            value = this.getValue({
+          point: point,
           dataIndex: dataIndex,
           pointIndex: pointIndex
         });
@@ -347,7 +365,7 @@ var RChart = /*#__PURE__*/function (_Component) {
         }
 
         if (!this.mouseDownDetail.target) {
-          var keyIndex = keyAxis.keys.indexOf(key);
+          var keyIndex = keys.indexOf(key);
           point._keyIndex = keyIndex === -1 ? undefined : keyIndex;
         }
 
@@ -428,20 +446,20 @@ var RChart = /*#__PURE__*/function (_Component) {
     }
   }, {
     key: "getGridLine",
-    value: function getGridLine(value, axis, _ref3) {
-      var _ref3$color = _ref3.color,
-          color = _ref3$color === void 0 ? 'red' : _ref3$color,
-          _ref3$lineWidth = _ref3.lineWidth,
-          lineWidth = _ref3$lineWidth === void 0 ? 0.7 : _ref3$lineWidth,
-          dash = _ref3.dash;
+    value: function getGridLine(value, axis, _ref5) {
+      var _ref5$color = _ref5.color,
+          color = _ref5$color === void 0 ? 'red' : _ref5$color,
+          _ref5$lineWidth = _ref5.lineWidth,
+          lineWidth = _ref5$lineWidth === void 0 ? 0.7 : _ref5$lineWidth,
+          dash = _ref5.dash;
       var range = this.details.range[axis];
 
       if (!range) {
         return {};
       }
 
-      var keyAxis = this.props.keyAxis;
-      value = typeof value === 'string' ? keyAxis.keys.indexOf(value) : value;
+      var keys = this.props.keys;
+      value = typeof value === 'string' ? keys.indexOf(value) : value;
       var start = range.start,
           end = range.end,
           v = (value - start) * 100 / (end - start);
@@ -456,7 +474,7 @@ var RChart = /*#__PURE__*/function (_Component) {
     }
   }, {
     key: "getGridLines",
-    value: function getGridLines(axis, color) {
+    value: function getGridLines(axis) {
       var color = this.props[this.details.axisToD[axis] + 'Axis'].gridColor;
 
       if (!color) {
@@ -1164,8 +1182,8 @@ var RChart = /*#__PURE__*/function (_Component) {
         editValue: function editValue(point) {
           return _this6.getLabel(axis, point.value);
         },
-        ondrag: function ondrag(_ref4) {
-          var points = _ref4.points;
+        ondrag: function ondrag(_ref6) {
+          var points = _ref6.points;
           return _this6.changeFilter(axis, points[0].value, points[1].value);
         },
         style: {
@@ -1295,8 +1313,7 @@ var RChart = /*#__PURE__*/function (_Component) {
           items = '',
           HTML = '';
       var _this$props9 = this.props,
-          keyAxis = _this$props9.keyAxis,
-          valueAxis = _this$props9.valueAxis,
+          keys = _this$props9.keys,
           axisSize = _this$props9.axisSize,
           data = _this$props9.data,
           _this$props9$html = _this$props9.html,
@@ -1312,7 +1329,7 @@ var RChart = /*#__PURE__*/function (_Component) {
           vertical = _axisSize$vertical2 === void 0 ? 50 : _axisSize$vertical2;
       var ok = false;
 
-      if (this.details.canvasSize && data.length && keyAxis && keyAxis.keys && valueAxis) {
+      if (this.details.canvasSize && data.length && keys) {
         ok = true;
         this.getDetails();
         var d = this.details;
@@ -1452,7 +1469,9 @@ RChart.defaultProps = {
   clickRadius: 12,
   lines: [],
   axisSize: {},
-  labelSize: 60
+  labelSize: 40,
+  keyAxis: {},
+  valueAxis: {}
 };
 
 var RChartEdit = /*#__PURE__*/function (_Component2) {
@@ -1495,6 +1514,7 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
           dataIndexes = _this$props10$dataInd === void 0 ? [] : _this$props10$dataInd;
       var _this$context = this.context,
           keyAxis = _this$context.keyAxis,
+          keys = _this$context.keys,
           valueAxis = _this$context.valueAxis,
           data = _this$context.data,
           _this$context$multise = _this$context.multiselect,
@@ -1610,7 +1630,6 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
       }), onAdd && /*#__PURE__*/_react.default.createElement("button", {
         className: "r-chart-edit-button",
         onClick: function onClick() {
-          var keys = keyAxis.keys;
           var points = data[dataIndex].points;
           var index = keys.indexOf(staticValue);
           var pointIndex = points.length;

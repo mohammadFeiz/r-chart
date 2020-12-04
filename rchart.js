@@ -50,25 +50,32 @@ var RChartContext = createContext();
       this.reverse_getArea = reverse_getArea;
     }
     getStyle(x,y){return {gridTemplateColumns:`${x}px auto`,gridTemplateRows:`auto ${y}px`,direction:'ltr'}}
-    getKey(point,{dataIndex,pointIndex}){return this.props.data[dataIndex].getKey(point,{dataIndex,pointIndex});}
-    getValue(point,{dataIndex,pointIndex}){return this.props.data[dataIndex].getValue(point,{dataIndex,pointIndex});}
+    getKey({point,dataIndex,pointIndex}){
+      let {getKey = ({point})=>point.x} = this.props.data[dataIndex];
+      return getKey({point,dataIndex,pointIndex});
+    }
+    getValue({point,dataIndex,pointIndex}){
+      let {getValue = ({point})=>point.y} = this.props.data[dataIndex];
+      return getValue({point,dataIndex,pointIndex});
+    }
     getClient(e){
       return 'ontouchstart' in document.documentElement?{x: e.changedTouches[0].clientX,y:e.changedTouches[0].clientY }:{x:e.clientX,y:e.clientY}
     }
     SetState(obj){this.setState(obj)}
     getLineChart(data,dataIndex){ 
-      var {keyAxis} = this.props;
+      var {keys} = this.props;
       var {points,color = '#000',lineWidth = 2,areaOpacity,dash,pointStyle,text} = data;
       var dataDetail = {...data,dataIndex,points:[],line:{points:[],lineWidth,stroke:color,dash},area:false,
       texts:[]}
       var labelSpace = this.details.labelSpace;
       for(let pointIndex = 0; pointIndex < points.length; pointIndex++){
         let point = points[pointIndex];
-        let key = this.getKey(point,{dataIndex,pointIndex}),value = this.getValue(point,{dataIndex,pointIndex});
+        let key = this.getKey({point,dataIndex,pointIndex}),
+          value = this.getValue({point,dataIndex,pointIndex});
         point._key = key; point._value = value;
         if(key === null || value === null){continue;}
         if(!this.mouseDownDetail.target){
-          point._keyIndex = keyAxis.keys.indexOf(key);
+          point._keyIndex = keys.indexOf(key);
         }
         if(point._keyIndex === -1 || point._keyIndex === undefined){continue;}
         var px = this.getPercentByValue('x',point);
@@ -106,16 +113,16 @@ var RChartContext = createContext();
     }
     getBarChart(data,barCounter,dataIndex){
       var {color,points,text} = data;
-      var {reverse,keyAxis} = this.props;
+      var {reverse,keys} = this.props;
       var dataDetail = {...data,dataIndex,rects:[],texts:[]}
       var {barCount,barWidth} = this.details;
       for(var pointIndex = 0; pointIndex < points.length; pointIndex++){
         let point = points[pointIndex];
-        let key = this.getKey(point,{dataIndex,pointIndex}),value = this.getValue(point,{dataIndex,pointIndex});
+        let key = this.getKey({point,dataIndex,pointIndex}),value = this.getValue({point,dataIndex,pointIndex});
         point._key = key; point._value = value;
         if(key === null || value === null){continue;}
         if(!this.mouseDownDetail.target){
-          var keyIndex = keyAxis.keys.indexOf(key);
+          var keyIndex = keys.indexOf(key);
           point._keyIndex = keyIndex === -1?undefined:keyIndex;
         }
         var px = this.getPercentByValue('x',point) + '%';
@@ -154,14 +161,15 @@ var RChartContext = createContext();
     getGridLine(value,axis,{color = 'red',lineWidth = 0.7,dash}){
       var range = this.details.range[axis];
       if(!range){return {}}
-      var {keyAxis} = this.props;
-      value = typeof value === 'string'?keyAxis.keys.indexOf(value):value;
+      var {keys} = this.props;
+      value = typeof value === 'string'?keys.indexOf(value):value;
       var {start,end} = range,v = (value - start) * 100 / (end - start);
       var points = axis === 'x'?[[v + '%','0%'],[v + '%','-100%']]:[['0%',-v + '%'],['100%',-v + '%']];
       return {stroke:color,lineWidth,points,type:'line',dash}
     }
-    getGridLines(axis,color){
-      var color = this.props[this.details.axisToD[axis] + 'Axis'].gridColor; if(!color){return []}
+    getGridLines(axis){
+      var color = this.props[this.details.axisToD[axis] + 'Axis'].gridColor;
+      if(!color){return []}
       var range = this.details.range[axis];
       if(!range){return []}
       var {start,step,end} = range;
@@ -546,12 +554,12 @@ var RChartContext = createContext();
     }
     render(){
       var xls = '',yls = '',xfs = '',yfs = '',items = '',HTML = '';
-      var {keyAxis,valueAxis,axisSize,data,html = ()=>'',add} = this.props;  
+      var {keys,axisSize,data,html = ()=>'',add} = this.props;  
       var style = typeof this.props.style === 'function'?this.props.style():this.props.style;
       var {popup} = this.state; 
       var {horizontal = 50,vertical = 50} = axisSize;
       var ok = false;
-      if(this.details.canvasSize && data.length && keyAxis && keyAxis.keys && valueAxis){
+      if(this.details.canvasSize && data.length && keys){
         ok = true;
         this.getDetails();
         var d = this.details;
@@ -632,7 +640,7 @@ var RChartContext = createContext();
   }
   RChart.defaultProps = {
     data:[],filter:{key:[],value:[]},globalization:'en',precision:0,clickRadius:12,
-    lines:[],axisSize:{},labelSize:60
+    lines:[],axisSize:{},labelSize:40,keyAxis:{},valueAxis:{}
   }
 
  class RChartEdit extends Component{
@@ -646,7 +654,7 @@ var RChartContext = createContext();
   }
    render(){
      var {points,type,title,onChange,onClose,onAdd,onEdit,onRemove,dataIndex,pointIndex,dynamicValue,staticValue,dataIndexes = []} = this.props;
-     var {keyAxis,valueAxis,data,multiselect = {},translate,rtl} = this.context;
+     var {keyAxis,keys,valueAxis,data,multiselect = {},translate,rtl} = this.context;
      var {inputs = [],buttons = []} = multiselect;
      return (
        <div className='r-chart-edit' ref={this.dom} style={{direction:rtl?'rtl':'ltr'}}>
@@ -736,7 +744,6 @@ var RChartContext = createContext();
                   <button 
                     className='r-chart-edit-button' 
                     onClick={()=>{
-                      let keys = keyAxis.keys;
                       let points = data[dataIndex].points;
                       let index = keys.indexOf(staticValue);
                       let pointIndex = points.length;
