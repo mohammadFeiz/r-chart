@@ -1,7 +1,6 @@
 # r-chart (react editable line chart and bar chart)
 ![GitHub Logo](/images/r-chart-dark.png)
 
-
 ### description
 * create line chart , bar chart and combo chart.
 * editable points By drag or popup.  
@@ -11,25 +10,46 @@
 * zoomable.
 * up to 1000000 point support.
 
-### Zoom Demo
-![GitHub Logo](/images/r-chart-zoom.gif)
-
-### Edit Demo
-![GitHub Logo](/images/basic.gif)
-
-
 ### Instalation
 ```npm i r-chart```
 
 ### Usage
-
 ``` javascript
 import react from 'react';
 import RChart from "r-chart";
 <RChart />
 ```
 ### Basic
-![GitHub Logo](/images/r-chart-zoom.gif)
+![GitHub Logo](/images/basic.jpg)
+##### Code:
+```javascript
+<Chart
+    data={[
+      {
+        type:'line',
+        title:'data',
+        color:'blue',
+        points:[
+          {key:'January',value:10},
+          {key:'February',value:15},
+          {key:'March',value:25},
+          {key:'April',value:30},
+          {key:'May',value:40},
+          {key:'June',value:35},
+          {key:'July',value:40},
+          {key:'August',value:60},
+          {key:'September',value:60},
+          {key:'October',value:75},
+          {key:'November',value:80},
+          {key:'December',value:100}
+        ],
+      }
+    ]}
+    keys={[
+      'January','February','March','April','May','June','July','August','September','October','November','December'
+    ]}
+ />
+ ```
 ### Root Properties
 Properties | Type | Required | Description
 ---------- | ---- | -------- | -----------
