@@ -49,7 +49,7 @@ import Chart from "r-chart";
     ]}
  />
  ```
-##### Preview:
+##### Preview(Click image and open demo on stackblitz):
 [![alt text](/images/basic.jpg)](https://www.google.com)
 
 
@@ -64,7 +64,7 @@ import Chart from "r-chart";
   ...
 />
 ```
-##### Preview:
+##### Preview(Click image and open demo on stackblitz):
 [![alt text](/images/label%20size.jpg)](https://www.google.com)
 
 
@@ -81,7 +81,7 @@ import Chart from "r-chart";
   ...
 />`
 ```
-##### Preview:
+##### Preview(Click image and open demo on stackblitz):
 [![alt text](/images/edit%20labels.jpg)](https://www.google.com)
 
 
@@ -98,7 +98,7 @@ import Chart from "r-chart";
   ...
 />
 ```
-##### Preview:
+##### Preview(Click image and open demo on stackblitz):
 [![alt text](/images/grid%20lines.jpg)](https://www.google.com)
 
 
@@ -139,7 +139,7 @@ import Chart from "r-chart";
   ...
 />
 ```
-##### Preview:
+##### Preview(Click image and open demo on stackblitz):
 [![alt text](/images/get%20key%20get%20value.jpg)](https://www.google.com)
 
 
@@ -177,7 +177,7 @@ import Chart from "r-chart";
   ...
 />
 ```
-##### Preview:
+##### Preview(Click image and open demo on stackblitz):
 [![alt text](/images/multi%20data.jpg)](https://www.google.com)
 
 
@@ -200,7 +200,7 @@ import Chart from "r-chart";
   ...
 />
 ```
-##### Preview:
+##### Preview(Click image and open demo on stackblitz):
 [![alt text](/images/point%20style%201.jpg)](https://www.google.com)
 
 
@@ -222,7 +222,7 @@ import Chart from "r-chart";
   ...
 />
 ```
-##### Preview:
+##### Preview(Click image and open demo on stackblitz):
 [![alt text](/images/point%20style%202.jpg)](https://www.google.com)
 ###### Set circle on each points by set 'pointStyle' prop on data (function type).
 ##### Code:
@@ -249,7 +249,7 @@ import Chart from "r-chart";
   ...
 />
 ```
-##### Preview:
+##### Preview(Click image and open demo on stackblitz):
 [![alt text](/images/point%20style%203.jpg)](https://www.google.com)
 
 
@@ -269,7 +269,7 @@ import Chart from "r-chart";
   ...
 />
 ```
-##### Preview:
+##### Preview(Click image and open demo on stackblitz):
 [![alt text](/images/set%20lines.jpg)](https://www.google.com)
 
 
@@ -298,7 +298,7 @@ import Chart from "r-chart";
   ...
 />
 ```
-##### Preview:
+##### Preview(Click image and open demo on stackblitz):
 [![alt text](/images/text.jpg)](https://www.google.com)
 
 
@@ -313,7 +313,7 @@ import Chart from "r-chart";
   ...
 />
 ```
-##### Preview:
+##### Preview(Click image and open demo on stackblitz):
 [![alt text](/images/label%20rotate.jpg)](https://www.google.com)
 
 
@@ -331,5 +331,5 @@ import Chart from "r-chart";
   ...
 />
 ```
-##### Preview:
+##### Preview(Click image and open demo on stackblitz):
 [![alt text](/images/axis%20thickness.jpg)](https://www.google.com)
