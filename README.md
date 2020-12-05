@@ -19,7 +19,7 @@ import Chart from "r-chart";
 <Chart />
 ```
 
-### Basic
+# Basic
 ##### Code:
 ```javascript
 <Chart
@@ -54,7 +54,7 @@ import Chart from "r-chart";
 
 
 
-### Label Size
+# Label Size
 ###### Set width of horizontal axis labels by 'labelSize' prop to prevent those to interference .
 ##### Code:
 ```javascript
@@ -69,7 +69,7 @@ import Chart from "r-chart";
 
 
 
-### Edit Labels
+# Edit Labels
 ###### Set 'key_editLabel' function to edit 'key axis' labels.
 ###### Set 'value_editLabel' function to edit 'value axis' labels.
 ##### Code:
@@ -86,7 +86,7 @@ import Chart from "r-chart";
 
 
 
-### Grid Lines
+# Grid Lines
 ###### Set 'key_gridColor' to show and set color of grid lines on key axis.
 ###### Set 'value_gridColor' to show and set color of grid lines on value axis.
 ##### Code:
@@ -103,7 +103,7 @@ import Chart from "r-chart";
 
 
 
-### Get key and value from points object
+# Get key and value from points object
 ###### Read key from point object by 'getKey' prop function on data.
 ###### Read value from point object by 'getValue' prop function on data.
 ##### Code:
@@ -144,7 +144,7 @@ import Chart from "r-chart";
 
 
 
-### Set Multi Data by diffrent styles
+# Set Multi Data by diffrent styles
 ###### Set 3 data on 'data' prop by diffrent styles.
 ###### Controlling line chart style by 'dash' , 'lineWidth' , 'color' and 'areaOpacity' property on data
 ##### Code:
@@ -182,7 +182,7 @@ import Chart from "r-chart";
 
 
 
-### Set Point Style
+# Set Point Style
 ###### Set circle on each points by set 'pointStyle' prop on data (object type).
 ##### Code:
 ```javascript
@@ -254,7 +254,7 @@ import Chart from "r-chart";
 
 
 
-### Set Lines
+# Set Lines
 ###### Set lines by 'lines' prop width custom style on 'keyAxis' and 'valueAxis' prop.
 ##### Code:
 ```javascript
@@ -274,7 +274,7 @@ import Chart from "r-chart";
 
 
 
-### Set Text On Points
+# Set Text On Points
 ###### Set text on each points by set 'text' prop (function) on data that read text value from point object and can get custom style.
 ##### Code:
 ```javascript
@@ -303,7 +303,7 @@ import Chart from "r-chart";
 
 
 
-### Rotate Horizontal Labels
+# Rotate Horizontal Labels
 ###### rotate horizontal labels by 'labelRotate' props.
 ##### Code:
 ```javascript
@@ -318,7 +318,7 @@ import Chart from "r-chart";
 
 
 
-### Set Axis Thickness
+# Set Axis Thickness
 ###### Set horizontal and vertical axis thickness by 'axisSize' props.
 ##### Code:
 ```javascript
