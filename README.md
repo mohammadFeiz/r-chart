@@ -28,7 +28,7 @@ import react from 'react';
 import RChart from "r-chart";
 <RChart />
 ```
-###Basic
+### Basic
 
 ### Root Properties
 Properties | Type | Required | Description
