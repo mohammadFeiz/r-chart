@@ -1,5 +1,4 @@
 # r-chart (react editable line chart and bar chart)
-![GitHub Logo](/images/r-chart-dark.png)
 
 ### description
 * create line chart , bar chart and combo chart.
@@ -52,7 +51,7 @@ import Chart from "r-chart";
  ```
 ##### Preview:
 ![GitHub Logo](/images/basic.jpg)
-
+[Open Demo On Stackblitz.com](https://www.google.com)
 
 
 ### Label Size
