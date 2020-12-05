@@ -50,7 +50,7 @@ import Chart from "r-chart";
  />
  ```
 ##### Preview:
-[![GitHub Logo](/images/basic.jpg)](https://www.google.com)
+[![alt text](/images/basic.jpg)](https://www.google.com)
 
 
 
@@ -65,7 +65,7 @@ import Chart from "r-chart";
 />
 ```
 ##### Preview:
-![alt text](/images/label%20size.jpg)
+[![alt text](/images/label%20size.jpg)](https://www.google.com)
 
 
 
@@ -82,7 +82,7 @@ import Chart from "r-chart";
 />`
 ```
 ##### Preview:
-![GitHub Logo](/images/edit%20labels.jpg)
+[![alt text](/images/edit%20labels.jpg)](https://www.google.com)
 
 
 
@@ -99,7 +99,7 @@ import Chart from "r-chart";
 />
 ```
 ##### Preview:
-![GitHub Logo](/images/grid%20lines.jpg)
+[![alt text](/images/grid%20lines.jpg)](https://www.google.com)
 
 
 
@@ -140,7 +140,7 @@ import Chart from "r-chart";
 />
 ```
 ##### Preview:
-![GitHub Logo](/images/get%20key%20get%20value.jpg)
+[![alt text](/images/get%20key%20get%20value.jpg)](https://www.google.com)
 
 
 
@@ -178,7 +178,7 @@ import Chart from "r-chart";
 />
 ```
 ##### Preview:
-![GitHub Logo](/images/multi%20data.jpg)
+[![alt text](/images/multi%20data.jpg)](https://www.google.com)
 
 
 
@@ -201,7 +201,10 @@ import Chart from "r-chart";
 />
 ```
 ##### Preview:
-![GitHub Logo](/images/point%20style%201.jpg)
+[![alt text](/images/point%20style%201.jpg)](https://www.google.com)
+
+
+
 ###### Set circle on each points by set 'pointStyle' prop on data (object type).
 ##### Code:
 ```javascript
@@ -220,7 +223,7 @@ import Chart from "r-chart";
 />
 ```
 ##### Preview:
-![GitHub Logo](/images/point%20style%202.jpg)
+[![alt text](/images/point%20style%202.jpg)](https://www.google.com)
 ###### Set circle on each points by set 'pointStyle' prop on data (function type).
 ##### Code:
 ```javascript
@@ -247,7 +250,7 @@ import Chart from "r-chart";
 />
 ```
 ##### Preview:
-![GitHub Logo](/images/point%20style%203.jpg)
+[![alt text](/images/point%20style%203.jpg)](https://www.google.com)
 
 
 
@@ -267,7 +270,7 @@ import Chart from "r-chart";
 />
 ```
 ##### Preview:
-![GitHub Logo](/images/set%20lines.jpg)
+[![alt text](/images/set%20lines.jpg)](https://www.google.com)
 
 
 
@@ -296,7 +299,7 @@ import Chart from "r-chart";
 />
 ```
 ##### Preview:
-![GitHub Logo](/images/text.jpg)
+[![alt text](/images/text.jpg)](https://www.google.com)
 
 
 
@@ -311,7 +314,7 @@ import Chart from "r-chart";
 />
 ```
 ##### Preview:
-![GitHub Logo](/images/label%20rotate.jpg)
+[![alt text](/images/label%20rotate.jpg)](https://www.google.com)
 
 
 
@@ -329,9 +332,4 @@ import Chart from "r-chart";
 />
 ```
 ##### Preview:
-![GitHub Logo](/images/axis%20thickness.jpg)
-
-
-
-
-[**Demo on stackblitz**](https://stackblitz.com/edit/r-chart-qfx76m?embed=1&file=index.js)
+[![alt text](/images/axis%20thickness.jpg)](https://www.google.com)
