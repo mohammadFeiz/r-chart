@@ -137,11 +137,11 @@ var RChart = /*#__PURE__*/function (_Component) {
       var point = _ref.point,
           dataIndex = _ref.dataIndex,
           pointIndex = _ref.pointIndex;
-      var _this$props$data$data = this.props.data[dataIndex].getKey,
-          getKey = _this$props$data$data === void 0 ? function (_ref2) {
+      var _this$props$getKey = this.props.getKey,
+          getKey = _this$props$getKey === void 0 ? function (_ref2) {
         var point = _ref2.point;
-        return point.x;
-      } : _this$props$data$data;
+        return point.key;
+      } : _this$props$getKey;
       return getKey({
         point: point,
         dataIndex: dataIndex,
@@ -154,11 +154,11 @@ var RChart = /*#__PURE__*/function (_Component) {
       var point = _ref3.point,
           dataIndex = _ref3.dataIndex,
           pointIndex = _ref3.pointIndex;
-      var _this$props$data$data2 = this.props.data[dataIndex].getValue,
-          getValue = _this$props$data$data2 === void 0 ? function (_ref4) {
+      var _this$props$getValue = this.props.getValue,
+          getValue = _this$props$getValue === void 0 ? function (_ref4) {
         var point = _ref4.point;
-        return point.y;
-      } : _this$props$data$data2;
+        return point.value;
+      } : _this$props$getValue;
       return getValue({
         point: point,
         dataIndex: dataIndex,
@@ -240,7 +240,8 @@ var RChart = /*#__PURE__*/function (_Component) {
         this.keyDictionary[dataIndex][key] = pointIndex;
 
         if (pointStyle) {
-          var PointStyle = typeof pointStyle === 'function' ? pointStyle(point, {
+          var PointStyle = typeof pointStyle === 'function' ? pointStyle({
+            point: point,
             dataIndex: dataIndex,
             pointIndex: pointIndex
           }) : pointStyle;
@@ -279,7 +280,8 @@ var RChart = /*#__PURE__*/function (_Component) {
         }
 
         if (text) {
-          var _text = text(point, {
+          var _text = text({
+            point: point,
             dataIndex: dataIndex,
             pointIndex: pointIndex
           }),
@@ -289,10 +291,10 @@ var RChart = /*#__PURE__*/function (_Component) {
               fontSize = _text$fontSize === void 0 ? 16 : _text$fontSize,
               _text$color = _text.color,
               _color = _text$color === void 0 ? '#444' : _text$color,
-              _text$x = _text.x,
-              x = _text$x === void 0 ? 0 : _text$x,
-              _text$y = _text.y,
-              y = _text$y === void 0 ? 0 : _text$y,
+              _text$left = _text.left,
+              left = _text$left === void 0 ? 0 : _text$left,
+              _text$top = _text.top,
+              top = _text$top === void 0 ? 0 : _text$top,
               rotate = _text.rotate,
               align = _text.align;
 
@@ -304,8 +306,8 @@ var RChart = /*#__PURE__*/function (_Component) {
               text: _value,
               fontSize: fontSize,
               fill: _color,
-              x: x,
-              y: y,
+              x: left,
+              y: top,
               align: align
             }]
           };
@@ -407,7 +409,8 @@ var RChart = /*#__PURE__*/function (_Component) {
         }
 
         if (text) {
-          var _text2 = text(point, {
+          var _text2 = text({
+            point: point,
             dataIndex: dataIndex,
             pointIndex: pointIndex
           }),
@@ -417,10 +420,10 @@ var RChart = /*#__PURE__*/function (_Component) {
               fontSize = _text2$fontSize === void 0 ? 16 : _text2$fontSize,
               _text2$color = _text2.color,
               _color2 = _text2$color === void 0 ? '#444' : _text2$color,
-              _text2$x = _text2.x,
-              x = _text2$x === void 0 ? 0 : _text2$x,
-              _text2$y = _text2.y,
-              y = _text2$y === void 0 ? 0 : _text2$y,
+              _text2$left = _text2.left,
+              left = _text2$left === void 0 ? 0 : _text2$left,
+              _text2$top = _text2.top,
+              top = _text2$top === void 0 ? 0 : _text2$top,
               rotate = _text2.rotate,
               align = _text2.align;
 
@@ -432,8 +435,8 @@ var RChart = /*#__PURE__*/function (_Component) {
               text: _value2,
               fontSize: fontSize,
               fill: _color2,
-              x: x,
-              y: y,
+              x: left,
+              y: top,
               align: align
             }]
           };
@@ -475,7 +478,7 @@ var RChart = /*#__PURE__*/function (_Component) {
   }, {
     key: "getGridLines",
     value: function getGridLines(axis) {
-      var color = this.props[this.details.axisToD[axis] + 'Axis'].gridColor;
+      var color = this.props[this.details.axisToD[axis] + '_gridColor'];
 
       if (!color) {
         return [];
@@ -513,11 +516,11 @@ var RChart = /*#__PURE__*/function (_Component) {
 
       for (var i = 0; i < Lines.length; i++) {
         var _Lines$i = Lines[i],
-            value = _Lines$i.value,
             dash = _Lines$i.dash,
             lineWidth = _Lines$i.lineWidth,
             color = _Lines$i.color;
-        indicators.push(this.getGridLine(value, axis, {
+        var a = Lines[i][this.details.axisToD[axis]];
+        indicators.push(this.getGridLine(a, axis, {
           dash: dash,
           lineWidth: lineWidth,
           color: color
@@ -593,6 +596,8 @@ var RChart = /*#__PURE__*/function (_Component) {
       var _this2 = this;
 
       var _this$props2 = this.props,
+          key_zoom = _this$props2.key_zoom,
+          value_zoom = _this$props2.value_zoom,
           data = _this$props2.data,
           _this$props2$barWidth = _this$props2.barWidth,
           barWidth = _this$props2$barWidth === void 0 ? 80 : _this$props2$barWidth,
@@ -610,6 +615,14 @@ var RChart = /*#__PURE__*/function (_Component) {
             value: 'y'
           };
           this.getArea = this.normal_getArea;
+
+          if (key_zoom) {
+            d.xZoom = true;
+          }
+
+          if (value_zoom) {
+            d.yZoom = true;
+          }
         } else {
           d.axisToD = {
             x: 'value',
@@ -620,6 +633,14 @@ var RChart = /*#__PURE__*/function (_Component) {
             value: 'x'
           };
           this.getArea = this.reverse_getArea;
+
+          if (key_zoom) {
+            d.yZoom = true;
+          }
+
+          if (value_zoom) {
+            d.xZoom = true;
+          }
         }
 
         this.changeFilter = function (axis, p1, p2) {
@@ -639,7 +660,7 @@ var RChart = /*#__PURE__*/function (_Component) {
         };
 
         d.getLines = function (axis) {
-          return _this2.getLines(axis, _this2.props[d.axisToD[axis] + 'Axis'].lines);
+          return _this2.getLines(axis, _this2.props[d.axisToD[axis] + '_lines']);
         };
       } //نوع چارت و تابع گرفتن درصد با مقدار یکبار تایین می شود
 
@@ -741,8 +762,7 @@ var RChart = /*#__PURE__*/function (_Component) {
           data = _this$props5.data,
           edit = _this$props5.edit,
           remove = _this$props5.remove,
-          onDragEnd = _this$props5.onDragEnd,
-          valueAxis = _this$props5.valueAxis;
+          onDragEnd = _this$props5.onDragEnd;
       var point = data[this.so.dataIndex].points[this.so.pointIndex];
 
       if (!this.moved) {
@@ -1045,7 +1065,12 @@ var RChart = /*#__PURE__*/function (_Component) {
     value: function getLabelSlider(axis) {
       var _this5 = this;
 
-      if (!this.details.range || !this.details.range[axis]) {
+      var _this$details2 = this.details,
+          range = _this$details2.range,
+          xZoom = _this$details2.xZoom,
+          yZoom = _this$details2.yZoom;
+
+      if (!range || !range[axis]) {
         return null;
       }
 
@@ -1055,11 +1080,11 @@ var RChart = /*#__PURE__*/function (_Component) {
           step = _this$details$range$a.step;
       var labelStyle = {
         x: {
-          top: '24px'
+          top: xZoom ? '24px' : '14px'
         },
         y: {
           left: 'unset',
-          right: '16px',
+          right: yZoom ? '16px' : '8px',
           justifyContent: 'flex-end'
         }
       };
@@ -1124,7 +1149,7 @@ var RChart = /*#__PURE__*/function (_Component) {
       var _fillStyle,
           _this6 = this;
 
-      var zoom = this.props[this.details.axisToD[axis] + 'Axis'].zoom;
+      var zoom = this.props[this.details.axisToD[axis] + '_zoom'];
 
       if (!zoom) {
         return null;
@@ -1269,9 +1294,9 @@ var RChart = /*#__PURE__*/function (_Component) {
 
       var _this$props8 = this.props,
           add = _this$props8.add,
-          axisSize = _this$props8.axisSize;
-      var _axisSize$vertical = axisSize.vertical,
-          vertical = _axisSize$vertical === void 0 ? 50 : _axisSize$vertical;
+          axisThickness = _this$props8.axisThickness;
+      var _axisThickness$vertic = axisThickness.vertical,
+          vertical = _axisThickness$vertic === void 0 ? 50 : _axisThickness$vertic;
       var obj = this.getValueByPercent({
         x: px,
         y: -py
@@ -1313,19 +1338,21 @@ var RChart = /*#__PURE__*/function (_Component) {
           HTML = '';
       var _this$props9 = this.props,
           keys = _this$props9.keys,
-          axisSize = _this$props9.axisSize,
+          axisThickness = _this$props9.axisThickness,
           data = _this$props9.data,
           _this$props9$html = _this$props9.html,
           html = _this$props9$html === void 0 ? function () {
         return '';
       } : _this$props9$html,
-          add = _this$props9.add;
+          add = _this$props9.add,
+          id = _this$props9.id,
+          className = _this$props9.className;
       var style = typeof this.props.style === 'function' ? this.props.style() : this.props.style;
       var popup = this.state.popup;
-      var _axisSize$horizontal = axisSize.horizontal,
-          horizontal = _axisSize$horizontal === void 0 ? 50 : _axisSize$horizontal,
-          _axisSize$vertical2 = axisSize.vertical,
-          vertical = _axisSize$vertical2 === void 0 ? 50 : _axisSize$vertical2;
+      var _axisThickness$horizo = axisThickness.horizontal,
+          horizontal = _axisThickness$horizo === void 0 ? 50 : _axisThickness$horizo,
+          _axisThickness$vertic2 = axisThickness.vertical,
+          vertical = _axisThickness$vertic2 === void 0 ? 50 : _axisThickness$vertic2;
       var ok = false;
 
       if (this.details.canvasSize && data.length && keys) {
@@ -1346,9 +1373,10 @@ var RChart = /*#__PURE__*/function (_Component) {
           keyDictionary: this.keyDictionary
         }
       }, /*#__PURE__*/_react.default.createElement("div", {
-        className: "r-chart",
+        className: 'r-chart' + (className ? ' ' + className : ''),
         ref: this.dom,
-        style: style
+        style: style,
+        id: id
       }, this.getHeader(vertical), /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-container",
         style: this.getStyle(vertical, horizontal)
@@ -1417,8 +1445,8 @@ var RChart = /*#__PURE__*/function (_Component) {
               yLabel = _this7.getLabel('y', _this7.mouseDetail['keyIndex']);
             }
 
-            horLine.html("<div>".concat(yLabel === undefined ? '' : yLabel, "</div>"));
-            verLine.html("<div>".concat(xLabel === undefined ? '' : xLabel, "</div>"));
+            horLine.html("<div style=\"padding-right:".concat(_this7.details.yZoom ? '16' : '8', "px;\">").concat(yLabel === undefined ? '' : yLabel, "</div>"));
+            verLine.html("<div style=\"top:calc(100% + ".concat(_this7.details.xZoom ? '14' : '4', "px);\">").concat(xLabel === undefined ? '' : xLabel, "</div>"));
 
             if (addDataIndexes.length) {
               var container = (0, _jquery.default)(_this7.dom.current).find('.r-chart-add-popup');
@@ -1477,10 +1505,9 @@ RChart.defaultProps = {
   precision: 0,
   clickRadius: 12,
   lines: [],
-  axisSize: {},
+  axisThickness: {},
   labelSize: 40,
-  keyAxis: {},
-  valueAxis: {}
+  axisStyle: {}
 };
 
 var RChartEdit = /*#__PURE__*/function (_Component2) {
@@ -1522,9 +1549,9 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
           _this$props10$dataInd = _this$props10.dataIndexes,
           dataIndexes = _this$props10$dataInd === void 0 ? [] : _this$props10$dataInd;
       var _this$context = this.context,
-          keyAxis = _this$context.keyAxis,
+          key_title = _this$context.key_title,
+          value_title = _this$context.value_title,
           keys = _this$context.keys,
-          valueAxis = _this$context.valueAxis,
           data = _this$context.data,
           _this$context$multise = _this$context.multiselect,
           multiselect = _this$context$multise === void 0 ? {} : _this$context$multise,
@@ -1578,13 +1605,13 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
         className: "r-chart-edit-item"
       }, /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-edit-label"
-      }, (keyAxis.title || 'untitle') + ' : '), /*#__PURE__*/_react.default.createElement("div", {
+      }, (key_title || 'untitle') + ' : '), /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-detail-value"
       }, staticValue)), dynamicValue !== undefined && /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-edit-item"
       }, /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-edit-label"
-      }, (valueAxis.title || 'untitle') + ' : '), /*#__PURE__*/_react.default.createElement("input", {
+      }, (value_title || 'untitle') + ' : '), /*#__PURE__*/_react.default.createElement("input", {
         className: "r-chart-edit-tag",
         type: "number",
         value: dynamicValue,

@@ -314,7 +314,7 @@ option{
 .r-chart-horizontal-line div{
   right:100%;
   position:absolute;
-  padding-right:16px;
+ 
   padding-left:3px;
   top:-10px;
 }
@@ -324,10 +324,9 @@ option{
   top:0;
   display:flex;
   justify-content: center;
-  
 }
 .r-chart-vertical-line div{
   width:fit-content;
   padding:0 3px;
-  top:calc(100% + 14px);
+  
 }

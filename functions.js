@@ -138,14 +138,14 @@ export function value_getRange(axis){
       return dictionary[value][this.props.globalization];
     }
     export function key_getLabel(value){
-      var {keyAxis,keys} = this.props;
+      var {key_editLabel,keys} = this.props;
       if(value < 0 || value >= keys.length){return ''}
-      if(!keyAxis.editLabel){return keys[value]}
-      return keyAxis.editLabel(keys[value]);    
+      if(!key_editLabel){return keys[value]}
+      return key_editLabel(keys[value]);    
     }
     export function value_getLabel(value){
-      var {valueAxis} = this.props;
-      return valueAxis.editLabel?valueAxis.editLabel(value):value
+      var {value_editLabel} = this.props;
+      return value_editLabel?value_editLabel(value):value
     }
     export function key_changeFilter(p1,p2){
       let {filter} = this.state;

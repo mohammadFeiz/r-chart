@@ -51,11 +51,11 @@ var RChartContext = createContext();
     }
     getStyle(x,y){return {gridTemplateColumns:`${x}px auto`,gridTemplateRows:`auto ${y}px`,direction:'ltr'}}
     getKey({point,dataIndex,pointIndex}){
-      let {getKey = ({point})=>point.x} = this.props.data[dataIndex];
+      let {getKey = ({point})=>point.key} = this.props;
       return getKey({point,dataIndex,pointIndex});
     }
     getValue({point,dataIndex,pointIndex}){
-      let {getValue = ({point})=>point.y} = this.props.data[dataIndex];
+      let {getValue = ({point})=>point.value} = this.props;
       return getValue({point,dataIndex,pointIndex});
     }
     getClient(e){
@@ -82,7 +82,7 @@ var RChartContext = createContext();
         var py = this.getPercentByValue('y',point);
         this.keyDictionary[dataIndex][key] = pointIndex;
         if(pointStyle){
-          let PointStyle = typeof pointStyle === 'function'?pointStyle(point,{dataIndex,pointIndex}):pointStyle;
+          let PointStyle = typeof pointStyle === 'function'?pointStyle({point,dataIndex,pointIndex}):pointStyle;
           let {radius,fill = '#fff',stroke = color,lineWidth:pointLineWidth = lineWidth,dash:pointDash,slice} = PointStyle;
           if(radius && labelSpace > 2 * (radius + pointLineWidth) + 2){
             let Point = {
@@ -97,8 +97,8 @@ var RChartContext = createContext();
           }
         }
         if(text){
-          let {value = '',fontSize = 16,color = '#444',x = 0,y = 0,rotate,align} = text(point,{dataIndex,pointIndex});
-          let Text = {x:px + '%',y:py + '%',rotate,items:[{text:value,fontSize,fill:color,x,y,align}]};
+          let {value = '',fontSize = 16,color = '#444',left = 0,top = 0,rotate,align} = text({point,dataIndex,pointIndex});
+          let Text = {x:px + '%',y:py + '%',rotate,items:[{text:value,fontSize,fill:color,x:left,y:top,align}]};
           this.elements.texts.push(Text);
           dataDetail.texts.push(Text);
         }
@@ -150,8 +150,8 @@ var RChartContext = createContext();
           dataDetail.rects.push(rect);
         }
         if(text){
-          let {value = '',fontSize = 16,color = '#444',x = 0,y = 0,rotate,align} = text(point,{dataIndex,pointIndex});
-          let Text = {x:px + '%',y:py + '%',rotate,items:[{text:value,fontSize,fill:color,x,y,align}]};
+          let {value = '',fontSize = 16,color = '#444',left = 0,top = 0,rotate,align} = text({point,dataIndex,pointIndex});
+          let Text = {x:px + '%',y:py + '%',rotate,items:[{text:value,fontSize,fill:color,x:left,y:top,align}]};
           this.elements.texts.push(Text);
           dataDetail.texts.push(Text);
         }
@@ -168,7 +168,7 @@ var RChartContext = createContext();
       return {stroke:color,lineWidth,points,type:'line',dash}
     }
     getGridLines(axis){
-      var color = this.props[this.details.axisToD[axis] + 'Axis'].gridColor;
+      var color = this.props[this.details.axisToD[axis] + '_gridColor'];
       if(!color){return []}
       var range = this.details.range[axis];
       if(!range){return []}
@@ -184,8 +184,9 @@ var RChartContext = createContext();
       var Lines = (typeof lines === 'function'?lines():lines) || [];
       var indicators = [];
       for(var i = 0; i < Lines.length; i++){
-        var {value,dash,lineWidth,color} = Lines[i];
-        indicators.push(this.getGridLine(value,axis,{dash,lineWidth,color}))
+        var {dash,lineWidth,color} = Lines[i];
+        var a = Lines[i][this.details.axisToD[axis]];
+        indicators.push(this.getGridLine(a,axis,{dash,lineWidth,color}))
       }
       return indicators;
     }
@@ -224,21 +225,26 @@ var RChartContext = createContext();
     componentDidMount(){this.SetState({})}
     
     getDetails(){
-      var {data,barWidth = 80,reverse} = this.props,d = this.details; 
+      var {key_zoom,value_zoom,data,barWidth = 80,reverse} = this.props,d = this.details; 
       if(!d.axisToD){ 
         if(!reverse){
           d.axisToD = {x:'key',y:'value'}; d.dToAxis = {key:'x',value:'y'};
           this.getArea = this.normal_getArea;
+          if(key_zoom){d.xZoom = true;}
+          if(value_zoom){d.yZoom = true;}
+          
         }
         else{
           d.axisToD = {x:'value',y:'key'}; d.dToAxis = {key:'y',value:'x'};
           this.getArea = this.reverse_getArea;
+          if(key_zoom){d.yZoom = true;}
+          if(value_zoom){d.xZoom = true;} 
         }
         this.changeFilter = (axis,p1,p2)=>this[d.axisToD[axis] + '_changeFilter'](p1,p2);
         this.getRange = (axis)=>this[d.axisToD[axis]+'_getRange'](axis);
         this.getLabel = (axis,value)=>this[d.axisToD[axis] + '_getLabel'](value);
         this.getPercentByValue = (axis,point)=>this[d.axisToD[axis] + '_getPercentByValue'](axis,point) * (axis === 'y'?-1:1);
-        d.getLines = (axis)=>this.getLines(axis,this.props[d.axisToD[axis] + 'Axis'].lines);
+        d.getLines = (axis)=>this.getLines(axis,this.props[d.axisToD[axis] + '_lines']);
       } //نوع چارت و تابع گرفتن درصد با مقدار یکبار تایین می شود
       if(this.mouseDownDetail.target !== 'point'){
         if(this.mouseDownDetail.target !== 'filter'){
@@ -280,7 +286,7 @@ var RChartContext = createContext();
       eventHandler('window','mousemove',this.pointMouseMove,'unbind')
       eventHandler('window','mouseup',this.pointMouseUp,'unbind');
       this.mouseDownDetail = {};
-      var {data,edit,remove,onDragEnd,valueAxis} = this.props;
+      var {data,edit,remove,onDragEnd} = this.props;
       var point = data[this.so.dataIndex].points[this.so.pointIndex];
       if(!this.moved){
         var title = !edit?this.translate('Remove.Point'):this.translate('Edit.Point');
@@ -442,9 +448,10 @@ var RChartContext = createContext();
       )
     }
     getLabelSlider(axis){
-      if(!this.details.range || !this.details.range[axis]){return null;}
+      var {range,xZoom,yZoom} = this.details;
+      if(!range || !range[axis]){return null;}
       var {start,end,step} = this.details.range[axis]; 
-      var labelStyle = {x:{top:'24px'},y:{left:'unset',right:'16px',justifyContent:'flex-end'}};
+      var labelStyle = {x:{top:xZoom?'24px':'14px'},y:{left:'unset',right:yZoom?'16px':'8px',justifyContent:'flex-end'}};
       var {labelRotate} = this.props;
       return (
         <RSlider 
@@ -476,7 +483,7 @@ var RChartContext = createContext();
       eventHandler('window','mouseup',this.filterMouseUp,'unbind');
     }
     getFilterSlider(axis){
-      var zoom  = this.props[this.details.axisToD[axis] + 'Axis'].zoom; if(!zoom){return null;}
+      var zoom  = this.props[this.details.axisToD[axis] + '_zoom']; if(!zoom){return null;}
       var {range} = this.details;
       if(!range || !range[axis]){return null;}
       var color = '#eee';
@@ -540,8 +547,8 @@ var RChartContext = createContext();
     getMouseDetail(a){
       if(!a){return;}
       var [x,y,px,py] = a;
-      var {add,axisSize} = this.props;
-      var {vertical = 50} = axisSize;
+      var {add,axisThickness} = this.props;
+      var {vertical = 50} = axisThickness;
       var obj = this.getValueByPercent({x:px,y:-py});
       if(this.mouseDownDetail.target === 'point'){
         obj.key = this.mouseDownDetail.key;
@@ -554,10 +561,10 @@ var RChartContext = createContext();
     }
     render(){
       var xls = '',yls = '',xfs = '',yfs = '',items = '',HTML = '';
-      var {keys,axisSize,data,html = ()=>'',add} = this.props;  
+      var {keys,axisThickness,data,html = ()=>'',add,id,className} = this.props;  
       var style = typeof this.props.style === 'function'?this.props.style():this.props.style;
       var {popup} = this.state; 
-      var {horizontal = 50,vertical = 50} = axisSize;
+      var {horizontal = 50,vertical = 50} = axisThickness;
       var ok = false;
       if(this.details.canvasSize && data.length && keys){
         ok = true;
@@ -572,7 +579,7 @@ var RChartContext = createContext();
       }
       return (
         <RChartContext.Provider value={{...this.props,translate:this.translate.bind(this),keyDictionary:this.keyDictionary}}>
-          <div className='r-chart' ref={this.dom} style={style}>
+          <div className={'r-chart' + (className?' ' + className:'')} ref={this.dom} style={style} id={id}>
             {this.getHeader(vertical)}
             <div className='r-chart-container' style={this.getStyle(vertical,horizontal)}>
               <div 
@@ -615,8 +622,8 @@ var RChartContext = createContext();
                         xLabel = this.getLabel('x',this.mouseDetail[xD]);
                         yLabel = this.getLabel('y',this.mouseDetail['keyIndex']);
                       }
-                      horLine.html(`<div>${yLabel === undefined?'':yLabel}</div>`);
-                      verLine.html(`<div>${xLabel === undefined?'':xLabel}</div>`);
+                      horLine.html(`<div style="padding-right:${this.details.yZoom?'16':'8'}px;">${yLabel === undefined?'':yLabel}</div>`);
+                      verLine.html(`<div style="top:calc(100% + ${this.details.xZoom?'14':'4'}px);">${xLabel === undefined?'':xLabel}</div>`);
                       if(addDataIndexes.length){
                           var container = $(this.dom.current).find('.r-chart-add-popup');
                           var addIndicator = `<div class="add-indicator" style="background:${data[addDataIndexes[0]].color}">+</div>`;
@@ -654,7 +661,7 @@ var RChartContext = createContext();
   }
   RChart.defaultProps = {
     data:[],filter:{key:[],value:[]},globalization:'en',precision:0,clickRadius:12,
-    lines:[],axisSize:{},labelSize:40,keyAxis:{},valueAxis:{}
+    lines:[],axisThickness:{},labelSize:40,axisStyle:{}
   }
 
  class RChartEdit extends Component{
@@ -668,7 +675,7 @@ var RChartContext = createContext();
   }
    render(){
      var {points,type,title,onChange,onClose,onAdd,onEdit,onRemove,dataIndex,pointIndex,dynamicValue,staticValue,dataIndexes = []} = this.props;
-     var {keyAxis,keys,valueAxis,data,multiselect = {},translate,rtl} = this.context;
+     var {key_title,value_title,keys,data,multiselect = {},translate,rtl} = this.context;
      var {inputs = [],buttons = []} = multiselect;
      return (
        <div className='r-chart-edit' ref={this.dom} style={{direction:rtl?'rtl':'ltr'}}>
@@ -696,14 +703,14 @@ var RChartContext = createContext();
             {
               staticValue !== undefined &&
               <div className='r-chart-edit-item'>
-                <div className="r-chart-edit-label">{(keyAxis.title || 'untitle') + ' : '}</div>
+                <div className="r-chart-edit-label">{(key_title || 'untitle') + ' : '}</div>
                 <div className="r-chart-detail-value">{staticValue}</div>
               </div>
             }
             {
               dynamicValue !== undefined &&
               <div className='r-chart-edit-item'>
-                <div className="r-chart-edit-label">{(valueAxis.title || 'untitle') + ' : '}</div>
+                <div className="r-chart-edit-label">{(value_title || 'untitle') + ' : '}</div>
                 <input 
                   className='r-chart-edit-tag' type='number' value={dynamicValue} 
                   onChange={(e)=>{
