@@ -183,50 +183,140 @@ import Chart from "r-chart";
 
 
 
-### Label Size
-###### Set width of horizontal axis labels by 'labelSize' prop to prevent those to interference .
+### Set Point Style
+###### Set circle on each points by set 'pointStyle' prop on data (object type).
 ##### Code:
 ```javascript
 <Chart
   ...
-  labelSize={90}
+  data={[
+    {
+      ...
+      pointStyle:{
+        radius:5
+      }
+      ...
+    }
+  ]}
   ...
 />
 ```
 ##### Preview:
-![GitHub Logo](/images/label%20size.jpg)
+![GitHub Logo](/images/point%20style%201.jpg)
+###### Set circle on each points by set 'pointStyle' prop on data (object type).
+##### Code:
+```javascript
+<Chart
+  ...
+  data={[
+    {
+      ...
+      pointStyle:{
+        radius:5,fill:'blue',stroke:'rgba(0,0,255,.1)',lineWidth:6
+      }
+      ...
+    }
+  ]}
+  ...
+/>
+```
 ##### Preview:
-![GitHub Logo](/images/basic.jpg)
+![GitHub Logo](/images/point%20style%202.jpg)
+###### Set circle on each points by set 'pointStyle' prop on data (function type).
+##### Code:
+```javascript
+<Chart
+  ...
+  data={[
+    {
+      ...
+      pointStyle:({point,dataIndex,pointIndex})=>{
+        if(pointIndex === 0){
+          return {radius:5,fill:'blue'}
+        }
+        if(point.date === 'August'){
+          return {radius:8,stroke:'red',lineWidth:2,dash:[4,3]}
+        }
+        else{
+          return {radius:5}
+        }
+      }
+      ...
+    }
+  ]}
+  ...
+/>
+```
+##### Preview:
+![GitHub Logo](/images/point%20style%203.jpg)
 
-### Label Size
-###### Set width of horizontal axis labels by 'labelSize' prop to prevent those to interference .
-##### Code:
-```javascript
-<Chart
-  ...
-  labelSize={90}
-  ...
-/>
-```
-##### Preview:
-![GitHub Logo](/images/label%20size.jpg)
-##### Preview:
-![GitHub Logo](/images/basic.jpg)
 
-### Label Size
-###### Set width of horizontal axis labels by 'labelSize' prop to prevent those to interference .
+
+### Set Lines
+###### Set lines by 'lines' prop width custom style on 'keyAxis' and 'valueAxis' prop.
 ##### Code:
 ```javascript
 <Chart
   ...
-  labelSize={90}
+  key_lines={[
+    {key:'June',dash:[2,2],color:'red',lineWidth:1}
+  ]}
+  value_lines={[
+    {value:50,dash:[8,5],color:'blue',lineWidth:2}
+  ]}
   ...
 />
 ```
 ##### Preview:
-![GitHub Logo](/images/label%20size.jpg)
+![GitHub Logo](/images/set%20lines.jpg)
+
+
+
+### Set Text On Points
+###### Set text on each points by set 'text' prop (function) on data that read text value from point object and can get custom style.
+##### Code:
+```javascript
+<Chart
+  ...
+  data={[
+    {
+      ...
+      text:({point,dataIndex,pointIndex})=>{
+        return {
+          value:point.size,
+          y:-20,
+          fontSize:12,
+          rotate:pointIndex === 11?90:0,
+          align:[0,0]
+        }
+      }
+      ...
+    }
+  ]}
+  ...
+/>
+```
 ##### Preview:
-![GitHub Logo](/images/basic.jpg)
+![GitHub Logo](/images/text.jpg)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ### Label Size
 ###### Set width of horizontal axis labels by 'labelSize' prop to prevent those to interference .
