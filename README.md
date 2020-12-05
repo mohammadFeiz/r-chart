@@ -15,12 +15,11 @@
 
 ### Usage
 ``` javascript
-import react from 'react';
-import RChart from "r-chart";
-<RChart />
+import react from "react";
+import Chart from "r-chart";
+<Chart />
 ```
 ### Basic
-![GitHub Logo](/images/basic.jpg)
 ##### Code:
 ```javascript
 <Chart
@@ -50,6 +49,25 @@ import RChart from "r-chart";
     ]}
  />
  ```
+##### Preview:
+![GitHub Logo](/images/basic.jpg)
+
+### Label Size
+###### Set width of horizontal axis labels by 'labelSize' prop to prevent those to interference .
+##### Code:
+```javascript
+<Chart
+  ...
+  labelSize={90}
+  ...
+/>
+```
+##### Preview:
+![GitHub Logo](/images/label size.jpg)
+
+
+
+
 ### Root Properties
 Properties | Type | Required | Description
 ---------- | ---- | -------- | -----------
