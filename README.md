@@ -50,8 +50,8 @@ import Chart from "r-chart";
  />
  ```
 ##### Preview:
-![GitHub Logo](/images/basic.jpg)
-[Open Demo On Stackblitz.com](https://www.google.com)
+[![GitHub Logo](/images/basic.jpg)](https://www.google.com)
+
 
 
 ### Label Size
@@ -65,7 +65,7 @@ import Chart from "r-chart";
 />
 ```
 ##### Preview:
-![GitHub Logo](/images/label%20size.jpg)
+![alt text](/images/label%20size.jpg)
 
 
 
