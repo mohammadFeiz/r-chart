@@ -301,35 +301,36 @@ import Chart from "r-chart";
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### Label Size
-###### Set width of horizontal axis labels by 'labelSize' prop to prevent those to interference .
+### Rotate Horizontal Labels
+###### rotate horizontal labels by 'labelRotate' props.
 ##### Code:
 ```javascript
 <Chart
   ...
-  labelSize={90}
+  labelRotate={45}
   ...
 />
 ```
 ##### Preview:
-![GitHub Logo](/images/label%20size.jpg)
+![GitHub Logo](/images/label%20rotate.jpg)
+
+
+
+### Set Axis Thickness
+###### Set horizontal and vertical axis thickness by 'axisSize' props.
+##### Code:
+```javascript
+<Chart
+  ...
+  value_editLabel={(value)=>value * 1000 + '$'}
+  axisThickness={{horizontal:90,vertical:70}}
+  labelRotate={90}
+  labelSize={40}
+  ...
+/>
+```
+##### Preview:
+![GitHub Logo](/images/axis%20thickness.jpg)
 
 
 
