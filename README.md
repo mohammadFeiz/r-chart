@@ -104,35 +104,84 @@ import Chart from "r-chart";
 
 
 
-### Label Size
-###### Set width of horizontal axis labels by 'labelSize' prop to prevent those to interference .
+### Get key and value from points object
+###### Read key from point object by 'getKey' prop function on data.
+###### Read value from point object by 'getValue' prop function on data.
 ##### Code:
 ```javascript
 <Chart
   ...
-  labelSize={90}
+  data={[
+    {
+      type:'line',
+      title:'data',
+      color:'blue',
+      points:[
+        {date:'January',percent:10},
+        {date:'February',percent:15},
+        {date:'March',percent:25},
+        {date:'April',percent:30},
+        {date:'May',percent:40},
+        {date:'June',percent:35},
+        {date:'July',percent:40},
+        {date:'August',percent:60},
+        {date:'September',percent:60},
+        {date:'October',percent:75},
+        {date:'November',percent:80},
+        {date:'December',percent:100}
+      ],
+    }
+  ]}
+  keys={[
+    'January','February','March','April','May','June','July','August','September','October','November','December'
+  ]}
+  getKey={({point,dataIndex,pointIndex})=>point.date}
+  getValue={({point,dataIndex,pointIndex})=>point.percent}
   ...
 />
 ```
 ##### Preview:
-![GitHub Logo](/images/label%20size.jpg)
-##### Preview:
-![GitHub Logo](/images/basic.jpg)
+![GitHub Logo](/images/get%20key%20get%20value.jpg)
 
-### Label Size
-###### Set width of horizontal axis labels by 'labelSize' prop to prevent those to interference .
+
+
+### Set Multi Data by diffrent styles
+###### Set 3 data on 'data' prop by diffrent styles.
+###### Controlling line chart style by 'dash' , 'lineWidth' , 'color' and 'areaOpacity' property on data
 ##### Code:
 ```javascript
 <Chart
   ...
-  labelSize={90}
+  data={[
+    {
+      ...
+      title:'data1',
+      color:'blue',
+      dash:[4,2],
+      areaOpacity:0.2
+      ...
+    },
+    {
+      ...
+      title:'data2',
+      color:'#03ebcc',
+      lineWidth:4,
+      ...
+    },
+    {
+      ...
+      title:'data3',
+      color:'#e414c8',
+      dash:[7,5],
+    }
+  ]}
   ...
 />
 ```
 ##### Preview:
-![GitHub Logo](/images/label%20size.jpg)
-##### Preview:
-![GitHub Logo](/images/basic.jpg)
+![GitHub Logo](/images/multi%20data.jpg)
+
+
 
 ### Label Size
 ###### Set width of horizontal axis labels by 'labelSize' prop to prevent those to interference .
