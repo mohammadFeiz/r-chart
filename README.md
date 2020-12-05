@@ -50,7 +50,7 @@ import Chart from "r-chart";
  />
  ```
 ##### Preview(Click image and open demo on stackblitz):
-[![alt text](/images/basic.jpg)](https://www.google.com)
+[![alt text](/images/basic.jpg)](https://stackblitz.com/edit/r-chart-basic?embed=1&file=src/App.js)
 
 
 
@@ -65,7 +65,7 @@ import Chart from "r-chart";
 />
 ```
 ##### Preview(Click image and open demo on stackblitz):
-[![alt text](/images/label%20size.jpg)](https://www.google.com)
+[![alt text](/images/label%20size.jpg)](https://stackblitz.com/edit/r-chart-demo-label-size?embed=1&file=src/App.js)
 
 
 
@@ -99,7 +99,7 @@ import Chart from "r-chart";
 />
 ```
 ##### Preview(Click image and open demo on stackblitz):
-[![alt text](/images/grid%20lines.jpg)](https://www.google.com)
+[![alt text](/images/grid%20lines.jpg)](https://stackblitz.com/edit/r-chart-demo-grid-lines?embed=1&file=src/App.js)
 
 
 
@@ -140,7 +140,7 @@ import Chart from "r-chart";
 />
 ```
 ##### Preview(Click image and open demo on stackblitz):
-[![alt text](/images/get%20key%20get%20value.jpg)](https://www.google.com)
+[![alt text](/images/get%20key%20get%20value.jpg)](https://stackblitz.com/edit/r-chart-demo-get-key-get-value?embed=1&file=src/App.js)
 
 
 
@@ -178,7 +178,7 @@ import Chart from "r-chart";
 />
 ```
 ##### Preview(Click image and open demo on stackblitz):
-[![alt text](/images/multi%20data.jpg)](https://www.google.com)
+[![alt text](/images/multi%20data.jpg)](https://stackblitz.com/edit/r-chart-demo-multi-data?embed=1&file=src/App.js)
 
 
 
