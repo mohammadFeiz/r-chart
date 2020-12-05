@@ -1,12 +1,10 @@
 # r-chart (react editable line chart and bar chart)
-# under develop commin soon!!!!!
-
 ![GitHub Logo](/images/r-chart-dark.png)
 
 
 ### description
 * create line chart , bar chart and combo chart.
-* editable points. select point(s) and drag to change value.  
+* editable points By drag or popup.  
 * developed by reactjs.
 * responsive.
 * customizable style.
@@ -28,8 +26,9 @@
 ``` javascript
 import react from 'react';
 import RChart from "r-chart";
-<RCahrt data={} x={} y={} padding={} onchange={} style={}/>
+<RChart />
 ```
+###Basic
 
 ### Root Properties
 Properties | Type | Required | Description
