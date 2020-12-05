@@ -15,7 +15,7 @@
 ![GitHub Logo](/images/r-chart-zoom.gif)
 
 ### Edit Demo
-![GitHub Logo](/images/r-chart-edit.gif)
+![GitHub Logo](/images/basic.gif)
 
 
 ### Instalation
@@ -29,7 +29,7 @@ import RChart from "r-chart";
 <RChart />
 ```
 ### Basic
-
+![GitHub Logo](/images/r-chart-zoom.gif)
 ### Root Properties
 Properties | Type | Required | Description
 ---------- | ---- | -------- | -----------
