@@ -19,6 +19,49 @@ import Chart from "r-chart";
 <Chart />
 ```
 
+##### r-chart consists of a set of data, and each data consists of a set of points.
+##### r-chart have 2 axis (key axis and value axis)
+##### key axis is based on chart keys array
+##### value axis is based on points value
+
+Prop            | type                                          | Default                                         | Description
+--------------- | --------------------------------------------- | ----------------------------------------------- | ----------------------------
+data            | Array of objects                              | Required                                        | list of chart data
+keys            | Array of strings or numbers                   | Required                                        | list of chart keys
+getKey          | function                                      | ({point, dataIndex, pointIndex}) => point.key   | get key from point object
+getValue        | function                                      | ({point, dataIndex, pointIndex}) => point.value | get value from point object
+key_gridColor   | string(color)                                 | Optional                                        | set grid lines on key axis
+value_gridColor | string(color)                                 | Optional                                        | set grid lines on value axis
+key_lines       | Array of objects                              | Optional                                        | set lines by custom style on key axis
+value_lines     | Array of objects                              | Optional                                        | set lines by custom style on value axis
+key_editLabel   | function                                      | Optional                                        | get each key label and return edited it
+value_editLabel | function                                      | Optional                                        | get each value label and return edited it
+key_zoom        | boolean                                       | false                                           | set key axis zoomable
+value_zoom      | boolean                                       | false                                           | set value axis zoomable
+labelSize       | number                                        | 40                                              | set size of horizontal labels
+labelRotate     | number                                        | 0                                               | angle of labels on horizontal axis 
+axisThickness   | object by 2 property(horizontal and vertical) | {horizontal : 50, vertical : 50}                | set thickness of horizontal and vertical axis
+edit            | function                                      | Optional                                        | edit point by chart popup
+add             | function                                      | Optional                                        | add point by chart popup
+remove          | function                                      | Optional                                        | remove point by chart popup
+onDrag          | function                                      | Optional                                        | edit point by dragging points
+onDragEnd       | function                                      | Optional                                        | edit point in end of dragging
+##### each data
+Prop        | Type                    | Default   | Description
+----------- | ----------------------- | --------- | -----------
+type        | string('line' or 'bar') | 'line'    | type of chart data
+title       | string                  | 'untitle' | title of chart data
+points      | array of objects        | required  | points of chart data
+color       | string(color)           | '#000'    | color of chart data
+dash        | array of 2 number(int)  | Optional  | dash style of line of data
+lineWidth   | number                  | 2         | line width of line of data
+areaOpacity | number between 0 and 1  | 0         | opacity of line chart area
+pointStyle  | object or function      | Optional  | style of line chart points
+text        | function                | Optional  | set text on chart points
+editable    | boolean                 | false     | Specifies whether chart points can be edited or not
+draggable   | boolean                 | false     | Specifies whether chart points can be edited by drag or not
+
+
 # Basic
 ##### Code:
 ```javascript
