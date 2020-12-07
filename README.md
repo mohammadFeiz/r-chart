@@ -4,10 +4,13 @@
 * create line chart , bar chart and combo chart.
 * editable points By drag or popup.  
 * developed by reactjs.
+* high performance.
+* mobile support(support touch events).
 * responsive.
 * customizable style.
 * zoomable.
-* up to 1000000 point support.
+* up to 500000 point support.
+* multi select points
 
 ### Instalation
 ```npm i r-chart```
