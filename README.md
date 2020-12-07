@@ -19,14 +19,57 @@ import Chart from "r-chart";
 <Chart />
 ```
 
-# Basic
+##### r-chart consists of a set of data, and each data consists of a set of points.
+##### r-chart have 2 axis (key axis and value axis)
+##### key axis is based on chart keys array
+##### value axis is based on points value
+
+Prop            | type                                          | Default                                         | Description
+--------------- | --------------------------------------------- | ----------------------------------------------- | ----------------------------
+data            | Array of objects                              | Required                                        | list of chart data
+keys            | Array of strings or numbers                   | Required                                        | list of chart keys
+getKey          | function                                      | ({point, dataIndex, pointIndex}) => point.key   | get key from point object
+getValue        | function                                      | ({point, dataIndex, pointIndex}) => point.value | get value from point object
+key_gridColor   | string(color)                                 | Optional                                        | set grid lines on key axis
+value_gridColor | string(color)                                 | Optional                                        | set grid lines on value axis
+key_lines       | Array of objects                              | Optional                                        | set lines by custom style on key axis
+value_lines     | Array of objects                              | Optional                                        | set lines by custom style on value axis
+key_editLabel   | function                                      | Optional                                        | get each key label and return edited it
+value_editLabel | function                                      | Optional                                        | get each value label and return edited it
+key_zoom        | boolean                                       | false                                           | set key axis zoomable
+value_zoom      | boolean                                       | false                                           | set value axis zoomable
+labelSize       | number                                        | 40                                              | set size of horizontal labels
+labelRotate     | number                                        | 0                                               | angle of labels on horizontal axis 
+axisThickness   | object by 2 property(horizontal and vertical) | {horizontal : 50, vertical : 50}                | set thickness of horizontal and vertical axis
+edit            | function                                      | Optional                                        | edit point by chart popup
+add             | function                                      | Optional                                        | add point by chart popup
+remove          | function                                      | Optional                                        | remove point by chart popup
+onDrag          | function                                      | Optional                                        | edit point by dragging points
+onDragEnd       | function                                      | Optional                                        | edit point in end of dragging
+##### each data
+Prop        | Type                    | Default   | Description
+----------- | ----------------------- | --------- | -----------
+type        | string('line' or 'bar') | 'line'    | type of chart data
+title       | string                  | 'untitle' | title of chart data
+points      | array of objects        | required  | points of chart data
+color       | string(color)           | '#000'    | color of chart data
+dash        | array of 2 number(int)  | Optional  | dash style of line of data
+lineWidth   | number                  | 2         | line width of line of data
+areaOpacity | number between 0 and 1  | 0         | opacity of line chart area
+pointStyle  | object or function      | Optional  | style of line chart points
+text        | function                | Optional  | set text on chart points
+editable    | boolean                 | false     | Specifies whether chart points can be edited or not
+draggable   | boolean                 | false     | Specifies whether chart points can be edited by drag or not
+
+
+# Line Chart
 ##### Code:
 ```javascript
 <Chart
     data={[
       {
         type:'line',
-        title:'data',
+        title:'data1',
         color:'blue',
         points:[
           {key:'January',value:10},
@@ -42,15 +85,145 @@ import Chart from "r-chart";
           {key:'November',value:80},
           {key:'December',value:100}
         ],
+
+      },
+      {
+        type:'line',
+        title:'data2',
+        color:'crimson',
+        points:[
+          {key:'January',value:20},
+          {key:'February',value:35},
+          {key:'March',value:15},
+          {key:'April',value:40},
+          {key:'May',value:60},
+          {key:'June',value:55},
+          {key:'July',value:50},
+          {key:'August',value:70},
+          {key:'September',value:65},
+          {key:'October',value:85},
+          {key:'November',value:90},
+          {key:'December',value:100}
+        ],
       }
     ]}
     keys={[
       'January','February','March','April','May','June','July','August','September','October','November','December'
     ]}
- />
+  />
  ```
 ##### Preview(Click image and open demo on stackblitz):
-[![alt text](/images/basic.jpg)](https://www.google.com)
+[![alt text](/images/line%20chart.jpg)](https://stackblitz.com/edit/r-chart-demo-line-chart?embed=1&file=src/App.js)
+
+
+
+# Bar Chart
+##### Code:
+```javascript
+<Chart
+    data={[
+      {
+        type:'bar',
+        title:'data1',
+        color:'blue',
+        points:[
+          {key:'January',value:10},
+          {key:'February',value:15},
+          {key:'March',value:25},
+          {key:'April',value:30},
+          {key:'May',value:40},
+          {key:'June',value:35},
+          {key:'July',value:40},
+          {key:'August',value:60},
+          {key:'September',value:60},
+          {key:'October',value:75},
+          {key:'November',value:80},
+          {key:'December',value:100}
+        ],
+
+      },
+      {
+        type:'bar',
+        title:'data2',
+        color:'crimson',
+        points:[
+          {key:'January',value:20},
+          {key:'February',value:35},
+          {key:'March',value:15},
+          {key:'April',value:40},
+          {key:'May',value:60},
+          {key:'June',value:55},
+          {key:'July',value:50},
+          {key:'August',value:70},
+          {key:'September',value:65},
+          {key:'October',value:85},
+          {key:'November',value:90},
+          {key:'December',value:100}
+        ],
+      }
+    ]}
+    keys={[
+      'January','February','March','April','May','June','July','August','September','October','November','December'
+    ]}
+  />
+ ```
+##### Preview(Click image and open demo on stackblitz):
+[![alt text](/images/bar%20chart.jpg)](https://stackblitz.com/edit/r-chart-demo-bar-chart?embed=1&file=src/App.js)
+
+
+
+# Line Chart And Bar Chart
+##### Code:
+```javascript
+<Chart
+    data={[
+      {
+        type:'line',
+        title:'data1',
+        color:'blue',
+        points:[
+          {key:'January',value:10},
+          {key:'February',value:15},
+          {key:'March',value:25},
+          {key:'April',value:30},
+          {key:'May',value:40},
+          {key:'June',value:35},
+          {key:'July',value:40},
+          {key:'August',value:60},
+          {key:'September',value:60},
+          {key:'October',value:75},
+          {key:'November',value:80},
+          {key:'December',value:100}
+        ],
+
+      },
+      {
+        type:'bar',
+        title:'data2',
+        color:'crimson',
+        points:[
+          {key:'January',value:20},
+          {key:'February',value:35},
+          {key:'March',value:15},
+          {key:'April',value:40},
+          {key:'May',value:60},
+          {key:'June',value:55},
+          {key:'July',value:50},
+          {key:'August',value:70},
+          {key:'September',value:65},
+          {key:'October',value:85},
+          {key:'November',value:90},
+          {key:'December',value:100}
+        ],
+      }
+    ]}
+    keys={[
+      'January','February','March','April','May','June','July','August','September','October','November','December'
+    ]}
+  />
+ ```
+##### Preview(Click image and open demo on stackblitz):
+[![alt text](/images/line%20chart%20and%20bar%20chart.jpg)](https://stackblitz.com/edit/r-chart-demo-line-chart-and-bar-chart?embed=1&file=src/App.js)
 
 
 
@@ -65,7 +238,7 @@ import Chart from "r-chart";
 />
 ```
 ##### Preview(Click image and open demo on stackblitz):
-[![alt text](/images/label%20size.jpg)](https://www.google.com)
+[![alt text](/images/label%20size.jpg)](https://stackblitz.com/edit/r-chart-demo-label-size?embed=1&file=src/App.js)
 
 
 
@@ -99,7 +272,7 @@ import Chart from "r-chart";
 />
 ```
 ##### Preview(Click image and open demo on stackblitz):
-[![alt text](/images/grid%20lines.jpg)](https://www.google.com)
+[![alt text](/images/grid%20lines.jpg)](https://stackblitz.com/edit/r-chart-demo-grid-lines?embed=1&file=src/App.js)
 
 
 
@@ -140,7 +313,7 @@ import Chart from "r-chart";
 />
 ```
 ##### Preview(Click image and open demo on stackblitz):
-[![alt text](/images/get%20key%20get%20value.jpg)](https://www.google.com)
+[![alt text](/images/get%20key%20get%20value.jpg)](https://stackblitz.com/edit/r-chart-demo-get-key-get-value?embed=1&file=src/App.js)
 
 
 
@@ -178,7 +351,7 @@ import Chart from "r-chart";
 />
 ```
 ##### Preview(Click image and open demo on stackblitz):
-[![alt text](/images/multi%20data.jpg)](https://www.google.com)
+[![alt text](/images/multi%20data.jpg)](https://stackblitz.com/edit/r-chart-demo-multi-data?embed=1&file=src/App.js)
 
 
 
