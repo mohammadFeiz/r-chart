@@ -374,7 +374,7 @@ draggable   | boolean                 | false     | Specifies whether chart poin
 />
 ```
 ##### Preview(Click image and open demo on stackblitz):
-[![alt text](/images/point%20style%201.jpg)](https://www.google.com)
+[![alt text](/images/point%20style%201.jpg)](https://stackblitz.com/edit/r-chart-demo-point-style-1?embed=1&file=src/App.js)
 
 
 
@@ -396,7 +396,7 @@ draggable   | boolean                 | false     | Specifies whether chart poin
 />
 ```
 ##### Preview(Click image and open demo on stackblitz):
-[![alt text](/images/point%20style%202.jpg)](https://www.google.com)
+[![alt text](/images/point%20style%202.jpg)](https://stackblitz.com/edit/r-chart-demo-point-style-2?embed=1&file=src/App.js)
 ###### Set circle on each points by set 'pointStyle' prop on data (function type).
 ##### Code:
 ```javascript
@@ -423,7 +423,7 @@ draggable   | boolean                 | false     | Specifies whether chart poin
 />
 ```
 ##### Preview(Click image and open demo on stackblitz):
-[![alt text](/images/point%20style%203.jpg)](https://www.google.com)
+[![alt text](/images/point%20style%203.jpg)](https://stackblitz.com/edit/r-chart-demo-point-style-3?embed=1&file=src/App.js)
 
 
 
@@ -443,7 +443,7 @@ draggable   | boolean                 | false     | Specifies whether chart poin
 />
 ```
 ##### Preview(Click image and open demo on stackblitz):
-[![alt text](/images/set%20lines.jpg)](https://www.google.com)
+[![alt text](/images/set%20lines.jpg)](https://stackblitz.com/edit/r-chart-demo-set-lines?embed=1&file=src/App.js)
 
 
 
@@ -501,7 +501,7 @@ draggable   | boolean                 | false     | Specifies whether chart poin
 />
 ```
 ##### Preview(Click image and open demo on stackblitz):
-[![alt text](/images/label%20rotate.jpg)](https://www.google.com)
+[![alt text](/images/label%20rotate.jpg)](https://stackblitz.com/edit/r-chart-demo-rotate-labels?embed=1&file=src/App.js)
 
 
 
@@ -519,4 +519,4 @@ draggable   | boolean                 | false     | Specifies whether chart poin
 />
 ```
 ##### Preview(Click image and open demo on stackblitz):
-[![alt text](/images/axis%20thickness.jpg)](https://www.google.com)
+[![alt text](/images/axis%20thickness.jpg)](https://stackblitz.com/edit/r-char-demo-axis-size?embed=1&file=src/App.js)
