@@ -62,14 +62,14 @@ editable    | boolean                 | false     | Specifies whether chart poin
 draggable   | boolean                 | false     | Specifies whether chart points can be edited by drag or not
 
 
-# Basic
+# Line Chart
 ##### Code:
 ```javascript
 <Chart
     data={[
       {
         type:'line',
-        title:'data',
+        title:'data1',
         color:'blue',
         points:[
           {key:'January',value:10},
@@ -85,15 +85,145 @@ draggable   | boolean                 | false     | Specifies whether chart poin
           {key:'November',value:80},
           {key:'December',value:100}
         ],
+
+      },
+      {
+        type:'line',
+        title:'data2',
+        color:'crimson',
+        points:[
+          {key:'January',value:20},
+          {key:'February',value:35},
+          {key:'March',value:15},
+          {key:'April',value:40},
+          {key:'May',value:60},
+          {key:'June',value:55},
+          {key:'July',value:50},
+          {key:'August',value:70},
+          {key:'September',value:65},
+          {key:'October',value:85},
+          {key:'November',value:90},
+          {key:'December',value:100}
+        ],
       }
     ]}
     keys={[
       'January','February','March','April','May','June','July','August','September','October','November','December'
     ]}
- />
+  />
  ```
 ##### Preview(Click image and open demo on stackblitz):
-[![alt text](/images/basic.jpg)](https://stackblitz.com/edit/r-chart-basic?embed=1&file=src/App.js)
+[![alt text](/images/line%20chart.jpg)](https://stackblitz.com/edit/r-chart-demo-line-chart?embed=1&file=src/App.js)
+
+
+
+# Bar Chart
+##### Code:
+```javascript
+<Chart
+    data={[
+      {
+        type:'bar',
+        title:'data1',
+        color:'blue',
+        points:[
+          {key:'January',value:10},
+          {key:'February',value:15},
+          {key:'March',value:25},
+          {key:'April',value:30},
+          {key:'May',value:40},
+          {key:'June',value:35},
+          {key:'July',value:40},
+          {key:'August',value:60},
+          {key:'September',value:60},
+          {key:'October',value:75},
+          {key:'November',value:80},
+          {key:'December',value:100}
+        ],
+
+      },
+      {
+        type:'bar',
+        title:'data2',
+        color:'crimson',
+        points:[
+          {key:'January',value:20},
+          {key:'February',value:35},
+          {key:'March',value:15},
+          {key:'April',value:40},
+          {key:'May',value:60},
+          {key:'June',value:55},
+          {key:'July',value:50},
+          {key:'August',value:70},
+          {key:'September',value:65},
+          {key:'October',value:85},
+          {key:'November',value:90},
+          {key:'December',value:100}
+        ],
+      }
+    ]}
+    keys={[
+      'January','February','March','April','May','June','July','August','September','October','November','December'
+    ]}
+  />
+ ```
+##### Preview(Click image and open demo on stackblitz):
+[![alt text](/images/bar%20chart.jpg)](https://stackblitz.com/edit/r-chart-demo-bar-chart?embed=1&file=src/App.js)
+
+
+
+# Line Chart And Bar Chart
+##### Code:
+```javascript
+<Chart
+    data={[
+      {
+        type:'line',
+        title:'data1',
+        color:'blue',
+        points:[
+          {key:'January',value:10},
+          {key:'February',value:15},
+          {key:'March',value:25},
+          {key:'April',value:30},
+          {key:'May',value:40},
+          {key:'June',value:35},
+          {key:'July',value:40},
+          {key:'August',value:60},
+          {key:'September',value:60},
+          {key:'October',value:75},
+          {key:'November',value:80},
+          {key:'December',value:100}
+        ],
+
+      },
+      {
+        type:'bar',
+        title:'data2',
+        color:'crimson',
+        points:[
+          {key:'January',value:20},
+          {key:'February',value:35},
+          {key:'March',value:15},
+          {key:'April',value:40},
+          {key:'May',value:60},
+          {key:'June',value:55},
+          {key:'July',value:50},
+          {key:'August',value:70},
+          {key:'September',value:65},
+          {key:'October',value:85},
+          {key:'November',value:90},
+          {key:'December',value:100}
+        ],
+      }
+    ]}
+    keys={[
+      'January','February','March','April','May','June','July','August','September','October','November','December'
+    ]}
+  />
+ ```
+##### Preview(Click image and open demo on stackblitz):
+[![alt text](/images/line%20chart%20and%20bar%20chart.jpg)](https://stackblitz.com/edit/r-chart-demo-line-chart-and-bar-chart?embed=1&file=src/App.js)
 
 
 
