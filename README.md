@@ -456,6 +456,20 @@ draggable   | boolean                 | false     | Specifies whether chart poin
   data={[
     {
       ...
+      points:[
+        {date:'January',percent:10,size:'low'},
+          {date:'February',percent:15,size:'low'},
+          {date:'March',percent:25,size:'low'},
+          {date:'April',percent:30,size:'low'},
+          {date:'May',percent:40,size:'medium'},
+          {date:'June',percent:35,size:'medium'},
+          {date:'July',percent:40,size:'medium'},
+          {date:'August',percent:60,size:'high'},
+          {date:'September',percent:60,size:'high'},
+          {date:'October',percent:75,size:'high'},
+          {date:'November',percent:80,size:'high'},
+          {date:'December',percent:100,size:'high'}
+      ],
       text:({point,dataIndex,pointIndex})=>{
         return {
           value:point.size,
