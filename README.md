@@ -486,7 +486,7 @@ draggable   | boolean                 | false     | Specifies whether chart poin
 />
 ```
 ##### Preview(Click image and open demo on stackblitz):
-[![alt text](/images/text.jpg)](https://www.google.com)
+[![alt text](/images/text.jpg)](https://stackblitz.com/edit/r-chart-demo-point-text?embed=1&file=src/App.js)
 
 
 
