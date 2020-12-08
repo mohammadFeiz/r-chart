@@ -36,6 +36,8 @@ keys            | Array of strings or numbers                   | Required      
 getKey          | function                                      | ({point, dataIndex, pointIndex}) => point.key   | get key from point object
 getValue        | function                                      | ({point, dataIndex, pointIndex}) => point.value | get value from point object
 key_gridColor   | string(color)                                 | Optional                                        | set grid lines on key axis
+key_title       | string                                        | Required for show in chart popup                | title of key axis
+value_title     | string                                        | Required for show in chart popup                | title of value axis
 value_gridColor | string(color)                                 | Optional                                        | set grid lines on value axis
 key_lines       | Array of objects                              | Optional                                        | set lines by custom style on key axis
 value_lines     | Array of objects                              | Optional                                        | set lines by custom style on value axis
