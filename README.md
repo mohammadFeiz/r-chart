@@ -66,7 +66,7 @@ lineWidth   | number                  | 2         | line width of line of data
 areaOpacity | number between 0 and 1  | 0         | opacity of line chart area
 pointStyle  | object or function      | Optional  | style of line chart points
 text        | function                | Optional  | set text on chart points
-editable    | boolean                 | false     | Specifies whether chart points can be edited or not
+editable    | boolean                 | true     | Specifies whether chart points can be edited or not
 draggable   | boolean                 | false     | Specifies whether chart points can be edited by drag or not
 
 
