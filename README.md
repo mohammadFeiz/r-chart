@@ -48,11 +48,10 @@ value_zoom      | boolean                                       | false         
 labelSize       | number                                        | 40                                              | set size of horizontal labels
 labelRotate     | number                                        | 0                                               | angle of labels on horizontal axis 
 axisThickness   | object by 2 property(horizontal and vertical) | {horizontal : 50, vertical : 50}                | set thickness of horizontal and vertical axis
-edit            | function                                      | Optional                                        | edit point by chart popup
-add             | function                                      | Optional                                        | add point by chart popup
-remove          | function                                      | Optional                                        | remove point by chart popup
-onDrag          | function                                      | Optional                                        | edit point by dragging points
-onDragEnd       | function                                      | Optional                                        | edit point in end of dragging
+onChange        | function                                      | Optional                                        | change points value in chart popup or end of dragging points
+onDrag          | function                                      | Optional                                        | change points value while dragging points
+onAdd           | function                                      | Optional                                        | get point details for add
+onRemove        | function                                      | Optional                                        | get point details for remove
 html            | function                                      | Optional                                        | add custom html on chart(example: add a button on chart)
 ##### each data
 Prop        | Type                    | Default   | Description
