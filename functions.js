@@ -60,12 +60,10 @@ export function value_getRange(axis){
     // }
 
     export function value_getPercentByValue(axis,point = {}){
-      if(isNaN(point._value)){return false}  
       var {start,end} = this.details.range[axis];
       return 100 * (point._value - start) / (end - start) 
     }
     export function key_getPercentByValue(axis,point = {}){
-      if(point._keyIndex === undefined){return false;}
       let {start,end} = this.details.range[axis]; 
       return 100 * (point._keyIndex - start) / (end - start) 
     }
