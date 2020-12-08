@@ -1,5 +1,5 @@
 # r-chart (react editable line chart and bar chart)
-![alt text](/images/line%20chart.jpg)
+![alt text](/images/changedemo.gif)
 ### description
 * developed by reactjs.
 * create line chart , bar chart and both in one container.
