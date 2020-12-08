@@ -670,4 +670,4 @@ export default class App extends Component{
 }
 ```
 ##### Preview(Click image and open demo on stackblitz):
-[![alt text](/images/axis%20thickness.jpg)](https://stackblitz.com/edit/r-chart-test?embed=1&file=src/App.js)
+[![alt text](/images/events.jpg)](https://stackblitz.com/edit/r-chart-demo-add-edit-remove?embed=1&file=src/App.js)
