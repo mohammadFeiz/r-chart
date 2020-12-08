@@ -53,8 +53,8 @@ onDrag          | function                                      | Optional      
 onAdd           | function                                      | Optional                                        | get point details for add
 onRemove        | function                                      | Optional                                        | get point details for remove
 html            | function                                      | Optional                                        | add custom html on chart(example: add a button on chart)
-##### each data
-Prop        | Type                    | Default   | Description
+##### each data object
+Property        | Type                    | Default   | Description
 ----------- | ----------------------- | --------- | -----------
 type        | string('line' or 'bar') | 'line'    | type of chart data
 title       | string                  | 'untitle' | title of chart data
