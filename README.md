@@ -51,6 +51,7 @@ add             | function                                      | Optional      
 remove          | function                                      | Optional                                        | remove point by chart popup
 onDrag          | function                                      | Optional                                        | edit point by dragging points
 onDragEnd       | function                                      | Optional                                        | edit point in end of dragging
+html            | function                                      | Optional                                        | add custom html on chart(example: add a button on chart)
 ##### each data
 Prop        | Type                    | Default   | Description
 ----------- | ----------------------- | --------- | -----------
