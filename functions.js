@@ -123,18 +123,6 @@ export function value_getRange(axis){
       }
       return Shapes;
     }
-    export function translate(value){
-      var dictionary = {
-        'Add.Point':{en:'Add Point',fa:'افزودن نقطه'},
-        'Edit.Point':{en:'Edit Point',fa:'ویرایش نقطه'},
-        'Remove.Point':{en:'Remove Point',fa:'حذف نقطه'},
-        'Add':{en:'Add',fa:'افزودن'},
-        'Edit':{en:'Edit',fa:'ویرایش'},
-        'Remove':{en:'Remove',fa:'حذف'},
-        'Close':{en:'Close',fa:'بستن'},
-      }
-      return dictionary[value][this.props.globalization];
-    }
     export function key_getLabel(value){
       var {key_editLabel,keys} = this.props;
       if(value < 0 || value >= keys.length){return ''}

@@ -104,7 +104,6 @@ var RChart = /*#__PURE__*/function (_Component) {
       });
     }
 
-    _this.translate = _functions.translate;
     _this.getLimitTypeNumber = _functions.getLimitTypeNumber;
     _this.key_getRange = _functions.key_getRange;
     _this.value_getRange = _functions.value_getRange;
@@ -119,6 +118,11 @@ var RChart = /*#__PURE__*/function (_Component) {
     _this.getValueByPercent = _functions.getValueByPercent;
     _this.normal_getArea = _functions.normal_getArea;
     _this.reverse_getArea = _functions.reverse_getArea;
+    _this.translate = _this.props.translate ? function (text) {
+      return _this.props.translate(text);
+    } : function (text) {
+      return text;
+    };
     return _this;
   }
 
@@ -1504,7 +1508,6 @@ RChart.defaultProps = {
     key: [],
     value: []
   },
-  globalization: 'en',
   precision: 0,
   clickRadius: 12,
   lines: [],

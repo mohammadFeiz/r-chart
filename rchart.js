@@ -10,7 +10,7 @@ import {
   value_getPercentByValue,key_getPercentByValue,
   value_getValueByPercent,key_getValueByPercent,getValueByPercent,
   value_changeFilter,key_changeFilter,
-  getLimitTypeNumber,eventHandler,getShapes,translate} from './functions';
+  getLimitTypeNumber,eventHandler,getShapes} from './functions';
 
 var RChartContext = createContext();
  export default class RChart extends Component{
@@ -33,7 +33,6 @@ var RChartContext = createContext();
           $('.r-chart-line').css({display:'none'})
         })
       }
-      this.translate = translate;
       this.getLimitTypeNumber = getLimitTypeNumber;
       this.key_getRange = key_getRange;
       this.value_getRange = value_getRange;
@@ -48,6 +47,7 @@ var RChartContext = createContext();
       this.getValueByPercent = getValueByPercent;
       this.normal_getArea = normal_getArea;
       this.reverse_getArea = reverse_getArea;
+      this.translate = this.props.translate?(text)=>this.props.translate(text):(text)=>text;
     }
     getStyle(x,y){return {gridTemplateColumns:`${x}px auto`,gridTemplateRows:`auto ${y}px`,direction:'ltr'}}
     getKey({point,dataIndex,pointIndex}){
@@ -662,7 +662,7 @@ var RChartContext = createContext();
     }
   }
   RChart.defaultProps = {
-    data:[],filter:{key:[],value:[]},globalization:'en',precision:0,clickRadius:12,
+    data:[],filter:{key:[],value:[]},precision:0,clickRadius:12,
     lines:[],axisThickness:{},labelSize:40,axisStyle:{}
   }
 
