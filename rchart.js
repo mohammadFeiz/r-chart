@@ -458,7 +458,7 @@ var RChartContext = createContext();
       return (
         <RSlider 
           className='labelSlider' editable={false} showValue={false}
-          style={{position:'absolute',left:0,top:0,width:'100%',height:'100%',padding:0,zIndex:-1}}
+          style={{position:'absolute',left:0,top:0,width:'100%',height:'100%',padding:0}}
           pointStyle={{display:'none'}} lineStyle={{display:'none'}}
           direction={axis === 'x'?'right':'top'} start={start} end={end}
           label={{

@@ -1107,7 +1107,6 @@ var RChart = /*#__PURE__*/function (_Component) {
           width: '100%',
           height: '100%',
           padding: 0,
-          zIndex: -1
         },
         pointStyle: {
           display: 'none'

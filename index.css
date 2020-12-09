@@ -294,7 +294,7 @@ option{
 .r-chart-line{
   position:absolute;
   display:none;
-  z-index:100;
+  z-index:1000;
   pointer-events: none;
 }
 .r-chart-line div{
