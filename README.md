@@ -54,7 +54,15 @@ onAdd           | function                                      | Optional      
 onRemove        | function                                      | Optional                                        | get point details for remove
 html            | function                                      | Optional                                        | add custom html on chart(example: add a button on chart)
 
-##### onChange props get an object as parameter that has properties like: dataIndex(index of data of changed point),pointIndex(index of changed point),value(value of point),key(key of point),point(object of point) and drag(if is true mean this point is changed by drag).
+##### onChange props 
+is a function  that get changed point details as a parameter.
+this parameter type is object and has this properties: 
+* dataIndex(index of data of changed point)(number)
+* pointIndex(index of changed point)(number)
+* value(value of point)(number)
+* key(key of point)(string or number)
+* point(object of point)(object)
+* drag(if is true mean this point is changed by drag)(boolean)
 ##### each data object
 Property        | Type                    | Default   | Description
 ----------- | ----------------------- | --------- | -----------
