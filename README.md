@@ -49,11 +49,13 @@ value_zoom      | boolean                                       | false         
 labelSize       | number                                        | 40                                              | set size of horizontal labels
 labelRotate     | number                                        | 0                                               | angle of labels on horizontal axis 
 axisThickness   | object by 2 property(horizontal and vertical) | {horizontal : 50, vertical : 50}                | set thickness of horizontal and vertical axis
-onChange        | function                                      | Optional                                        | change points value in chart popup or end of dragging points
-onDrag          | function                                      | Optional                                        | change points value while dragging points
+onChange        | function                                      | Optional                                        | change points value in chart popup or dragging points.
+this function get an object as parameter that has properties like dataIndex(index of data of changed point),pointIndex(index of changed point),value(value of point),key(key of point),point(object of point) and drag(if is true mean this point is changed by drag)
 onAdd           | function                                      | Optional                                        | get point details for add
 onRemove        | function                                      | Optional                                        | get point details for remove
 html            | function                                      | Optional                                        | add custom html on chart(example: add a button on chart)
+
+
 ##### each data object
 Property        | Type                    | Default   | Description
 ----------- | ----------------------- | --------- | -----------
