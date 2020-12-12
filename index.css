@@ -75,6 +75,7 @@ body,html{
   align-items:center;
   width:0;
   height:0;
+  z-index:10000;
   pointer-events: none;
   transition:0s;
 }
@@ -83,25 +84,30 @@ body,html{
 }
 
 .r-chart-popup{
-  background:rgba(20,20,20,.7);
+  background:#fff;
+  border:1px solid #ddd;
   padding:6px 12px;
+  box-shadow: 5px 5px 10px 0 rgba(0,0,0,0.1);
   border-radius:6px;
   position:absolute;
   font-size:11px;
   bottom:calc(100% + 10px);
   display:flex;
-  color:#fff;
+  color:#777;
   flex-direction:column;
 }
 
 .r-chart-popup:before{
   content:'';
   position: absolute;
-  top:100%;
+  top:calc(100% - 5px);
   left:calc(50% - 5px);
-  border-top:5px solid rgba(0,0,0,.7);
-  border-left:5px solid transparent;
-  border-right:5px solid transparent;
+  width:10px;
+  height:10px;
+  background:#fff;
+  transform:rotate(45deg);
+  border-right:1px solid #ddd;
+  border-bottom:1px solid #ddd;
   
 }
 
@@ -265,8 +271,8 @@ option{
   position:absolute;
   right:-6px;
   top:-6px;
-  font-size:20px;
-  background:#fff;
+  font-size:16px;
+  color:#fff;
   border-radius:100%;
 }
 
@@ -322,7 +328,6 @@ option{
   width:0;
   border-left:1px dashed #aaa;
   top:0;
-  display:flex;
   justify-content: center;
 }
 .r-chart-vertical-line div{

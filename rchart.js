@@ -67,7 +67,7 @@ var RChartContext = createContext();
       var {points,color = '#000',lineWidth = 2,areaOpacity,dash,pointStyle,text} = data;
       var dataDetail = {...data,dataIndex,points:[],line:{points:[],lineWidth,stroke:color,dash},area:false,
       texts:[]}
-      var labelSpace = this.details.labelSpace;
+      var space = -Infinity;
       for(let pointIndex = 0; pointIndex < points.length; pointIndex++){
         let point = points[pointIndex];
         let key = this.getKey({point,dataIndex,pointIndex}),
@@ -77,6 +77,9 @@ var RChartContext = createContext();
         if(!this.mouseDownDetail.target){
           point._keyIndex = keys.indexOf(key);
         }
+        if(point._keyIndex === undefined){
+            point._keyIndex = this.lastData[dataIndex].points[pointIndex]._keyIndex;
+        }
         if(point._keyIndex === -1 || point._keyIndex === undefined){continue;}
         let px = this.getPercentByValue('x',point),py = this.getPercentByValue('y',point);
         
@@ -84,16 +87,21 @@ var RChartContext = createContext();
         if(pointStyle){
           let PointStyle = typeof pointStyle === 'function'?pointStyle({point,dataIndex,pointIndex}):pointStyle;
           let {radius,fill = '#fff',stroke = color,lineWidth:pointLineWidth = lineWidth,dash:pointDash,slice} = PointStyle;
-          if(radius && labelSpace > 2 * (radius + pointLineWidth) + 2){
-            let Point = {
-              x:px + '%',y:py + '%',
-              items:[
-                {r:this.props.clickRadius,fill:'rgba(0,0,0,0)',onMouseDown:this.pointMouseDown.bind(this),dataIndex,pointIndex},
-                {r: radius,lineWidth:pointLineWidth * 2,fill,stroke,dash:pointDash,slice}
-              ]
+          if(radius){
+            var center = this.details.canvasSize.x * px / 100;
+            var left = center - radius - pointLineWidth / 2;
+            if(left > space){         
+              space = center + radius + pointLineWidth / 2;
+              let Point = {
+                x:px + '%',y:py + '%',
+                items:[
+                  {r:this.props.clickRadius,fill:'rgba(0,0,0,0)',onMouseDown:this.pointMouseDown.bind(this),dataIndex,pointIndex},
+                  {r: radius,lineWidth:pointLineWidth * 2,fill,stroke,dash:pointDash,slice}
+                ]
+              }
+              this.elements.points.push(Point);
+              dataDetail.points.push(Point);
             }
-            this.elements.points.push(Point);
-            dataDetail.points.push(Point);
           }
         }
         if(text){
@@ -122,6 +130,7 @@ var RChartContext = createContext();
         point._key = key; point._value = value;
         if(key === null || value === null){continue;}
         if(!this.mouseDownDetail.target){point._keyIndex = keys.indexOf(key);}
+        if(point._keyIndex === undefined){point._keyIndex = this.lastData[dataIndex].points[pointIndex]._keyIndex;}
         if(point._keyIndex === -1 || point._keyIndex === undefined){continue;}
         var px = this.getPercentByValue('x',point);
         var py = this.getPercentByValue('y',point);
@@ -219,6 +228,7 @@ var RChartContext = createContext();
       }
       var elements = [];
       for(var prop in this.elements){elements = elements.concat(this.elements[prop])}
+      this.lastData = data;
       return elements;
     }
     componentDidMount(){this.SetState({})}
@@ -262,12 +272,14 @@ var RChartContext = createContext();
     }
     pointMouseDown(e,pos,obj){
       var {dataIndex,pointIndex} = obj;
-      let {data,onChange,onDrag,onRemove} = this.props;
+      let {data,onChange,onRemove} = this.props;
       this.getMouseDetail(pos);
       if(data[dataIndex].editable === false){return;}
       var point = data[dataIndex].points[pointIndex];
       this.mouseDownDetail = {target:'point',key:point._key,value:point._value};
-      if(onDrag){eventHandler('window','mousemove',$.proxy(this.pointMouseMove,this))}
+      if(onChange && data[dataIndex].draggable !== false){
+        eventHandler('window','mousemove',$.proxy(this.pointMouseMove,this))
+      }
       if(onChange || onRemove){
         eventHandler('window','mouseup',$.proxy(this.pointMouseUp,this))
       }
@@ -275,14 +287,14 @@ var RChartContext = createContext();
       this.moved = false;
     }
     pointMouseMove(){
-      var {data,onDrag} = this.props,point = data[this.so.dataIndex].points[this.so.pointIndex];
+      var {data,onChange} = this.props,point = data[this.so.dataIndex].points[this.so.pointIndex];
       var {dToAxis} = this.details;
       if(!this.moved){
         if(Math.abs(this.mouseDetail[dToAxis.value] - this.so[dToAxis.value]) < 8){return;}
         if(point._value === this.mouseDetail.value){return;}
       }
       this.moved = true;
-      onDrag({point,key:point._key,value:this.mouseDetail.value,dataIndex:this.so.dataIndex,pointIndex:this.so.pointIndex});
+      onChange({point,key:point._key,value:this.mouseDetail.value,dataIndex:this.so.dataIndex,pointIndex:this.so.pointIndex,drag:true});
     }
     pointMouseUp(){
       eventHandler('window','mousemove',this.pointMouseMove,'unbind')
@@ -395,7 +407,7 @@ var RChartContext = createContext();
       this.SetState({ 
         popup:{
           type:'multiselect',
-          title:'Multi Select',
+          title:this.translate('Multi Select'),
           points:this.multiselect.points 
         }
       })
@@ -724,7 +736,7 @@ var RChartContext = createContext();
               </div>
             }
             {
-              type === 'multiselect' && (buttons.length || items.length) &&
+              type === 'multiselect' && (buttons.length || inputs.length) &&
               inputs.map((item,i)=>{
                 return ( 
                   <div key={i} className='r-chart-edit-item'>

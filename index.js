@@ -210,7 +210,7 @@ var RChart = /*#__PURE__*/function (_Component) {
         area: false,
         texts: []
       };
-      var labelSpace = this.details.labelSpace;
+      var space = -Infinity;
 
       for (var pointIndex = 0; pointIndex < points.length; pointIndex++) {
         var point = points[pointIndex];
@@ -233,6 +233,10 @@ var RChart = /*#__PURE__*/function (_Component) {
 
         if (!this.mouseDownDetail.target) {
           point._keyIndex = keys.indexOf(key);
+        }
+
+        if (point._keyIndex === undefined) {
+          point._keyIndex = this.lastData[dataIndex].points[pointIndex]._keyIndex;
         }
 
         if (point._keyIndex === -1 || point._keyIndex === undefined) {
@@ -259,27 +263,33 @@ var RChart = /*#__PURE__*/function (_Component) {
               pointDash = PointStyle.dash,
               slice = PointStyle.slice;
 
-          if (radius && labelSpace > 2 * (radius + pointLineWidth) + 2) {
-            var Point = {
-              x: px + '%',
-              y: py + '%',
-              items: [{
-                r: this.props.clickRadius,
-                fill: 'rgba(0,0,0,0)',
-                onMouseDown: this.pointMouseDown.bind(this),
-                dataIndex: dataIndex,
-                pointIndex: pointIndex
-              }, {
-                r: radius,
-                lineWidth: pointLineWidth * 2,
-                fill: fill,
-                stroke: stroke,
-                dash: pointDash,
-                slice: slice
-              }]
-            };
-            this.elements.points.push(Point);
-            dataDetail.points.push(Point);
+          if (radius) {
+            var center = this.details.canvasSize.x * px / 100;
+            var left = center - radius - pointLineWidth / 2;
+
+            if (left > space) {
+              space = center + radius + pointLineWidth / 2;
+              var Point = {
+                x: px + '%',
+                y: py + '%',
+                items: [{
+                  r: this.props.clickRadius,
+                  fill: 'rgba(0,0,0,0)',
+                  onMouseDown: this.pointMouseDown.bind(this),
+                  dataIndex: dataIndex,
+                  pointIndex: pointIndex
+                }, {
+                  r: radius,
+                  lineWidth: pointLineWidth * 2,
+                  fill: fill,
+                  stroke: stroke,
+                  dash: pointDash,
+                  slice: slice
+                }]
+              };
+              this.elements.points.push(Point);
+              dataDetail.points.push(Point);
+            }
           }
         }
 
@@ -296,7 +306,7 @@ var RChart = /*#__PURE__*/function (_Component) {
               _text$color = _text.color,
               _color = _text$color === void 0 ? '#444' : _text$color,
               _text$left = _text.left,
-              left = _text$left === void 0 ? 0 : _text$left,
+              _left = _text$left === void 0 ? 0 : _text$left,
               _text$top = _text.top,
               top = _text$top === void 0 ? 0 : _text$top,
               rotate = _text.rotate,
@@ -310,7 +320,7 @@ var RChart = /*#__PURE__*/function (_Component) {
               text: _value,
               fontSize: fontSize,
               fill: _color,
-              x: left,
+              x: _left,
               y: top,
               align: align
             }]
@@ -372,6 +382,10 @@ var RChart = /*#__PURE__*/function (_Component) {
 
         if (!this.mouseDownDetail.target) {
           point._keyIndex = keys.indexOf(key);
+        }
+
+        if (point._keyIndex === undefined) {
+          point._keyIndex = this.lastData[dataIndex].points[pointIndex]._keyIndex;
         }
 
         if (point._keyIndex === -1 || point._keyIndex === undefined) {
@@ -592,6 +606,7 @@ var RChart = /*#__PURE__*/function (_Component) {
         elements = elements.concat(this.elements[prop]);
       }
 
+      this.lastData = data;
       return elements;
     }
   }, {
@@ -702,7 +717,6 @@ var RChart = /*#__PURE__*/function (_Component) {
       var _this$props3 = this.props,
           data = _this$props3.data,
           onChange = _this$props3.onChange,
-          onDrag = _this$props3.onDrag,
           onRemove = _this$props3.onRemove;
       this.getMouseDetail(pos);
 
@@ -717,7 +731,7 @@ var RChart = /*#__PURE__*/function (_Component) {
         value: point._value
       };
 
-      if (onDrag) {
+      if (onChange && data[dataIndex].draggable !== false) {
         (0, _functions.eventHandler)('window', 'mousemove', _jquery.default.proxy(this.pointMouseMove, this));
       }
 
@@ -738,7 +752,7 @@ var RChart = /*#__PURE__*/function (_Component) {
     value: function pointMouseMove() {
       var _this$props4 = this.props,
           data = _this$props4.data,
-          onDrag = _this$props4.onDrag,
+          onChange = _this$props4.onChange,
           point = data[this.so.dataIndex].points[this.so.pointIndex];
       var dToAxis = this.details.dToAxis;
 
@@ -753,12 +767,13 @@ var RChart = /*#__PURE__*/function (_Component) {
       }
 
       this.moved = true;
-      onDrag({
+      onChange({
         point: point,
         key: point._key,
         value: this.mouseDetail.value,
         dataIndex: this.so.dataIndex,
-        pointIndex: this.so.pointIndex
+        pointIndex: this.so.pointIndex,
+        drag: true
       });
     }
   }, {
@@ -963,7 +978,7 @@ var RChart = /*#__PURE__*/function (_Component) {
       this.SetState({
         popup: {
           type: 'multiselect',
-          title: 'Multi Select',
+          title: this.translate('Multi Select'),
           points: this.multiselect.points
         }
       });
@@ -1106,7 +1121,7 @@ var RChart = /*#__PURE__*/function (_Component) {
           top: 0,
           width: '100%',
           height: '100%',
-          padding: 0,
+          padding: 0
         },
         pointStyle: {
           display: 'none'
@@ -1631,7 +1646,7 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
             dynamicValue: e.target.value
           });
         }
-      })), type === 'multiselect' && (buttons.length || items.length) && inputs.map(function (item, i) {
+      })), type === 'multiselect' && (buttons.length || inputs.length) && inputs.map(function (item, i) {
         return /*#__PURE__*/_react.default.createElement("div", {
           key: i,
           className: "r-chart-edit-item"
