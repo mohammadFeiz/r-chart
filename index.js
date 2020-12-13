@@ -477,7 +477,9 @@ var RChart = /*#__PURE__*/function (_Component) {
           color = _ref5$color === void 0 ? 'red' : _ref5$color,
           _ref5$lineWidth = _ref5.lineWidth,
           lineWidth = _ref5$lineWidth === void 0 ? 0.7 : _ref5$lineWidth,
-          dash = _ref5.dash;
+          dash = _ref5.dash,
+          startLine = _ref5.start,
+          endLine = _ref5.end;
       var range = this.details.range[axis];
 
       if (!range) {
@@ -485,11 +487,55 @@ var RChart = /*#__PURE__*/function (_Component) {
       }
 
       var keys = this.props.keys;
-      value = typeof value === 'string' ? keys.indexOf(value) : value;
-      var start = range.start,
-          end = range.end,
-          v = (value - start) * 100 / (end - start);
-      var points = axis === 'x' ? [[v + '%', '0%'], [v + '%', '-100%']] : [['0%', -v + '%'], ['100%', -v + '%']];
+
+      if (this.details.axisToD[axis] === 'key') {
+        value = keys.indexOf(value);
+        var start = range.start,
+            end = range.end,
+            v = (value - start) * 100 / (end - start);
+        var startPercent = 0;
+        var endPercent = 100;
+
+        if (startLine !== undefined) {
+          var _this$details$range$t = this.details.range[this.details.dToAxis['value']],
+              _start = _this$details$range$t.start,
+              _end = _this$details$range$t.end;
+          startPercent = (startLine - _start) * 100 / (_end - _start);
+        }
+
+        if (endLine !== undefined) {
+          var _this$details$range$t2 = this.details.range[this.details.dToAxis['value']],
+              _start2 = _this$details$range$t2.start,
+              _end2 = _this$details$range$t2.end;
+          endPercent = (endLine - _start2) * 100 / (_end2 - _start2);
+        }
+      } else {
+        var start = range.start,
+            end = range.end,
+            v = (value - start) * 100 / (end - start);
+        var startPercent = 0;
+        var endPercent = 100;
+
+        if (startLine !== undefined) {
+          var _this$details$range$t3 = this.details.range[this.details.dToAxis['key']],
+              _start3 = _this$details$range$t3.start,
+              _end3 = _this$details$range$t3.end;
+          var index = keys.indexOf(startLine);
+          startPercent = (index - _start3) * 100 / (_end3 - _start3);
+        }
+
+        if (endLine !== undefined) {
+          var _this$details$range$t4 = this.details.range[this.details.dToAxis['key']],
+              _start4 = _this$details$range$t4.start,
+              _end4 = _this$details$range$t4.end;
+
+          var _index = keys.indexOf(endLine);
+
+          endPercent = (_index - _start4) * 100 / (_end4 - _start4);
+        }
+      }
+
+      var points = axis === 'x' ? [[v + '%', -startPercent + '%'], [v + '%', -endPercent + '%']] : [[startPercent + '%', -v + '%'], [endPercent + '%', -v + '%']];
       return {
         stroke: color,
         lineWidth: lineWidth,
@@ -536,17 +582,22 @@ var RChart = /*#__PURE__*/function (_Component) {
     value: function getLines(axis) {
       var lines = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
       var result = [];
+      var Lines = typeof lines === 'function' ? lines(this.props.data, this.props.keys) : lines;
 
-      for (var i = 0; i < lines.length; i++) {
-        var _lines$i = lines[i],
-            dash = _lines$i.dash,
-            lineWidth = _lines$i.lineWidth,
-            color = _lines$i.color;
-        var a = lines[i][this.details.axisToD[axis]];
+      for (var i = 0; i < Lines.length; i++) {
+        var _Lines$i = Lines[i],
+            dash = _Lines$i.dash,
+            lineWidth = _Lines$i.lineWidth,
+            color = _Lines$i.color,
+            start = _Lines$i.start,
+            end = _Lines$i.end;
+        var a = Lines[i][this.details.axisToD[axis]];
         result.push(this.getGridLine(a, axis, {
           dash: dash,
           lineWidth: lineWidth,
-          color: color
+          color: color,
+          start: start,
+          end: end
         }));
       }
 

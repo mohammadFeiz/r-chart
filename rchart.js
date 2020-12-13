@@ -167,13 +167,49 @@ var RChartContext = createContext();
       }
       this.dataDetails.push(dataDetail);
     } 
-    getGridLine(value,axis,{color = 'red',lineWidth = 0.7,dash}){
+    getGridLine(value,axis,{color = 'red',lineWidth = 0.7,dash,start:startLine,end:endLine}){
       var range = this.details.range[axis];
       if(!range){return {}}
       var {keys} = this.props;
-      value = typeof value === 'string'?keys.indexOf(value):value;
-      var {start,end} = range,v = (value - start) * 100 / (end - start);
-      var points = axis === 'x'?[[v + '%','0%'],[v + '%','-100%']]:[['0%',-v + '%'],['100%',-v + '%']];
+      if(this.details.axisToD[axis] === 'key'){
+        value = keys.indexOf(value);
+        var {start,end} = range,v = (value - start) * 100 / (end - start);
+        var startPercent = 0;
+        var endPercent = 100;
+        if(startLine !== undefined){
+          let {start,end} = this.details.range[this.details.dToAxis['value']];
+          startPercent = (startLine - start) * 100 / (end - start)
+        }
+        if(endLine !== undefined){
+          let {start,end} = this.details.range[this.details.dToAxis['value']];
+          endPercent = (endLine - start) * 100 / (end - start)
+        }
+      }
+      else {
+        var {start,end} = range,
+        v = (value - start) * 100 / (end - start);
+        var startPercent = 0;
+        var endPercent = 100;
+        if(startLine !== undefined){
+          let {start,end} = this.details.range[this.details.dToAxis['key']];
+          let index = keys.indexOf(startLine);
+          startPercent = (index - start) * 100 / (end - start)
+        }
+        if(endLine !== undefined){
+          let {start,end} = this.details.range[this.details.dToAxis['key']];
+          let index = keys.indexOf(endLine);
+          endPercent = (index - start) * 100 / (end - start)
+        }
+
+      }
+      
+      var points = axis === 'x'?[
+        [v + '%',-startPercent + '%'],
+        [v + '%',-endPercent + '%']
+      ]:[
+        [startPercent + '%',-v + '%'],
+        [endPercent + '%',-v + '%']
+      ];
       return {stroke:color,lineWidth,points,type:'line',dash}
     }
     getGridLines(axis){
@@ -191,10 +227,11 @@ var RChartContext = createContext();
     }
     getLines(axis,lines = []){
       var result = [];
-      for(var i = 0; i < lines.length; i++){
-        var {dash,lineWidth,color} = lines[i];
-        var a = lines[i][this.details.axisToD[axis]];
-        result.push(this.getGridLine(a,axis,{dash,lineWidth,color}))
+      var Lines = typeof lines === 'function'?lines(this.props.data,this.props.keys):lines;
+      for(var i = 0; i < Lines.length; i++){
+        var {dash,lineWidth,color,start,end} = Lines[i];
+        var a = Lines[i][this.details.axisToD[axis]];
+        result.push(this.getGridLine(a,axis,{dash,lineWidth,color,start,end}))
       }
       return result;
     }
