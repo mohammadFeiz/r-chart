@@ -207,7 +207,7 @@ option{
   border-radius:4px;
   background:none;
   color:inherit;
-  width:100px;
+  width:70px;
   outline:none;
   text-align: center;
 }
@@ -229,6 +229,7 @@ option{
   white-space: nowrap;
   flex:1;
   align-items:center;
+  overflow:hidden;
   margin-right:12px;
   -webkit-uset-select:none;
   user-select: none;
@@ -236,17 +237,17 @@ option{
 .r-chart-edit-button{
   background:none;
   color:inherit;
-  border:1px solid;
+  border:1px solid #ddd;
   border-radius:3px;
   flex:1;
   margin:0 3px;
   font-size:10px;
 }
 .r-chart-edit-footer{
-  height:24px;
+  height:28px;
   display:flex;
   width: 100%;
-  margin-top:8px;
+  margin-top:16px;
   background:none;
   cursor:pointer;
   z-index:100;
