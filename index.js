@@ -188,7 +188,9 @@ var RChart = /*#__PURE__*/function (_Component) {
   }, {
     key: "getLineChart",
     value: function getLineChart(data, dataIndex) {
-      var keys = this.props.keys;
+      var _this$props = this.props,
+          keys = _this$props.keys,
+          hideInterfere = _this$props.hideInterfere;
       var points = data.points,
           _data$color = data.color,
           color = _data$color === void 0 ? '#000' : _data$color,
@@ -264,12 +266,35 @@ var RChart = /*#__PURE__*/function (_Component) {
               slice = PointStyle.slice;
 
           if (radius) {
-            var center = this.details.canvasSize.x * px / 100;
-            var left = center - radius - pointLineWidth / 2;
+            if (hideInterfere) {
+              var center = this.details.canvasSize.x * px / 100;
+              var left = center - radius - pointLineWidth / 2;
 
-            if (left > space) {
-              space = center + radius + pointLineWidth / 2;
-              var Point = {
+              if (left > space) {
+                space = center + radius + pointLineWidth / 2;
+                var Point = {
+                  x: px + '%',
+                  y: py + '%',
+                  items: [{
+                    r: this.props.clickRadius,
+                    fill: 'rgba(0,0,0,0)',
+                    onMouseDown: this.pointMouseDown.bind(this),
+                    dataIndex: dataIndex,
+                    pointIndex: pointIndex
+                  }, {
+                    r: radius,
+                    lineWidth: pointLineWidth * 2,
+                    fill: fill,
+                    stroke: stroke,
+                    dash: pointDash,
+                    slice: slice
+                  }]
+                };
+                this.elements.points.push(Point);
+                dataDetail.points.push(Point);
+              }
+            } else {
+              var _Point = {
                 x: px + '%',
                 y: py + '%',
                 items: [{
@@ -287,8 +312,8 @@ var RChart = /*#__PURE__*/function (_Component) {
                   slice: slice
                 }]
               };
-              this.elements.points.push(Point);
-              dataDetail.points.push(Point);
+              this.elements.points.push(_Point);
+              dataDetail.points.push(_Point);
             }
           }
         }
@@ -349,9 +374,9 @@ var RChart = /*#__PURE__*/function (_Component) {
       var color = data.color,
           points = data.points,
           text = data.text;
-      var _this$props = this.props,
-          reverse = _this$props.reverse,
-          keys = _this$props.keys;
+      var _this$props2 = this.props,
+          reverse = _this$props2.reverse,
+          keys = _this$props2.keys;
       var dataDetail = { ...data,
         dataIndex: dataIndex,
         rects: [],
@@ -670,13 +695,13 @@ var RChart = /*#__PURE__*/function (_Component) {
     value: function getDetails() {
       var _this2 = this;
 
-      var _this$props2 = this.props,
-          key_zoom = _this$props2.key_zoom,
-          value_zoom = _this$props2.value_zoom,
-          data = _this$props2.data,
-          _this$props2$barWidth = _this$props2.barWidth,
-          barWidth = _this$props2$barWidth === void 0 ? 80 : _this$props2$barWidth,
-          reverse = _this$props2.reverse,
+      var _this$props3 = this.props,
+          key_zoom = _this$props3.key_zoom,
+          value_zoom = _this$props3.value_zoom,
+          data = _this$props3.data,
+          _this$props3$barWidth = _this$props3.barWidth,
+          barWidth = _this$props3$barWidth === void 0 ? 80 : _this$props3$barWidth,
+          reverse = _this$props3.reverse,
           d = this.details;
 
       if (!d.axisToD) {
@@ -765,10 +790,10 @@ var RChart = /*#__PURE__*/function (_Component) {
     value: function pointMouseDown(e, pos, obj) {
       var dataIndex = obj.dataIndex,
           pointIndex = obj.pointIndex;
-      var _this$props3 = this.props,
-          data = _this$props3.data,
-          onChange = _this$props3.onChange,
-          onRemove = _this$props3.onRemove;
+      var _this$props4 = this.props,
+          data = _this$props4.data,
+          onChange = _this$props4.onChange,
+          onRemove = _this$props4.onRemove;
       this.getMouseDetail(pos);
 
       if (data[dataIndex].editable === false) {
@@ -801,9 +826,9 @@ var RChart = /*#__PURE__*/function (_Component) {
   }, {
     key: "pointMouseMove",
     value: function pointMouseMove() {
-      var _this$props4 = this.props,
-          data = _this$props4.data,
-          onChange = _this$props4.onChange,
+      var _this$props5 = this.props,
+          data = _this$props5.data,
+          onChange = _this$props5.onChange,
           point = data[this.so.dataIndex].points[this.so.pointIndex];
       var dToAxis = this.details.dToAxis;
 
@@ -833,10 +858,10 @@ var RChart = /*#__PURE__*/function (_Component) {
       (0, _functions.eventHandler)('window', 'mousemove', this.pointMouseMove, 'unbind');
       (0, _functions.eventHandler)('window', 'mouseup', this.pointMouseUp, 'unbind');
       this.mouseDownDetail = {};
-      var _this$props5 = this.props,
-          data = _this$props5.data,
-          onRemove = _this$props5.onRemove,
-          onChange = _this$props5.onChange;
+      var _this$props6 = this.props,
+          data = _this$props6.data,
+          onRemove = _this$props6.onRemove,
+          onChange = _this$props6.onChange;
       var point = data[this.so.dataIndex].points[this.so.pointIndex];
 
       if (!this.moved) {
@@ -879,10 +904,10 @@ var RChart = /*#__PURE__*/function (_Component) {
         return;
       }
 
-      var _this$props6 = this.props,
-          onAdd = _this$props6.onAdd,
-          multiselect = _this$props6.multiselect,
-          addPopup = _this$props6.addPopup; // اگر مد افزودن فعال بود و در موقعیت فعلی موس دیتا یا دیتا هایی آمادگی دریافت نقطه جدید در این موقعیت را داشتند
+      var _this$props7 = this.props,
+          onAdd = _this$props7.onAdd,
+          multiselect = _this$props7.multiselect,
+          addPopup = _this$props7.addPopup; // اگر مد افزودن فعال بود و در موقعیت فعلی موس دیتا یا دیتا هایی آمادگی دریافت نقطه جدید در این موقعیت را داشتند
 
       this.mouseDownKey = this.mouseDetail.key;
 
@@ -923,9 +948,9 @@ var RChart = /*#__PURE__*/function (_Component) {
   }, {
     key: "addMouseUp",
     value: function addMouseUp() {
-      var _this$props7 = this.props,
-          onAdd = _this$props7.onAdd,
-          addPopup = _this$props7.addPopup;
+      var _this$props8 = this.props,
+          onAdd = _this$props8.onAdd,
+          addPopup = _this$props8.addPopup;
       (0, _functions.eventHandler)('window', 'mouseup', this.addMouseUp, 'unbind');
 
       if ('ontouchstart' in document.documentElement) {
@@ -1364,9 +1389,9 @@ var RChart = /*#__PURE__*/function (_Component) {
           px = _a[2],
           py = _a[3];
 
-      var _this$props8 = this.props,
-          onAdd = _this$props8.onAdd,
-          axisThickness = _this$props8.axisThickness;
+      var _this$props9 = this.props,
+          onAdd = _this$props9.onAdd,
+          axisThickness = _this$props9.axisThickness;
       var _axisThickness$vertic = axisThickness.vertical,
           vertical = _axisThickness$vertic === void 0 ? 50 : _axisThickness$vertic;
       var obj = this.getValueByPercent({
@@ -1408,17 +1433,17 @@ var RChart = /*#__PURE__*/function (_Component) {
           yfs = '',
           items = '',
           HTML = '';
-      var _this$props9 = this.props,
-          keys = _this$props9.keys,
-          axisThickness = _this$props9.axisThickness,
-          data = _this$props9.data,
-          _this$props9$html = _this$props9.html,
-          html = _this$props9$html === void 0 ? function () {
+      var _this$props10 = this.props,
+          keys = _this$props10.keys,
+          axisThickness = _this$props10.axisThickness,
+          data = _this$props10.data,
+          _this$props10$html = _this$props10.html,
+          html = _this$props10$html === void 0 ? function () {
         return '';
-      } : _this$props9$html,
-          onAdd = _this$props9.onAdd,
-          id = _this$props9.id,
-          className = _this$props9.className;
+      } : _this$props10$html,
+          onAdd = _this$props10.onAdd,
+          id = _this$props10.id,
+          className = _this$props10.className;
       var style = typeof this.props.style === 'function' ? this.props.style() : this.props.style;
       var popup = this.state.popup;
       var _axisThickness$horizo = axisThickness.horizontal,
@@ -1604,22 +1629,22 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
   }, {
     key: "render",
     value: function render() {
-      var _this$props10 = this.props,
-          points = _this$props10.points,
-          type = _this$props10.type,
-          title = _this$props10.title,
-          _onChange = _this$props10.onChange,
-          onClose = _this$props10.onClose,
-          onAdd = _this$props10.onAdd,
-          onEdit = _this$props10.onEdit,
-          onRemove = _this$props10.onRemove,
-          dataIndex = _this$props10.dataIndex,
-          pointIndex = _this$props10.pointIndex,
-          dynamicValue = _this$props10.dynamicValue,
-          staticValue = _this$props10.staticValue,
-          _this$props10$dataInd = _this$props10.dataIndexes,
-          dataIndexes = _this$props10$dataInd === void 0 ? [] : _this$props10$dataInd,
-          disabled = _this$props10.disabled;
+      var _this$props11 = this.props,
+          points = _this$props11.points,
+          type = _this$props11.type,
+          title = _this$props11.title,
+          _onChange = _this$props11.onChange,
+          onClose = _this$props11.onClose,
+          onAdd = _this$props11.onAdd,
+          onEdit = _this$props11.onEdit,
+          onRemove = _this$props11.onRemove,
+          dataIndex = _this$props11.dataIndex,
+          pointIndex = _this$props11.pointIndex,
+          dynamicValue = _this$props11.dynamicValue,
+          staticValue = _this$props11.staticValue,
+          _this$props11$dataInd = _this$props11.dataIndexes,
+          dataIndexes = _this$props11$dataInd === void 0 ? [] : _this$props11$dataInd,
+          disabled = _this$props11.disabled;
       var _this$context = this.context,
           key_title = _this$context.key_title,
           value_title = _this$context.value_title,

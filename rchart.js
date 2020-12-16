@@ -63,7 +63,7 @@ var RChartContext = createContext();
     }
     SetState(obj){this.setState(obj)}
     getLineChart(data,dataIndex){ 
-      var {keys} = this.props;
+      var {keys,hideInterfere} = this.props;
       var {points,color = '#000',lineWidth = 2,areaOpacity,dash,pointStyle,text} = data;
       var dataDetail = {...data,dataIndex,points:[],line:{points:[],lineWidth,stroke:color,dash},area:false,
       texts:[]}
@@ -88,10 +88,23 @@ var RChartContext = createContext();
           let PointStyle = typeof pointStyle === 'function'?pointStyle({point,dataIndex,pointIndex}):pointStyle;
           let {radius,fill = '#fff',stroke = color,lineWidth:pointLineWidth = lineWidth,dash:pointDash,slice} = PointStyle;
           if(radius){
-            var center = this.details.canvasSize.x * px / 100;
-            var left = center - radius - pointLineWidth / 2;
-            if(left > space){         
-              space = center + radius + pointLineWidth / 2;
+            if(hideInterfere){
+              var center = this.details.canvasSize.x * px / 100;
+              var left = center - radius - pointLineWidth / 2;
+              if(left > space){         
+                space = center + radius + pointLineWidth / 2;
+                let Point = {
+                  x:px + '%',y:py + '%',
+                  items:[
+                    {r:this.props.clickRadius,fill:'rgba(0,0,0,0)',onMouseDown:this.pointMouseDown.bind(this),dataIndex,pointIndex},
+                    {r: radius,lineWidth:pointLineWidth * 2,fill,stroke,dash:pointDash,slice}
+                  ]
+                }
+                this.elements.points.push(Point);
+                dataDetail.points.push(Point);
+              }
+            }
+            else {
               let Point = {
                 x:px + '%',y:py + '%',
                 items:[
