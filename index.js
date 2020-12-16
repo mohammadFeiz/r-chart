@@ -1701,13 +1701,15 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
       })), staticValue !== undefined && /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-edit-item"
       }, /*#__PURE__*/_react.default.createElement("div", {
-        className: "r-chart-edit-label"
+        className: "r-chart-edit-label",
+        title: key_title || 'untitle'
       }, (key_title || 'untitle') + ' : '), /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-detail-value"
       }, staticValue)), dynamicValue !== undefined && /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-edit-item"
       }, /*#__PURE__*/_react.default.createElement("div", {
-        className: "r-chart-edit-label"
+        className: "r-chart-edit-label",
+        title: value_title || 'untitle'
       }, (value_title || 'untitle') + ' : '), /*#__PURE__*/_react.default.createElement("input", {
         disabled: disabled,
         className: "r-chart-edit-tag",

@@ -767,14 +767,14 @@ var RChartContext = createContext();
             {
               staticValue !== undefined &&
               <div className='r-chart-edit-item'>
-                <div className="r-chart-edit-label">{(key_title || 'untitle') + ' : '}</div>
+                <div className="r-chart-edit-label" title={key_title || 'untitle'}>{(key_title || 'untitle') + ' : '}</div>
                 <div className="r-chart-detail-value">{staticValue}</div>
               </div>
             }
             {
               dynamicValue !== undefined &&
               <div className='r-chart-edit-item'>
-                <div className="r-chart-edit-label">{(value_title || 'untitle') + ' : '}</div>
+                <div className="r-chart-edit-label" title={value_title || 'untitle'}>{(value_title || 'untitle') + ' : '}</div>
                 <input 
                   disabled={disabled}
                   className='r-chart-edit-tag' type='number' value={dynamicValue} 
