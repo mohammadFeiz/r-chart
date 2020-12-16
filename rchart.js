@@ -353,7 +353,7 @@ var RChartContext = createContext();
       var {data,onRemove,onChange} = this.props;
       var point = data[this.so.dataIndex].points[this.so.pointIndex];
       if(!this.moved){
-        var title = !onChange?this.translate('Remove.Point'):this.translate('Edit.Point');
+        var title = !onChange?this.translate('Remove Point'):this.translate('Edit Point');
         this.SetState({
           popup:{
             disabled:onRemove && !onChange,
@@ -416,7 +416,7 @@ var RChartContext = createContext();
             dataIndex:this.mouseDetail.addDataIndexes[0],
             dynamicValue:this.mouseDetail.value,
             staticValue:this.mouseDetail.key,
-            onAdd,title:this.translate('Add.Point'),
+            onAdd,title:this.translate('Add Point'),
           }
         })
       }

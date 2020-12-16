@@ -865,7 +865,7 @@ var RChart = /*#__PURE__*/function (_Component) {
       var point = data[this.so.dataIndex].points[this.so.pointIndex];
 
       if (!this.moved) {
-        var title = !onChange ? this.translate('Remove.Point') : this.translate('Edit.Point');
+        var title = !onChange ? this.translate('Remove Point') : this.translate('Edit Point');
         this.SetState({
           popup: {
             disabled: onRemove && !onChange,
@@ -974,7 +974,7 @@ var RChart = /*#__PURE__*/function (_Component) {
             dynamicValue: this.mouseDetail.value,
             staticValue: this.mouseDetail.key,
             onAdd: onAdd,
-            title: this.translate('Add.Point')
+            title: this.translate('Add Point')
           }
         });
       }
