@@ -27,18 +27,6 @@ function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return 
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
@@ -204,6 +192,7 @@ var RChart = /*#__PURE__*/function (_Component) {
         dataIndex: dataIndex,
         points: [],
         line: {
+          type: 'Line',
           points: [],
           lineWidth: lineWidth,
           stroke: color,
@@ -273,15 +262,18 @@ var RChart = /*#__PURE__*/function (_Component) {
               if (left > space) {
                 space = center + radius + pointLineWidth / 2;
                 var Point = {
+                  type: 'Group',
                   x: px + '%',
                   y: py + '%',
                   items: [{
+                    type: 'Arc',
                     r: this.props.clickRadius,
                     fill: 'rgba(0,0,0,0)',
                     onMouseDown: this.pointMouseDown.bind(this),
                     dataIndex: dataIndex,
                     pointIndex: pointIndex
                   }, {
+                    type: 'Arc',
                     r: radius,
                     lineWidth: pointLineWidth * 2,
                     fill: fill,
@@ -295,15 +287,18 @@ var RChart = /*#__PURE__*/function (_Component) {
               }
             } else {
               var _Point = {
+                type: 'Group',
                 x: px + '%',
                 y: py + '%',
                 items: [{
+                  type: 'Arc',
                   r: this.props.clickRadius,
                   fill: 'rgba(0,0,0,0)',
                   onMouseDown: this.pointMouseDown.bind(this),
                   dataIndex: dataIndex,
                   pointIndex: pointIndex
                 }, {
+                  type: 'Arc',
                   r: radius,
                   lineWidth: pointLineWidth * 2,
                   fill: fill,
@@ -338,10 +333,12 @@ var RChart = /*#__PURE__*/function (_Component) {
               align = _text.align;
 
           var Text = {
+            type: 'Group',
             x: px + '%',
             y: py + '%',
             rotate: rotate,
             items: [{
+              type: 'Text',
               text: _value,
               fontSize: fontSize,
               fill: _color,
@@ -430,6 +427,7 @@ var RChart = /*#__PURE__*/function (_Component) {
 
         if (!reverse) {
           var rect = {
+            type: 'Rectangle',
             width: barWidth + '%',
             height: py,
             x: px,
@@ -443,6 +441,7 @@ var RChart = /*#__PURE__*/function (_Component) {
           dataDetail.rects.push(rect);
         } else {
           var _rect = {
+            type: 'Rectangle',
             width: px,
             height: barWidth + '%',
             y: py,
@@ -476,10 +475,12 @@ var RChart = /*#__PURE__*/function (_Component) {
               align = _text2.align;
 
           var Text = {
+            type: 'Group',
             x: px + '%',
             y: py + '%',
             rotate: rotate,
             items: [{
+              type: 'Text',
               text: _value2,
               fontSize: fontSize,
               fill: _color2,
@@ -560,12 +561,12 @@ var RChart = /*#__PURE__*/function (_Component) {
         }
       }
 
-      var points = axis === 'x' ? [[v + '%', -startPercent + '%'], [v + '%', -endPercent + '%']] : [[startPercent + '%', -v + '%'], [endPercent + '%', -v + '%']];
+      var points = axis === 'x' ? [[v + '%', startPercent + '%'], [v + '%', endPercent + '%']] : [[startPercent + '%', v + '%'], [endPercent + '%', v + '%']];
       return {
         stroke: color,
         lineWidth: lineWidth,
         points: points,
-        type: 'line',
+        type: 'Line',
         dash: dash
       };
     }
@@ -757,7 +758,7 @@ var RChart = /*#__PURE__*/function (_Component) {
 
         this.getPercentByValue = function (axis, point) {
           var D = d.axisToD[axis];
-          return _this2[D + '_getPercentByValue'](axis, point) * (axis === 'y' ? -1 : 1);
+          return _this2[D + '_getPercentByValue'](axis, point);
         };
 
         d.getLines = function (axis) {
@@ -897,10 +898,10 @@ var RChart = /*#__PURE__*/function (_Component) {
 
   }, {
     key: "mouseDown",
-    value: function mouseDown(a, b) {
+    value: function mouseDown(e, pos) {
       if ('ontouchstart' in document.documentElement) {
         (0, _functions.eventHandler)('window', 'mouseup', _jquery.default.proxy(this.addMouseUp, this));
-        this.getMouseDetail(b);
+        this.getMouseDetail(pos);
         return;
       }
 
@@ -1378,35 +1379,28 @@ var RChart = /*#__PURE__*/function (_Component) {
     }
   }, {
     key: "getMouseDetail",
-    value: function getMouseDetail(a) {
-      if (!a) {
+    value: function getMouseDetail(pos) {
+      if (!pos) {
         return;
       }
 
-      var _a = _slicedToArray(a, 4),
-          x = _a[0],
-          y = _a[1],
-          px = _a[2],
-          py = _a[3];
-
-      var _this$props9 = this.props,
-          onAdd = _this$props9.onAdd,
-          axisThickness = _this$props9.axisThickness;
-      var _axisThickness$vertic = axisThickness.vertical,
-          vertical = _axisThickness$vertic === void 0 ? 50 : _axisThickness$vertic;
+      var x = pos.x,
+          y = pos.y,
+          px = pos.px,
+          py = pos.py;
+      var client = this.canvasToClient([x, y]);
+      var cx = client[0] + this.vertical;
+      var cy = client[1];
+      var onAdd = this.props.onAdd;
       var obj = this.getValueByPercent({
         x: px,
-        y: -py
+        y: py
       });
 
       if (this.mouseDownDetail.target === 'point') {
         obj.key = this.mouseDownDetail.key;
       }
 
-      var popupPosition = {
-        x: x + vertical,
-        y: y + this.details.canvasSize.y
-      };
       var nearestPoint = this.getNearestPointToMouse(obj);
       var addDataIndexes = onAdd && this.mouseDownDetail.target !== 'point' ? this.getAddableDataIndexes(obj.key) : [];
       this.mouseDetail = {
@@ -1414,13 +1408,19 @@ var RChart = /*#__PURE__*/function (_Component) {
         y: y,
         px: px,
         py: py,
+        cx: cx,
+        cy: cy,
         key: obj.key,
         value: obj.value,
         keyIndex: obj.keyIndex,
         nearestPoint: nearestPoint,
-        addDataIndexes: addDataIndexes,
-        popupPosition: popupPosition
+        addDataIndexes: addDataIndexes
       };
+    }
+  }, {
+    key: "canvasToClient",
+    value: function canvasToClient(fn) {
+      this.canvasToClient = fn;
     }
   }, {
     key: "render",
@@ -1433,23 +1433,24 @@ var RChart = /*#__PURE__*/function (_Component) {
           yfs = '',
           items = '',
           HTML = '';
-      var _this$props10 = this.props,
-          keys = _this$props10.keys,
-          axisThickness = _this$props10.axisThickness,
-          data = _this$props10.data,
-          _this$props10$html = _this$props10.html,
-          html = _this$props10$html === void 0 ? function () {
+      var _this$props9 = this.props,
+          keys = _this$props9.keys,
+          axisThickness = _this$props9.axisThickness,
+          data = _this$props9.data,
+          _this$props9$html = _this$props9.html,
+          html = _this$props9$html === void 0 ? function () {
         return '';
-      } : _this$props10$html,
-          onAdd = _this$props10.onAdd,
-          id = _this$props10.id,
-          className = _this$props10.className;
+      } : _this$props9$html,
+          onAdd = _this$props9.onAdd,
+          id = _this$props9.id,
+          className = _this$props9.className;
       var style = typeof this.props.style === 'function' ? this.props.style() : this.props.style;
       var popup = this.state.popup;
       var _axisThickness$horizo = axisThickness.horizontal,
           horizontal = _axisThickness$horizo === void 0 ? 50 : _axisThickness$horizo,
-          _axisThickness$vertic2 = axisThickness.vertical,
-          vertical = _axisThickness$vertic2 === void 0 ? 50 : _axisThickness$vertic2;
+          _axisThickness$vertic = axisThickness.vertical,
+          vertical = _axisThickness$vertic === void 0 ? 50 : _axisThickness$vertic;
+      this.vertical = vertical;
       var ok = false;
 
       if (this.details.canvasSize && data.length && keys) {
@@ -1504,7 +1505,8 @@ var RChart = /*#__PURE__*/function (_Component) {
             y: height
           };
         },
-        axisPosition: ['0%', '100%'],
+        canvasToClient: this.canvasToClient.bind(this),
+        screenPosition: ['50%', '50%'],
         items: items,
         events: {
           onMouseMove: function onMouseMove(e, pos) {
@@ -1517,18 +1519,19 @@ var RChart = /*#__PURE__*/function (_Component) {
             var _this7$mouseDetail = _this7.mouseDetail,
                 nearestPoint = _this7$mouseDetail.nearestPoint,
                 addDataIndexes = _this7$mouseDetail.addDataIndexes,
-                popupPosition = _this7$mouseDetail.popupPosition;
+                cx = _this7$mouseDetail.cx,
+                cy = _this7$mouseDetail.cy;
             var dom = (0, _jquery.default)(_this7.dom.current);
             dom.find('.r-chart-popup-container').html('');
             var horLine = dom.find('.r-chart-horizontal-line');
             var verLine = dom.find('.r-chart-vertical-line');
             horLine.css({
               display: 'block',
-              top: "calc(100% + ".concat(pos[1] - horizontal, "px)")
+              top: cy + 'px'
             });
             verLine.css({
               display: 'flex',
-              right: "calc(100% - ".concat(pos[0] + vertical, "px)")
+              left: cx + 'px'
             });
             var xD = _this7.details.axisToD.x,
                 yD = _this7.details.axisToD.y;
@@ -1549,8 +1552,8 @@ var RChart = /*#__PURE__*/function (_Component) {
               var container = (0, _jquery.default)(_this7.dom.current).find('.r-chart-add-popup');
               var addIndicator = "<div class=\"add-indicator\" style=\"background:".concat(data[addDataIndexes[0]].color, "\">+</div>");
               container.css({
-                left: popupPosition.x,
-                top: popupPosition.y - ('ontouchstart' in document.documentElement ? 40 : 0)
+                left: cx,
+                top: cy - ('ontouchstart' in document.documentElement ? 40 : 0)
               });
               container.html('<div class="r-chart-popup">' + addIndicator + xLabel + '  ' + yLabel + '</div>');
             }
@@ -1558,7 +1561,7 @@ var RChart = /*#__PURE__*/function (_Component) {
             if (nearestPoint) {
               var container = (0, _jquery.default)(_this7.dom.current).find('.r-chart-detail-popup');
               var left = _this7.getPercentByValue('x', nearestPoint) * d.canvasSize.x / 100 + vertical;
-              var bottom = -_this7.getPercentByValue('y', nearestPoint) * d.canvasSize.y / 100 + horizontal;
+              var bottom = _this7.getPercentByValue('y', nearestPoint) * d.canvasSize.y / 100 + horizontal;
               container.css({
                 left: left,
                 top: 'unset',
@@ -1629,22 +1632,22 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
   }, {
     key: "render",
     value: function render() {
-      var _this$props11 = this.props,
-          points = _this$props11.points,
-          type = _this$props11.type,
-          title = _this$props11.title,
-          _onChange = _this$props11.onChange,
-          onClose = _this$props11.onClose,
-          onAdd = _this$props11.onAdd,
-          onEdit = _this$props11.onEdit,
-          onRemove = _this$props11.onRemove,
-          dataIndex = _this$props11.dataIndex,
-          pointIndex = _this$props11.pointIndex,
-          dynamicValue = _this$props11.dynamicValue,
-          staticValue = _this$props11.staticValue,
-          _this$props11$dataInd = _this$props11.dataIndexes,
-          dataIndexes = _this$props11$dataInd === void 0 ? [] : _this$props11$dataInd,
-          disabled = _this$props11.disabled;
+      var _this$props10 = this.props,
+          points = _this$props10.points,
+          type = _this$props10.type,
+          title = _this$props10.title,
+          _onChange = _this$props10.onChange,
+          onClose = _this$props10.onClose,
+          onAdd = _this$props10.onAdd,
+          onEdit = _this$props10.onEdit,
+          onRemove = _this$props10.onRemove,
+          dataIndex = _this$props10.dataIndex,
+          pointIndex = _this$props10.pointIndex,
+          dynamicValue = _this$props10.dynamicValue,
+          staticValue = _this$props10.staticValue,
+          _this$props10$dataInd = _this$props10.dataIndexes,
+          dataIndexes = _this$props10$dataInd === void 0 ? [] : _this$props10$dataInd,
+          disabled = _this$props10.disabled;
       var _this$context = this.context,
           key_title = _this$context.key_title,
           value_title = _this$context.value_title,

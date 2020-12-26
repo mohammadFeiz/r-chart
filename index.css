@@ -69,7 +69,6 @@ body,html{
 }
 .r-chart-popup-container{
   position: absolute;
-  z-index:100;
   display:flex;
   justify-content: center;
   align-items:center;
@@ -222,6 +221,9 @@ option{
   width:80px;
   line-height:20px;
   text-align: center;
+}
+.r-chart-detail-popup{
+  transition:.3s;
 }
 .r-chart-edit-label{
   height:24px;

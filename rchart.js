@@ -65,7 +65,7 @@ var RChartContext = createContext();
     getLineChart(data,dataIndex){ 
       var {keys,hideInterfere} = this.props;
       var {points,color = '#000',lineWidth = 2,areaOpacity,dash,pointStyle,text} = data;
-      var dataDetail = {...data,dataIndex,points:[],line:{points:[],lineWidth,stroke:color,dash},area:false,
+      var dataDetail = {...data,dataIndex,points:[],line:{type:'Line',points:[],lineWidth,stroke:color,dash},area:false,
       texts:[]}
       var space = -Infinity;
       for(let pointIndex = 0; pointIndex < points.length; pointIndex++){
@@ -94,10 +94,11 @@ var RChartContext = createContext();
               if(left > space){         
                 space = center + radius + pointLineWidth / 2;
                 let Point = {
+                  type:'Group',
                   x:px + '%',y:py + '%',
                   items:[
-                    {r:this.props.clickRadius,fill:'rgba(0,0,0,0)',onMouseDown:this.pointMouseDown.bind(this),dataIndex,pointIndex},
-                    {r: radius,lineWidth:pointLineWidth * 2,fill,stroke,dash:pointDash,slice}
+                    {type:'Arc',r:this.props.clickRadius,fill:'rgba(0,0,0,0)',onMouseDown:this.pointMouseDown.bind(this),dataIndex,pointIndex},
+                    {type:'Arc',r: radius,lineWidth:pointLineWidth * 2,fill,stroke,dash:pointDash,slice}
                   ]
                 }
                 this.elements.points.push(Point);
@@ -106,10 +107,11 @@ var RChartContext = createContext();
             }
             else {
               let Point = {
+                type:'Group',
                 x:px + '%',y:py + '%',
                 items:[
-                  {r:this.props.clickRadius,fill:'rgba(0,0,0,0)',onMouseDown:this.pointMouseDown.bind(this),dataIndex,pointIndex},
-                  {r: radius,lineWidth:pointLineWidth * 2,fill,stroke,dash:pointDash,slice}
+                  {type:'Arc',r:this.props.clickRadius,fill:'rgba(0,0,0,0)',onMouseDown:this.pointMouseDown.bind(this),dataIndex,pointIndex},
+                  {type:'Arc',r: radius,lineWidth:pointLineWidth * 2,fill,stroke,dash:pointDash,slice}
                 ]
               }
               this.elements.points.push(Point);
@@ -119,7 +121,7 @@ var RChartContext = createContext();
         }
         if(text){
           let {value = '',fontSize = 16,color = '#444',left = 0,top = 0,rotate,align} = text({point,dataIndex,pointIndex});
-          let Text = {x:px + '%',y:py + '%',rotate,items:[{text:value,fontSize,fill:color,x:left,y:top,align}]};
+          let Text = {type:'Group',x:px + '%',y:py + '%',rotate,items:[{type:'Text',text:value,fontSize,fill:color,x:left,y:top,align}]};
           this.elements.texts.push(Text);
           dataDetail.texts.push(Text);
         }
@@ -153,6 +155,7 @@ var RChartContext = createContext();
         this.keyDictionary[dataIndex][key] = pointIndex;
         if(!reverse){
           let rect = {
+            type:'Rectangle',
             width:barWidth + '%',height:py,x:px,fill:color,
             pivot:[barWidth * (barCount / 2 - barCounter) + '%',0],
             onMouseDown:this.pointMouseDown.bind(this),
@@ -163,6 +166,7 @@ var RChartContext = createContext();
         }
         else{
           let rect = {
+            type:'Rectangle',
             width:px,height:barWidth + '%',y:py,fill:color,
             pivot:[0,barWidth * (barCount / 2 - barCounter) + '%'],
             onMouseDown:this.pointMouseDown.bind(this),
@@ -173,7 +177,7 @@ var RChartContext = createContext();
         }
         if(text){
           let {value = '',fontSize = 16,color = '#444',left = 0,top = 0,rotate,align} = text({point,dataIndex,pointIndex});
-          let Text = {x:px + '%',y:py + '%',rotate,items:[{text:value,fontSize,fill:color,x:left,y:top,align}]};
+          let Text = {type:'Group',x:px + '%',y:py + '%',rotate,items:[{type:'Text',text:value,fontSize,fill:color,x:left,y:top,align}]};
           this.elements.texts.push(Text);
           dataDetail.texts.push(Text);
         }
@@ -217,13 +221,13 @@ var RChartContext = createContext();
       }
       
       var points = axis === 'x'?[
-        [v + '%',-startPercent + '%'],
-        [v + '%',-endPercent + '%']
+        [v + '%',startPercent + '%'],
+        [v + '%',endPercent + '%']
       ]:[
-        [startPercent + '%',-v + '%'],
-        [endPercent + '%',-v + '%']
+        [startPercent + '%',v + '%'],
+        [endPercent + '%',v + '%']
       ];
-      return {stroke:color,lineWidth,points,type:'line',dash}
+      return {stroke:color,lineWidth,points,type:'Line',dash}
     }
     getGridLines(axis){
       var color = this.props[this.details.axisToD[axis] + '_gridColor'];
@@ -304,7 +308,7 @@ var RChartContext = createContext();
         this.getLabel = (axis,value)=>this[d.axisToD[axis] + '_getLabel'](value);
         this.getPercentByValue = (axis,point)=>{
           let D = d.axisToD[axis];
-          return this[D + '_getPercentByValue'](axis,point) * (axis === 'y'?-1:1);
+          return this[D + '_getPercentByValue'](axis,point);
         }
         d.getLines = (axis)=>this.getLines(axis,this.props[d.axisToD[axis] + '_lines']);
       } //نوع چارت و تابع گرفتن درصد با مقدار یکبار تایین می شود
@@ -369,10 +373,10 @@ var RChartContext = createContext();
       if(onChange){onChange(obj)}
     }
     //کلیک روی بک گراند چارت
-    mouseDown(a,b){
+    mouseDown(e,pos){
       if('ontouchstart' in document.documentElement){
         eventHandler('window','mouseup',$.proxy(this.addMouseUp,this));
-        this.getMouseDetail(b);
+        this.getMouseDetail(pos);
         return;
       }
       var {onAdd,multiselect,addPopup} = this.props;
@@ -608,20 +612,24 @@ var RChartContext = createContext();
       }
       return res;
     }
-    getMouseDetail(a){
-      if(!a){return;}
-      var [x,y,px,py] = a;
-      var {onAdd,axisThickness} = this.props;
-      var {vertical = 50} = axisThickness;
-      var obj = this.getValueByPercent({x:px,y:-py});
+    getMouseDetail(pos){
+      if(!pos){return;}
+      var {x,y,px,py} = pos;
+      var client = this.canvasToClient([x,y]);
+      var cx = client[0] + this.vertical;
+      var cy = client[1];                
+      var {onAdd} = this.props;
+      var obj = this.getValueByPercent({x:px,y:py});
       if(this.mouseDownDetail.target === 'point'){
         obj.key = this.mouseDownDetail.key;
       }
-      var popupPosition = {x:x + vertical,y:y + this.details.canvasSize.y}; 
       var nearestPoint = this.getNearestPointToMouse(obj);
       var addDataIndexes = onAdd && this.mouseDownDetail.target !== 'point'?this.getAddableDataIndexes(obj.key):[];
-      this.mouseDetail = {x,y,px,py,key:obj.key,value:obj.value,keyIndex:obj.keyIndex,nearestPoint,addDataIndexes,popupPosition}  
+      this.mouseDetail = {x,y,px,py,cx,cy,key:obj.key,value:obj.value,keyIndex:obj.keyIndex,nearestPoint,addDataIndexes}  
             
+    }
+    canvasToClient(fn){
+      this.canvasToClient = fn;
     }
     render(){
       var xls = '',yls = '',xfs = '',yfs = '',items = '',HTML = '';
@@ -629,6 +637,7 @@ var RChartContext = createContext();
       var style = typeof this.props.style === 'function'?this.props.style():this.props.style;
       var {popup} = this.state; 
       var {horizontal = 50,vertical = 50} = axisThickness;
+      this.vertical = vertical;
       var ok = false;
       if(this.details.canvasSize && data.length && keys){
         ok = true;
@@ -663,19 +672,20 @@ var RChartContext = createContext();
                 <div className='r-chart-multiselect'></div>
                 <RCanvas 
                   getSize={(width,height)=>{this.details.canvasSize = {x:width,y:height}}} 
-                  axisPosition={['0%','100%']}
+                  canvasToClient={this.canvasToClient.bind(this)}
+                  screenPosition={['50%','50%']}
                   items={items}
                   events={{
                     onMouseMove:(e,pos)=>{
                       if(!ok){return;}            
                       this.getMouseDetail(pos);
-                      var {nearestPoint,addDataIndexes,popupPosition} = this.mouseDetail;
+                      var {nearestPoint,addDataIndexes,cx,cy} = this.mouseDetail;
                       var dom = $(this.dom.current);
                       dom.find('.r-chart-popup-container').html('');
                       var horLine = dom.find('.r-chart-horizontal-line');
                       var verLine = dom.find('.r-chart-vertical-line');
-                      horLine.css({display:'block',top:`calc(100% + ${pos[1] - horizontal}px)`});
-                      verLine.css({display:'flex',right:`calc(100% - ${pos[0] + vertical}px)`});
+                      horLine.css({display:'block',top:cy + 'px'});
+                      verLine.css({display:'flex',left:cx + 'px'});
                       var xD = this.details.axisToD.x,yD = this.details.axisToD.y;
                       var xLabel,yLabel;
                       if(xD === 'key'){
@@ -691,13 +701,13 @@ var RChartContext = createContext();
                       if(addDataIndexes.length){
                           var container = $(this.dom.current).find('.r-chart-add-popup');
                           var addIndicator = `<div class="add-indicator" style="background:${data[addDataIndexes[0]].color}">+</div>`;
-                          container.css({left:popupPosition.x,top:popupPosition.y - ('ontouchstart' in document.documentElement?40:0)});
+                          container.css({left:cx,top:cy - ('ontouchstart' in document.documentElement?40:0)});
                           container.html('<div class="r-chart-popup">' + addIndicator + xLabel  + '  ' + yLabel + '</div>');
                       }
                       if(nearestPoint){
                           var container = $(this.dom.current).find('.r-chart-detail-popup');
                           let left = this.getPercentByValue('x',nearestPoint) * d.canvasSize.x / 100 + vertical;
-                          let bottom = -this.getPercentByValue('y',nearestPoint) * d.canvasSize.y / 100 + horizontal;
+                          let bottom = this.getPercentByValue('y',nearestPoint) * d.canvasSize.y / 100 + horizontal;
                           container.css({left,top:'unset',bottom});
                           let xLabel,yLabel;
                           if(xD === 'key'){

@@ -156,14 +156,14 @@ export function value_getRange(axis){
     }
 
     export function normal_getArea(points,fill,opacity){
-      let area = {points:points.slice(),fill,opacity};
+      let area = {type:'Line',points:points.slice(),fill,opacity};
       area.points.splice(0,0,[points[0][0],0]);
       area.points.push([points[points.length - 1][0],0]);
       return area;
     };
 
     export function reverse_getArea(points,fill,opacity){
-      let area = {points:points.slice(),fill,opacity};
+      let area = {type:'Line',points:points.slice(),fill,opacity};
       area.points.splice(0,0,[0,points[0][1]]);
       area.points.push([0,points[points.length - 1][1]]);
       return area;
