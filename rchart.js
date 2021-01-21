@@ -65,6 +65,7 @@ var RChartContext = createContext();
     getLineChart(data,dataIndex){ 
       var {keys,hideInterfere} = this.props;
       var {points,color = '#000',lineWidth = 2,areaOpacity,dash,pointStyle,text} = data;
+      if(!points || !Array.isArray(points) || points.length === 0){return;}
       var dataDetail = {...data,dataIndex,points:[],line:{type:'Line',points:[],lineWidth,stroke:color,dash},area:false,
       texts:[]}
       var space = -Infinity;
@@ -136,6 +137,7 @@ var RChartContext = createContext();
     }
     getBarChart(data,barCounter,dataIndex){
       var {color,points,text} = data;
+      if(!points || !Array.isArray(points) || points.length === 0){return;}
       var {reverse,keys} = this.props;
       var dataDetail = {...data,dataIndex,rects:[],texts:[]}
       var {barCount,barWidth} = this.details;

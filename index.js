@@ -188,6 +188,11 @@ var RChart = /*#__PURE__*/function (_Component) {
           dash = data.dash,
           pointStyle = data.pointStyle,
           text = data.text;
+
+      if (!points || !Array.isArray(points) || points.length === 0) {
+        return;
+      }
+
       var dataDetail = { ...data,
         dataIndex: dataIndex,
         points: [],
@@ -371,6 +376,11 @@ var RChart = /*#__PURE__*/function (_Component) {
       var color = data.color,
           points = data.points,
           text = data.text;
+
+      if (!points || !Array.isArray(points) || points.length === 0) {
+        return;
+      }
+
       var _this$props2 = this.props,
           reverse = _this$props2.reverse,
           keys = _this$props2.keys;
