@@ -805,12 +805,12 @@ var RChart = /*#__PURE__*/function (_Component) {
           data = _this$props4.data,
           onChange = _this$props4.onChange,
           onRemove = _this$props4.onRemove;
-      this.getMouseDetail(pos);
 
-      if (data[dataIndex].editable === false) {
+      if (!onChange || data[dataIndex].editable === false) {
         return;
       }
 
+      this.getMouseDetail(pos);
       var point = data[dataIndex].points[pointIndex];
       this.mouseDownDetail = {
         target: 'point',

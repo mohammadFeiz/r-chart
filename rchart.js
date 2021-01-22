@@ -329,8 +329,8 @@ var RChartContext = createContext();
     pointMouseDown(e,pos,obj){
       var {dataIndex,pointIndex} = obj;
       let {data,onChange,onRemove} = this.props;
+      if(!onChange || data[dataIndex].editable === false){return;}
       this.getMouseDetail(pos);
-      if(data[dataIndex].editable === false){return;}
       var point = data[dataIndex].points[pointIndex];
       this.mouseDownDetail = {target:'point',key:point._key,value:point._value};
       if(onChange && data[dataIndex].draggable !== false){
