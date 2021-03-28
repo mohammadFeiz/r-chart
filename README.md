@@ -490,7 +490,7 @@ draggable   | boolean                 | false     | Specifies whether chart poin
       text:({point,dataIndex,pointIndex})=>{
         return {
           value:point.size,
-          y:-20,
+          top:-20,
           fontSize:12,
           rotate:pointIndex === 11?90:0,
           align:[0,0]
