@@ -536,7 +536,7 @@ draggable   | boolean                 | false     | Specifies whether chart poin
 />
 ```
 ##### Preview(Click image and open demo on stackblitz):
-[![alt text](/images/text.jpg)](https://stackblitz.com/edit/r-char-demo-axis-size?embed=1&file=src/App.js)
+[![alt text](/images/axis%20thickness.jpg)](https://stackblitz.com/edit/r-char-demo-axis-size?embed=1&file=src/App.js)
 
 
 
