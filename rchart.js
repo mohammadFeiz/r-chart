@@ -455,18 +455,9 @@ var RChartContext = createContext();
       eventHandler('window','mouseup',this.multiselectUp,'unbind');
       if(!this.multiselect.start || !this.multiselect.end || 
       Math.abs(this.multiselect.start - this.multiselect.end) < 3) {this.hideSelectRect(); return;}
-      this.multiselect.points = this.getPointsBySelectRect();
-      if(this.multiselect.points.length === 0){
-        this.hideSelectRect();
-        return;
-      } 
-      this.SetState({ 
-        popup:{
-          type:'multiselect',
-          title:this.translate('Multi Select'),
-          points:this.multiselect.points 
-        }
-      })
+      var points = this.getPointsBySelectRect();
+      if(points.length !== 0){this.props.multiselect(points);} 
+      this.hideSelectRect();
     }
     getPointsBySelectRect(){
       var {start,end} = this.multiselect;
@@ -750,9 +741,8 @@ var RChartContext = createContext();
     $(this.dom.current).find('input').eq(0).focus().select();
   }
    render(){
-     var {points,type,title,onChange,onClose,onAdd,onEdit,onRemove,dataIndex,pointIndex,dynamicValue,staticValue,dataIndexes = [],disabled} = this.props;
-     var {key_title,value_title,keys,data,multiselect = {},translate,rtl} = this.context;
-     var {inputs = [],buttons = []} = multiselect;
+     var {title,onChange,onClose,onAdd,onEdit,onRemove,dataIndex,pointIndex,dynamicValue,staticValue,dataIndexes = [],disabled} = this.props;
+     var {key_title,value_title,keys,data,translate,rtl} = this.context;
      return (
        <div className='r-chart-edit' ref={this.dom} style={{direction:rtl?'rtl':'ltr'}}>
           <div className='r-chart-edit-backdrop' onClick={onClose}></div>
@@ -797,46 +787,8 @@ var RChartContext = createContext();
                 />
               </div>
             }
-            {
-              type === 'multiselect' && (buttons.length || inputs.length) &&
-              inputs.map((item,i)=>{
-                return ( 
-                  <div key={i} className='r-chart-edit-item'>
-                    <div className="r-chart-edit-label">{item.title}</div> 
-                    {
-                      item.type === 'number' &&
-                      <input className='r-chart-edit-tag' type='number' value={item.value} onChange={item.onChange}/>      
-                    }
-                    {
-                      item.type === 'select' && 
-                      <select  
-                        className='r-chart-edit-tag' 
-                        title={item.value}
-                        onChange={item.onChange} 
-                        defaultValue={item.value}>
-                        {item.options.map((o,i)=><option key={i} value={o.value}>{o.text}</option>)}
-                      </select>        
-                    } 
-                    {
-                      item.type === 'checkbox' &&
-                      <input type='checkbox' value={item.value} onChange={item.onChange}/>
-                    }
-                  </div>      
-                )
-              })
-            }
           </div> 
           <div className='r-chart-edit-footer'>
-                { type === 'multiselect' &&
-                  buttons.filter((a)=>a.show !== false).map((a,i)=>{
-                    return (
-                      <button key={i} 
-                        className='r-chart-edit-button' 
-                        onClick={()=>{a.onClick(points); onClose();}}
-                      >{a.text}</button>    
-                    )
-                  }) 
-                }
                 {
                   onAdd && 
                   <button 

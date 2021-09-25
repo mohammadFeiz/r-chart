@@ -23,9 +23,9 @@ var _functions = require("./functions");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -43,11 +43,11 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
 
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
@@ -1055,20 +1055,13 @@ var RChart = /*#__PURE__*/function (_Component) {
         return;
       }
 
-      this.multiselect.points = this.getPointsBySelectRect();
+      var points = this.getPointsBySelectRect();
 
-      if (this.multiselect.points.length === 0) {
-        this.hideSelectRect();
-        return;
+      if (points.length !== 0) {
+        this.props.multiselect(points);
       }
 
-      this.SetState({
-        popup: {
-          type: 'multiselect',
-          title: this.translate('Multi Select'),
-          points: this.multiselect.points
-        }
-      });
+      this.hideSelectRect();
     }
   }, {
     key: "getPointsBySelectRect",
@@ -1643,8 +1636,6 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
     key: "render",
     value: function render() {
       var _this$props10 = this.props,
-          points = _this$props10.points,
-          type = _this$props10.type,
           title = _this$props10.title,
           _onChange = _this$props10.onChange,
           onClose = _this$props10.onClose,
@@ -1663,14 +1654,8 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
           value_title = _this$context.value_title,
           keys = _this$context.keys,
           data = _this$context.data,
-          _this$context$multise = _this$context.multiselect,
-          multiselect = _this$context$multise === void 0 ? {} : _this$context$multise,
           translate = _this$context.translate,
           rtl = _this$context.rtl;
-      var _multiselect$inputs = multiselect.inputs,
-          inputs = _multiselect$inputs === void 0 ? [] : _multiselect$inputs,
-          _multiselect$buttons = multiselect.buttons,
-          buttons = _multiselect$buttons === void 0 ? [] : _multiselect$buttons;
       return /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-edit",
         ref: this.dom,
@@ -1737,46 +1722,9 @@ var RChartEdit = /*#__PURE__*/function (_Component2) {
             dynamicValue: e.target.value
           });
         }
-      })), type === 'multiselect' && (buttons.length || inputs.length) && inputs.map(function (item, i) {
-        return /*#__PURE__*/_react.default.createElement("div", {
-          key: i,
-          className: "r-chart-edit-item"
-        }, /*#__PURE__*/_react.default.createElement("div", {
-          className: "r-chart-edit-label"
-        }, item.title), item.type === 'number' && /*#__PURE__*/_react.default.createElement("input", {
-          className: "r-chart-edit-tag",
-          type: "number",
-          value: item.value,
-          onChange: item.onChange
-        }), item.type === 'select' && /*#__PURE__*/_react.default.createElement("select", {
-          className: "r-chart-edit-tag",
-          title: item.value,
-          onChange: item.onChange,
-          defaultValue: item.value
-        }, item.options.map(function (o, i) {
-          return /*#__PURE__*/_react.default.createElement("option", {
-            key: i,
-            value: o.value
-          }, o.text);
-        })), item.type === 'checkbox' && /*#__PURE__*/_react.default.createElement("input", {
-          type: "checkbox",
-          value: item.value,
-          onChange: item.onChange
-        }));
-      })), /*#__PURE__*/_react.default.createElement("div", {
+      }))), /*#__PURE__*/_react.default.createElement("div", {
         className: "r-chart-edit-footer"
-      }, type === 'multiselect' && buttons.filter(function (a) {
-        return a.show !== false;
-      }).map(function (a, i) {
-        return /*#__PURE__*/_react.default.createElement("button", {
-          key: i,
-          className: "r-chart-edit-button",
-          onClick: function onClick() {
-            a.onClick(points);
-            onClose();
-          }
-        }, a.text);
-      }), onAdd && /*#__PURE__*/_react.default.createElement("button", {
+      }, onAdd && /*#__PURE__*/_react.default.createElement("button", {
         className: "r-chart-edit-button",
         onClick: function onClick() {
           var points = data[dataIndex].points;
