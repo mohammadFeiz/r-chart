@@ -620,28 +620,34 @@ export default class App extends Component{
                         {
                             type:'line',
                             color:'#0688f3',
-                            pointStyle:{radius:5,fill:'blue'},
-                            text:(point)=>{return {value:point.date,y:-20}},
+                            getPointStyle:(point)=>{return {radius:5,fill:'blue'}},
+                            getPointText:(point)=>{return {value:point.date,y:-20}},
                             title:'Data1',areaOpacity:.1,
                             points:targets
+                            getKey={({point})=>point.date}
+                            getValue={({point})=>point.amount}
                         },
                         {
                             type:'bar',
                             color:'#03ebcc',
                             title:'Data2',
-                            points:sales
+                            points:sales,
+                            getKey={({point})=>point.date}
+                            getValue={({point})=>point.amount}
                         },
                     ]} 
-                    getKey={({point})=>point.date}
-                    getValue={({point})=>point.amount}
-                    key_editLabel={(label)=>label.slice(0,3)}
-                    value_editLabel={(value)=>value + '%'}
-                    value_gridColor='#ddd'
-                    key_title='Date'
-                    value_title='Amount'
+                    keyAxis={{
+                        edit:(text)=>text.slice(0,3),
+                        zoom:true,
+                        title:'Date'
+                    }}
+                    valueAxis={{
+                        edit:(value)=>value + '%',
+                        gridColor:'#ddd',
+                        zoom:true,
+                        title:'Amount'
+                    }}
                     keys={['January','February','March','April','May','June','July','August','September','October','November','December']}
-                    key_zoom={true}
-                    value_zoom={true}
                     onChange={this.change.bind(this)}
                     onAdd={this.add.bind(this)}
                     onRemove={this.remove.bind(this)}
