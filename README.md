@@ -217,42 +217,46 @@ this parameter type is object and has this properties:
 <Chart
     data={[
       {
-        type:'line',
+        type:'bar',
         title:'data1',
         color:'blue',
+        getKey:(point)=>point.date,
+        getValue:(point)=>point.value,
         points:[
-          {key:'January',value:10},
-          {key:'February',value:15},
-          {key:'March',value:25},
-          {key:'April',value:30},
-          {key:'May',value:40},
-          {key:'June',value:35},
-          {key:'July',value:40},
-          {key:'August',value:60},
-          {key:'September',value:60},
-          {key:'October',value:75},
-          {key:'November',value:80},
-          {key:'December',value:100}
+          {date:'January',value:10},
+          {date:'February',value:15},
+          {date:'March',value:25},
+          {date:'April',value:30},
+          {date:'May',value:40},
+          {date:'June',value:35},
+          {date:'July',value:40},
+          {date:'August',value:60},
+          {date:'September',value:60},
+          {date:'October',value:75},
+          {date:'November',value:80},
+          {date:'December',value:100}
         ],
 
       },
       {
-        type:'bar',
+        type:'line',
         title:'data2',
+        getKey:(point)=>point.date,
+        getValue:(point)=>point.value,
         color:'crimson',
         points:[
-          {key:'January',value:20},
-          {key:'February',value:35},
-          {key:'March',value:15},
-          {key:'April',value:40},
-          {key:'May',value:60},
-          {key:'June',value:55},
-          {key:'July',value:50},
-          {key:'August',value:70},
-          {key:'September',value:65},
-          {key:'October',value:85},
-          {key:'November',value:90},
-          {key:'December',value:100}
+          {date:'January',value:20},
+          {date:'February',value:35},
+          {date:'March',value:15},
+          {date:'April',value:40},
+          {date:'May',value:60},
+          {date:'June',value:55},
+          {date:'July',value:50},
+          {date:'August',value:70},
+          {date:'September',value:65},
+          {date:'October',value:85},
+          {date:'November',value:90},
+          {date:'December',value:100}
         ],
       }
     ]}
@@ -313,56 +317,22 @@ this parameter type is object and has this properties:
 ```javascript
 <Chart
   ...
-  key_gridColor={'#ddd'}
-  value_gridColor={'#ddd'}
+  keyAxis={{
+    ...
+    gridLines:'#ddd'
+    ...
+  }}
+  valueAxis={{
+    ...
+    gridLines:'#ddd'
+    ...
+  }}
   ...
-/>
+/>`
+
 ```
 ##### Preview(Click image and open demo on stackblitz):
 [![alt text](/images/grid%20lines.jpg)](https://stackblitz.com/edit/r-chart-demo-grid-lines?embed=1&file=src/App.js)
-
-
-
-# Get key and value from points object
-###### Read key from point object by 'getKey' prop function on data.
-###### Read value from point object by 'getValue' prop function on data.
-##### Code:
-```javascript
-<Chart
-  ...
-  data={[
-    {
-      type:'line',
-      title:'data',
-      color:'blue',
-      points:[
-        {date:'January',percent:10},
-        {date:'February',percent:15},
-        {date:'March',percent:25},
-        {date:'April',percent:30},
-        {date:'May',percent:40},
-        {date:'June',percent:35},
-        {date:'July',percent:40},
-        {date:'August',percent:60},
-        {date:'September',percent:60},
-        {date:'October',percent:75},
-        {date:'November',percent:80},
-        {date:'December',percent:100}
-      ],
-    }
-  ]}
-  keys={[
-    'January','February','March','April','May','June','July','August','September','October','November','December'
-  ]}
-  getKey={({point,dataIndex,pointIndex})=>point.date}
-  getValue={({point,dataIndex,pointIndex})=>point.percent}
-  ...
-/>
-```
-##### Preview(Click image and open demo on stackblitz):
-[![alt text](/images/get%20key%20get%20value.jpg)](https://stackblitz.com/edit/r-chart-demo-get-key-get-value?embed=1&file=src/App.js)
-
-
 
 # Set Multi Data by diffrent styles
 ###### Set 3 data on 'data' prop by diffrent styles.
@@ -377,7 +347,7 @@ this parameter type is object and has this properties:
       title:'data1',
       color:'blue',
       dash:[4,2],
-      areaOpacity:0.2
+      area:true
       ...
     },
     {
@@ -401,31 +371,8 @@ this parameter type is object and has this properties:
 [![alt text](/images/multi%20data.jpg)](https://stackblitz.com/edit/r-chart-demo-multi-data?embed=1&file=src/App.js)
 
 
-
-# Set Point Style
-###### Set circle on each points by set 'pointStyle' prop on data (object type).
-##### Code:
-```javascript
-<Chart
-  ...
-  data={[
-    {
-      ...
-      pointStyle:{
-        radius:5
-      }
-      ...
-    }
-  ]}
-  ...
-/>
-```
-##### Preview(Click image and open demo on stackblitz):
-[![alt text](/images/point%20style%201.jpg)](https://stackblitz.com/edit/r-chart-demo-point-style-1?embed=1&file=src/App.js)
-
-
-
-###### Set circle on each points by set 'pointStyle' prop on data (object type).
+# Get Point Style
+###### Set circle on each points by set 'getPointStyle' function prop on data.
 ##### Code:
 ```javascript
 <Chart
@@ -444,7 +391,6 @@ this parameter type is object and has this properties:
 ```
 ##### Preview(Click image and open demo on stackblitz):
 [![alt text](/images/point%20style%202.jpg)](https://stackblitz.com/edit/r-chart-demo-point-style-2?embed=1&file=src/App.js)
-###### Set circle on each points by set 'pointStyle' prop on data (function type).
 ##### Code:
 ```javascript
 <Chart
@@ -452,8 +398,8 @@ this parameter type is object and has this properties:
   data={[
     {
       ...
-      pointStyle:({point,dataIndex,pointIndex})=>{
-        if(pointIndex === 0){
+      getPointStyle:(point)=>{
+        if(point.date === 'January'){
           return {radius:5,fill:'blue'}
         }
         if(point.date === 'August'){
@@ -475,17 +421,25 @@ this parameter type is object and has this properties:
 
 
 # Set Lines
-###### Set lines by 'lines' prop width custom style on 'keyAxis' and 'valueAxis' prop.
+###### Set lines by 'lines' prop width custom style on 'keyAxis' or 'valueAxis' props.
 ##### Code:
 ```javascript
 <Chart
   ...
-  key_lines={[
-    {key:'June',dash:[2,2],color:'red',lineWidth:1}
-  ]}
-  value_lines={[
-    {value:50,dash:[8,5],color:'blue',lineWidth:2}
-  ]}
+  keyAxis={
+    ...
+    lines:[
+        {key:'June',dash:[2,2],color:'red',lineWidth:1}
+    ]
+    ...
+  }
+  valueAxis={
+    ...
+    lines:[
+        {value:50,dash:[8,5],color:'blue',lineWidth:2}
+    ]
+    ...
+  }
   ...
 />
 ```
@@ -495,7 +449,7 @@ this parameter type is object and has this properties:
 
 
 # Set Text On Points
-###### Set text on each points by set 'text' prop (function) on data that read text value from point object and can get custom style.
+###### Set text on each points by set 'getPointText' function props on data that read text value from point object and can get custom style.
 ##### Code:
 ```javascript
 <Chart
@@ -517,12 +471,12 @@ this parameter type is object and has this properties:
           {date:'November',percent:80,size:'high'},
           {date:'December',percent:100,size:'high'}
       ],
-      text:({point,dataIndex,pointIndex})=>{
+      getPointText:(point)=>{
         return {
           value:point.size,
           top:20,
           fontSize:12,
-          rotate:pointIndex === 11?90:0,
+          rotate:point.date === 'December'?90:0,
           align:[0,0]
         }
       }
@@ -552,14 +506,19 @@ this parameter type is object and has this properties:
 
 
 
-# Set Axis Thickness
-###### Set horizontal and vertical axis thickness by 'axisSize' props.
+# Set Axis Size
+###### Set axis thickness by 'size' property in keyAxis or valueAxis.
 ##### Code:
 ```javascript
 <Chart
   ...
-  value_editLabel={(value)=>value * 1000 + '$'}
-  axisThickness={{horizontal:90,vertical:70}}
+  keyAxis={{
+    size:90  
+  }}
+  valueAxis={{
+    edit:(value)=>value * 1000 + '$',
+    size:70  
+  }}
   labelRotate={90}
   labelSize={40}
   ...
