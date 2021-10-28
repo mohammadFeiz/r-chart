@@ -56,8 +56,8 @@ color          | string(color)           | '#000'                               
 dash           | array of 2 number(int)  | Optional                                        | dash style of line of data
 lineWidth      | number                  | 2                                               | line width of line of data
 area           | boolean                 | false                                           | show line chart area
-getPointStyle  | function                | Optional                                        | return style of line chart points
-getPointText   | function                | Optional                                        | set text on chart points
+getPointStyle  | function                | Optional                                        | get point object and returns style of line chart point
+getPointText   | function                | Optional                                        | get point object and returns text for render on chart point
 editable       | boolean                 | true                                            | Specifies whether chart points can be edited or not
 draggable      | boolean                 | false                                           | Specifies whether chart points can be edited by drag or not
 
@@ -274,14 +274,22 @@ this parameter type is object and has this properties:
 
 
 # Edit Labels
-###### Set 'key_editLabel' function to edit 'key axis' labels.
-###### Set 'value_editLabel' function to edit 'value axis' labels.
+###### Set 'edit' function in ketAxis props to edit 'key axis' labels.
+###### Set 'edit' function in valueAxis props to edit 'value axis' labels.
 ##### Code:
 ```javascript
 <Chart
   ...
-  key_editLabel={(key)=>key.slice(0,3)}
-  value_editLabel={(value)=>value + '%'}
+  keyAxis={{
+    ...
+    edit:(key)=>key.slice(0,3)
+    ...
+  }}
+  valueAxis={{
+    ...
+    edit:(value)=>value + '%'
+    ...
+  }}
   ...
 />`
 ```
