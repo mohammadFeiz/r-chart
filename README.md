@@ -30,29 +30,57 @@ import Chart from "r-chart";
 ##### key axis is based on chart keys array
 ##### value axis is based on points value
 
+##### root props
 Prop            | type                                          | Default                                         | Description
 --------------- | --------------------------------------------- | ----------------------------------------------- | ----------------------------
 data            | Array of objects                              | Required                                        | list of chart data
 keys            | Array of strings or numbers                   | Required                                        | list of chart keys
-getKey          | function                                      | ({point, dataIndex, pointIndex}) => point.key   | get key from point object
-getValue        | function                                      | ({point, dataIndex, pointIndex}) => point.value | get value from point object
-key_gridColor   | string(color)                                 | Optional                                        | set grid lines on key axis
-key_title       | string                                        | Required for show in chart popup                | title of key axis
-value_title     | string                                        | Required for show in chart popup                | title of value axis
-value_gridColor | string(color)                                 | Optional                                        | set grid lines on value axis
-key_lines       | Array of objects                              | Optional                                        | set lines by custom style on key axis
-value_lines     | Array of objects                              | Optional                                        | set lines by custom style on value axis
-key_editLabel   | function                                      | Optional                                        | get each key label and return edited it
-value_editLabel | function                                      | Optional                                        | get each value label and return edited it
-key_zoom        | boolean                                       | false                                           | set key axis zoomable
-value_zoom      | boolean                                       | false                                           | set value axis zoomable
+keyAxis         | object                                        | Required                                        | key axis properties
+valueAxis       | object                                        | Required                                        | value axis properties
 labelSize       | number                                        | 40                                              | set size of horizontal labels
 labelRotate     | number                                        | 0                                               | angle of labels on horizontal axis 
-axisThickness   | object by 2 property(horizontal and vertical) | {horizontal : 50, vertical : 50}                | set thickness of horizontal and vertical axis
 onChange        | function                                      | Optional                                        | change points value in chart popup or dragging points.
 onAdd           | function                                      | Optional                                        | get point details for add
 onRemove        | function                                      | Optional                                        | get point details for remove
 html            | function                                      | Optional                                        | add custom html on chart(example: add a button on chart)
+
+##### each data object properties
+Property       | Type                    | Default                                         | Description
+-------------- | ----------------------- | ----------------------------------------------- | -----------
+type           | string('line' or 'bar') | 'line'                                          | type of chart data
+title          | string                  | 'untitle'                                       | title of chart data
+getKey         | function                | Required                                        | get key from point object
+getValue       | function                | Required                                        | get value from point object
+points         | array of objects        | required                                        | points of chart data
+color          | string(color)           | '#000'                                          | color of chart data
+dash           | array of 2 number(int)  | Optional                                        | dash style of line of data
+lineWidth      | number                  | 2                                               | line width of line of data
+area           | boolean                 | false                                           | show line chart area
+getPointStyle  | function                | Optional                                        | return style of line chart points
+getPointText   | function                | Optional                                        | set text on chart points
+editable       | boolean                 | true                                            | Specifies whether chart points can be edited or not
+draggable      | boolean                 | false                                           | Specifies whether chart points can be edited by drag or not
+
+##### keyAxis properties
+Prop            | type                                          | Default                                         | Description
+--------------- | --------------------------------------------- | ----------------------------------------------- | ----------------------------
+gridColor       | string(color)                                 | Optional                                        | set grid lines on key axis
+title           | string                                        | Required for show in chart popup                | title of key axis
+lines           | Array of objects                              | Optional                                        | set lines by custom style on key axis
+edit            | function                                      | Optional                                        | get each key label and return edited it
+zoom            | boolean                                       | false                                           | set key axis zoomable
+size            | number                                        | 50                                              | set thickness of key axis
+
+##### valueAxis properties
+Prop            | type                                          | Default                                         | Description
+--------------- | --------------------------------------------- | ----------------------------------------------- | ----------------------------
+gridColor       | string(color)                                 | Optional                                        | set grid lines on value axis
+title           | string                                        | Required for show in chart popup                | title of value axis
+lines           | Array of objects                              | Optional                                        | set lines by custom style on value axis
+edit            | function                                      | Optional                                        | get each value label and return edited it
+zoom            | boolean                                       | false                                           | set value axis zoomable
+size            | number                                        | 50                                              | set thickness of key value
+
 
 ##### onChange props 
 is a function  that get changed point details as a parameter.
@@ -63,20 +91,6 @@ this parameter type is object and has this properties:
 * key(key of point)(string or number)
 * point(object of point)(object)
 * drag(if is true mean this point is changed by drag)(boolean)
-##### each data object
-Property        | Type                    | Default   | Description
------------ | ----------------------- | --------- | -----------
-type        | string('line' or 'bar') | 'line'    | type of chart data
-title       | string                  | 'untitle' | title of chart data
-points      | array of objects        | required  | points of chart data
-color       | string(color)           | '#000'    | color of chart data
-dash        | array of 2 number(int)  | Optional  | dash style of line of data
-lineWidth   | number                  | 2         | line width of line of data
-areaOpacity | number between 0 and 1  | 0         | opacity of line chart area
-pointStyle  | object or function      | Optional  | style of line chart points
-text        | function                | Optional  | set text on chart points
-editable    | boolean                 | true     | Specifies whether chart points can be edited or not
-draggable   | boolean                 | false     | Specifies whether chart points can be edited by drag or not
 
 
 # Line Chart
