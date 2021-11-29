@@ -1180,7 +1180,7 @@ var RChart = /*#__PURE__*/function (_Component) {
           start = _this$details$range$a.start,
           end = _this$details$range$a.end,
           step = _this$details$range$a.step;
-      var labelStyle = {
+      var _labelStyle = {
         x: {
           top: xZoom ? '24px' : '14px'
         },
@@ -1190,38 +1190,45 @@ var RChart = /*#__PURE__*/function (_Component) {
           justifyContent: 'flex-end'
         }
       };
-      var labelRotate = this.props.labelRotate;
+      var _labelRotate = this.props.labelRotate;
       return /*#__PURE__*/_react.default.createElement(_rRangeSlider.default, {
-        className: "labelSlider",
-        editable: false,
+        attrs: {
+          className: 'labelSlider',
+          style: {
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            width: '100%',
+            height: '100%',
+            padding: 0
+          }
+        },
         showValue: false,
-        style: {
-          position: 'absolute',
-          left: 0,
-          top: 0,
-          width: '100%',
-          height: '100%',
-          padding: 0
+        pointStyle: function pointStyle() {
+          return {
+            display: 'none'
+          };
         },
-        pointStyle: {
-          display: 'none'
-        },
-        lineStyle: {
-          display: 'none'
+        lineStyle: function lineStyle() {
+          return {
+            display: 'none'
+          };
         },
         direction: axis === 'x' ? 'right' : 'top',
         start: start,
         end: end,
-        label: {
-          step: step,
-          rotate: axis === 'y' ? 0 : labelRotate,
-          edit: function edit(value) {
-            return _this5.getLabel(axis, value);
-          },
-          style: {
+        labelStep: step,
+        labelRotate: function labelRotate() {
+          return axis === 'y' ? 0 : _labelRotate;
+        },
+        editLabel: function editLabel(value) {
+          return _this5.getLabel(axis, value);
+        },
+        labelStyle: function labelStyle() {
+          return {
             fontSize: 'inherit',
-            ...labelStyle[axis]
-          }
+            ..._labelStyle[axis]
+          };
         }
       });
     }
@@ -1247,8 +1254,7 @@ var RChart = /*#__PURE__*/function (_Component) {
   }, {
     key: "getFilterSlider",
     value: function getFilterSlider(axis) {
-      var _fillStyle,
-          _this6 = this;
+      var _this6 = this;
 
       var zoom = this.props[this.details.axisToD[axis] + '_zoom'];
 
@@ -1275,14 +1281,6 @@ var RChart = /*#__PURE__*/function (_Component) {
         onMouseDown: this.filterMouseDown.bind(this)
       });
 
-      var points = [{
-        value: p1,
-        html: html
-      }, {
-        value: p2,
-        html: html,
-        fillStyle: (_fillStyle = {}, _defineProperty(_fillStyle, axis === 'y' ? 'width' : 'height', '1px'), _defineProperty(_fillStyle, "background", color), _fillStyle)
-      }];
       var style = {
         x: {
           width: '100%',
@@ -1303,32 +1301,46 @@ var RChart = /*#__PURE__*/function (_Component) {
         direction: axis === 'x' ? 'right' : 'top',
         start: start,
         end: end,
-        className: "filterSlider",
-        points: points,
-        editValue: function editValue(point) {
-          return _this6.getLabel(axis, point.value);
+        attrs: {
+          className: 'filterSlider',
+          style: {
+            position: 'absolute',
+            ...style[axis]
+          }
         },
-        ondrag: function ondrag(_ref6) {
-          var points = _ref6.points;
-          return _this6.changeFilter(axis, points[0].value, points[1].value);
+        points: [p1, p2],
+        fillStyle: function fillStyle(index) {
+          if (index === 1) {
+            var _ref6;
+
+            return _ref6 = {}, _defineProperty(_ref6, axis === 'y' ? 'width' : 'height', '1px'), _defineProperty(_ref6, "background", color), _ref6;
+          }
         },
-        style: {
-          position: 'absolute',
-          ...style[axis]
+        editValue: function editValue(value) {
+          return _this6.getLabel(axis, value);
         },
-        lineStyle: {
-          display: 'none'
+        getPointHTML: function getPointHTML() {
+          return html;
         },
-        pointStyle: {
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '30px',
-          height: '30px',
-          borderRadius: '0px',
-          background: 'none'
+        lineStyle: function lineStyle() {
+          return {
+            display: 'none'
+          };
         },
-        showValue: true
+        pointStyle: function pointStyle() {
+          return {
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '30px',
+            height: '30px',
+            borderRadius: '0px',
+            background: 'none'
+          };
+        },
+        onChange: function onChange(points) {
+          _this6.changeFilter(axis, points[0], points[1]);
+        }
       });
     }
   }, {

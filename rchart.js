@@ -1,5 +1,5 @@
 import React,{Component,createRef,createContext} from 'react';
-import RSlider from 'r-range-slider';
+import Slider from 'r-range-slider';
 import RCanvas from 'r-canvas';
 import $ from 'jquery';
 import './index.css';
@@ -515,15 +515,22 @@ var RChartContext = createContext();
       var labelStyle = {x:{top:xZoom?'24px':'14px'},y:{left:'unset',right:yZoom?'16px':'8px',justifyContent:'flex-end'}};
       var {labelRotate} = this.props;
       return (
-        <RSlider 
-          className='labelSlider' editable={false} showValue={false}
-          style={{position:'absolute',left:0,top:0,width:'100%',height:'100%',padding:0}}
-          pointStyle={{display:'none'}} lineStyle={{display:'none'}}
+        <Slider 
+          attrs={{
+            className:'labelSlider',
+            style:{position:'absolute',left:0,top:0,width:'100%',height:'100%',padding:0}
+          }}
+          showValue={false}
+          pointStyle={()=>{return {display:'none'}}} 
+          lineStyle={()=>{return {display:'none'}}}
           direction={axis === 'x'?'right':'top'} start={start} end={end}
-          label={{
-            step,rotate:axis === 'y'?0:labelRotate,
-            edit:(value)=>this.getLabel(axis,value),
-            style:{fontSize:'inherit',...labelStyle[axis]}
+          labelStep={step}
+          labelRotate={()=>{
+            return axis === 'y'?0:labelRotate
+          }}
+          editLabel={(value)=>this.getLabel(axis,value)}
+          labelStyle={()=>{
+            return {fontSize:'inherit',...labelStyle[axis]}
           }}
         />
       ) 
@@ -556,23 +563,34 @@ var RChartContext = createContext();
           onMouseDown={this.filterMouseDown.bind(this)}
         ></div>
       ) 
-      var points = [
-        {value:p1,html},
-        {value:p2,html,fillStyle:{[axis === 'y'?'width':'height']:'1px',background:color}}
-      ]
       var style = {
         x:{width:'100%',height:'16px',padding:'0 12px',top:'2px',opacity:1},
         y:{width:'16px',height:'100%',padding:'12px 0',right:'0px',opacity:1}
       } 
       return (
-        <RSlider direction={axis === 'x'?'right':'top'} start={start} end={end} className='filterSlider'
-          points={points}
-          editValue={(point)=>this.getLabel(axis,point.value)} 
-          ondrag={({points})=>this.changeFilter(axis,points[0].value,points[1].value)}
-          style={{position:'absolute',...style[axis]}}
-          lineStyle={{display:'none'}}
-          pointStyle={{display:'flex',alignItems:'center',justifyContent:'center',width:'30px',height:'30px',borderRadius:'0px',background:'none'}}
-          showValue={true}
+        <Slider 
+          direction={axis === 'x'?'right':'top'} 
+          start={start} 
+          end={end} 
+          attrs={{
+            className:'filterSlider',
+            style:{position:'absolute',...style[axis]}
+          }}
+          points={[p1,p2]}
+          fillStyle={(index)=>{
+            if(index === 1){
+              return {[axis === 'y'?'width':'height']:'1px',background:color}
+            }
+          }}
+          editValue={(value)=>this.getLabel(axis,value)} 
+          getPointHTML={()=>html}
+          lineStyle={()=>{return {display:'none'}}}
+          pointStyle={()=>{
+            return {display:'flex',alignItems:'center',justifyContent:'center',width:'30px',height:'30px',borderRadius:'0px',background:'none'}
+          }}
+          onChange={(points)=>{
+            this.changeFilter(axis,points[0],points[1])
+          }}
         />
       )
     }
